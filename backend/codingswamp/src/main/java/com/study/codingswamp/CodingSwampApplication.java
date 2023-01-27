@@ -1,13 +1,13 @@
-package coding.swamp;
+package com.study.codingswamp;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class SwampApplication {
+public class CodingSwampApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(SwampApplication.class, args);
+		SpringApplication.run(CodingSwampApplication.class, args);
 	}
 
 }
