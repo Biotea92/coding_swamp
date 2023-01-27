@@ -1,0 +1,24 @@
+spring:
+  sql:
+    init:
+      mode: never
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+
+  h2:
+    console:
+      enabled: true
+
+  datasource:
+    url: jdbc:h2:mem:~/testdb;MODE=MYSQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+jwt:
+  secret: codingswampkimwoojongkimsujincodingswampkimwoojongkimsujincodingswampkimwoojongkimsujin
+  token-validity-in-milliseconds: 86400000
