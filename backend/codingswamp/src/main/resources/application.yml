@@ -19,6 +19,5 @@ spring:
     username: sa
     password:
 
-jwt:
-  secret: codingswampkimwoojongkimsujincodingswampkimwoojongkimsujincodingswampkimwoojongkimsujin
-  token-validity-in-milliseconds: 86400000
+  profiles:
+    include: security
