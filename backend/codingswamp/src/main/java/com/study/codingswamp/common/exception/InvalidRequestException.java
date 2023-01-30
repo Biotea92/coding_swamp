@@ -7,12 +7,12 @@ public class InvalidRequestException extends CodingSwampException{
 
     private static final String MESSAGE = "잘못된 요청입니다.";
 
-    public InvalidRequestException(String message) {
-        super(message);
+    public InvalidRequestException() {
+        super(MESSAGE);
     }
 
     public InvalidRequestException(String fieldName, String message) {
-        super(message);
+        super(MESSAGE);
         addValidation(fieldName, message);
     }
 

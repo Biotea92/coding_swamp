@@ -68,6 +68,10 @@ public class TokenProvider {
         }
     }
 
+    public long getValidityInMilliseconds() {
+        return validityInMilliseconds;
+    }
+
     private Jws<Claims> getClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(secretKey)
