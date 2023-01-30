@@ -55,7 +55,7 @@ public class MemberService {
 
     private Member getMemberByEmail(String email) {
         return getByEmail(email)
-                .orElseThrow(() -> new UnauthorizedException("email", "없는 이메일입니다."));
+                .orElseThrow(() -> new UnauthorizedException("email", "데이터에 없는 이메일입니다."));
     }
 
     private Optional<Member> getByEmail(String email) {
