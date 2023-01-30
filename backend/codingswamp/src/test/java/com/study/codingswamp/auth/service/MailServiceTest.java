@@ -1,5 +1,7 @@
 package com.study.codingswamp.auth.service;
 
+import com.study.codingswamp.auth.service.request.MailAuthenticationRequest;
+import com.study.codingswamp.auth.service.response.MailAuthenticationResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,13 +19,12 @@ class MailServiceTest {
     @DisplayName("메일을 주면 메일을 쏘고 인증번호를 생성한다.")
     void sendMaile() {
         // given
-        MailAuthenticationDto mailAuthenticationDto = new MailAuthenticationDto();
-        mailAuthenticationDto.setEmail("seediu95@gmail.com");
+        MailAuthenticationRequest request = new MailAuthenticationRequest("seediu95@gmail.com");
 
         // when
-        mailService.sendEmail(mailAuthenticationDto);
+        MailAuthenticationResponse response = mailService.sendEmail(request);
 
         // then
-        assertThat(mailAuthenticationDto.getAuthCode()).isNotNull();
+        assertThat(response.getAuthCode()).isNotNull();
     }
 }

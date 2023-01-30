@@ -1,5 +1,7 @@
 package com.study.codingswamp.auth.service;
 
+import com.study.codingswamp.auth.service.request.MailAuthenticationRequest;
+import com.study.codingswamp.auth.service.response.MailAuthenticationResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -17,14 +19,13 @@ public class MailService {
 
     private String authCode;
 
-    public MailAuthenticationDto sendEmail(MailAuthenticationDto mailAuthenticationDto) {
+    public MailAuthenticationResponse sendEmail(MailAuthenticationRequest request) {
+        String email = request.getEmail();
         //메일전송에 필요한 정보 설정
-        MimeMessage emailForm = createEmailForm(mailAuthenticationDto.getEmail());
+        MimeMessage emailForm = createEmailForm(email);
         //실제 메일 전송
         emailSender.send(emailForm);
-
-        mailAuthenticationDto.setAuthCode(authCode);
-        return mailAuthenticationDto;
+        return new MailAuthenticationResponse(email, authCode);
     }
 
     private MimeMessage createEmailForm(String toEmail) {
