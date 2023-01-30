@@ -1,6 +1,6 @@
 package com.study.codingswamp.auth.utils;
 
-import com.study.codingswamp.auth.exception.TokenInvalidFormatException;
+import com.study.codingswamp.common.exception.UnauthorizedException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,11 +39,11 @@ class AuthTokenExtractorTest {
 
         // expected
         assertThrows(
-                TokenInvalidFormatException.class,
+                UnauthorizedException.class,
                 () -> authTokenExtractor.extractToken(authorizationHeader1, tokenType)
         );
         assertThrows(
-                TokenInvalidFormatException.class,
+                UnauthorizedException.class,
                 () -> authTokenExtractor.extractToken(authorizationHeader2, tokenType)
         );
     }
