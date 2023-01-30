@@ -1,10 +1,11 @@
 package com.study.codingswamp.member.service;
 
 import com.study.codingswamp.auth.service.request.CommonLoginRequest;
+import com.study.codingswamp.common.exception.ConflictException;
+import com.study.codingswamp.common.exception.UnauthorizedException;
 import com.study.codingswamp.common.file.FileStore;
 import com.study.codingswamp.member.domain.Member;
 import com.study.codingswamp.member.domain.repository.MemberRepository;
-import com.study.codingswamp.member.service.exception.MemberUnauthorizedException;
 import com.study.codingswamp.member.service.request.MemberSignupRequest;
 import com.study.codingswamp.member.service.response.MemberResponse;
 import lombok.RequiredArgsConstructor;
@@ -40,15 +41,21 @@ public class MemberService {
         if (isMatchesPassword(request.getPassword(), member.getPassword())) {
             return new MemberResponse(member);
         }
-        throw new MemberUnauthorizedException("wrong password");
+        throw new UnauthorizedException("password", "잘못된 비밀번호입니다.");
+    }
+
+    public void duplicateEmailCheck(String email) {
+        if (getByEmail(email).isPresent()) {
+            throw new ConflictException("email", "이메일이 중복입니다.");
+        }
     }
 
     private Member getMemberByEmail(String email) {
         return getByEmail(email)
-                .orElseThrow(() -> new MemberUnauthorizedException("invalid Email"));
+                .orElseThrow(() -> new UnauthorizedException("email", "없는 이메일입니다."));
     }
 
-    public Optional<Member> getByEmail(String email) {
+    private Optional<Member> getByEmail(String email) {
         return memberRepository.findByEmail(email);
     }
 

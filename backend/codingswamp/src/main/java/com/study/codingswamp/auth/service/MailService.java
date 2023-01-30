@@ -2,7 +2,6 @@ package com.study.codingswamp.auth.service;
 
 import com.study.codingswamp.auth.service.request.MailAuthenticationRequest;
 import com.study.codingswamp.auth.service.response.MailAuthenticationResponse;
-import com.study.codingswamp.common.exception.ConflictException;
 import com.study.codingswamp.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -24,18 +23,12 @@ public class MailService {
 
     public MailAuthenticationResponse sendEmail(MailAuthenticationRequest request) {
         String email = request.getEmail();
-        duplicateEmailCheck(email);
+        memberService.duplicateEmailCheck(email);
         //메일전송에 필요한 정보 설정
         MimeMessage emailForm = createEmailForm(email);
         //실제 메일 전송
         emailSender.send(emailForm);
         return new MailAuthenticationResponse(email, authCode);
-    }
-
-    private void duplicateEmailCheck(String email) {
-        if (memberService.getByEmail(email).isPresent()) {
-            throw new ConflictException("email", "이메일이 중복입니다.");
-        }
     }
 
     private MimeMessage createEmailForm(String toEmail) {
