@@ -9,6 +9,8 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
+        show_sql: true
+        format_sql: true
 
   datasource:
     url: jdbc:h2:mem:~/test;MODE=MYSQL
@@ -22,6 +24,8 @@ spring:
 logging:
   level:
     org:
+      springframework:
+        jdbc: debug
       hibernate:
         type:
           descriptor:
