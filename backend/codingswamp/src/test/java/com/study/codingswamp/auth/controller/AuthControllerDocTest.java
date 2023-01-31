@@ -75,8 +75,8 @@ public class AuthControllerDocTest {
                 .andDo(print())
                 .andDo(document("member-login",
                         requestFields(
-                           fieldWithPath("email").description("이메일"),
-                           fieldWithPath("password").description("비밀번호")
+                                fieldWithPath("email").description("이메일"),
+                                fieldWithPath("password").description("비밀번호")
                         ),
                         responseFields(
                                 fieldWithPath("accessToken").description("jwt token"),
