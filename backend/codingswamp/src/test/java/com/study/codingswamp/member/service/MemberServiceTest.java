@@ -12,13 +12,16 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
+@Transactional
 class MemberServiceTest {
 
     @Autowired
@@ -30,9 +33,12 @@ class MemberServiceTest {
     @Autowired
     PasswordEncoder passwordEncoder;
 
+    @Autowired
+    JdbcTemplate jdbcTemplate;
+
     @BeforeEach
     void clear() {
-        memberRepository.deleteAll();
+        jdbcTemplate.update("alter table member auto_increment= ?", 1);
     }
 
     @DisplayName("정상 회원가입")
@@ -49,7 +55,7 @@ class MemberServiceTest {
         memberService.signup(memberSignupRequest);
 
         // then
-        Member member = memberRepository.findById(1L).orElseThrow();
+        Member member = memberRepository.findById(1L).orElseThrow(RuntimeException::new);
         assertThat(member.getId()).isEqualTo(1L);
         assertThat(member.getEmail()).isEqualTo("abc@gmail.com");
         assertThat(passwordEncoder.matches("1q2w3e4r!", member.getPassword())).isTrue();

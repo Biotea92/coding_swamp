@@ -8,9 +8,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -18,6 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@Transactional
 class MemberControllerTest {
 
     @Autowired
@@ -28,9 +33,12 @@ class MemberControllerTest {
     @Autowired
     private MemberRepository memberRepository;
 
+    @Autowired
+    JdbcTemplate jdbcTemplate;
+
     @BeforeEach
     void clear() {
-        memberRepository.deleteAll();
+        jdbcTemplate.update("alter table member auto_increment= ?", 1);
     }
 
     @Test
@@ -40,10 +48,14 @@ class MemberControllerTest {
         String email = "seediu95@gmail.com";
         String password = "1q2w3e4r!";
         String username = "hong";
+        MockMultipartFile multipartFile = new MockMultipartFile("imageFile", "image".getBytes());
 
         // expected
-        mockMvc.perform(post("/api/member?email=" + email + "&username=" + username + "&password=" + password)
-                        .contentType(APPLICATION_JSON)
+        mockMvc.perform(multipart("/api/member")
+                        .file(multipartFile)
+                        .param("email", email)
+                        .param("username", username)
+                        .param("password", password)
                 )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1L))
@@ -76,10 +88,14 @@ class MemberControllerTest {
         String email = "seediu95@gmail.com";
         String password = "1q2w3e4r!";
         String username = "ho";
+        MockMultipartFile multipartFile = new MockMultipartFile("imageFile", "image".getBytes());
 
         // expected
-        mockMvc.perform(post("/api/member?email=" + email + "&username=" + username + "&password=" + password)
-                        .contentType(APPLICATION_JSON)
+        mockMvc.perform(multipart("/api/member")
+                        .file(multipartFile)
+                        .param("email", email)
+                        .param("username", username)
+                        .param("password", password)
                 )
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("400"))
@@ -95,10 +111,14 @@ class MemberControllerTest {
         String email = "seediu95@gmail.com";
         String password = "1q2w3e4r";
         String username = "hong";
+        MockMultipartFile multipartFile = new MockMultipartFile("imageFile", "image".getBytes());
 
         // expected
-        mockMvc.perform(post("/api/member?email=" + email + "&username=" + username + "&password=" + password)
-                        .contentType(APPLICATION_JSON)
+        mockMvc.perform(multipart("/api/member")
+                        .file(multipartFile)
+                        .param("email", email)
+                        .param("username", username)
+                        .param("password", password)
                 )
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("400"))
