@@ -1,4 +1,4 @@
-package com.study.codingswamp.common.firebase;
+package com.study.codingswamp.common.file.firebase;
 
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
