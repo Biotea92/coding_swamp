@@ -3,7 +3,9 @@ package com.study.codingswamp.auth.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.study.codingswamp.auth.service.request.CommonLoginRequest;
 import com.study.codingswamp.auth.service.request.MailAuthenticationRequest;
+import com.study.codingswamp.auth.token.TokenProvider;
 import com.study.codingswamp.member.domain.Member;
+import com.study.codingswamp.member.domain.Role;
 import com.study.codingswamp.member.domain.repository.MemberRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -12,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
@@ -22,6 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
@@ -42,7 +47,9 @@ public class AuthControllerDocTest {
     @Autowired
     private PasswordEncoder passwordEncoder;
     @Autowired
-    JdbcTemplate jdbcTemplate;
+    private JdbcTemplate jdbcTemplate;
+    @Autowired
+    private TokenProvider tokenProvider;
 
     @BeforeEach
     public void setUp(WebApplicationContext webApplicationContext, RestDocumentationContextProvider restDocumentation) {
@@ -104,6 +111,29 @@ public class AuthControllerDocTest {
                         responseFields(
                                 fieldWithPath("email").description("인증 발송된 이메일"),
                                 fieldWithPath("authCode").description("인증 번호")
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("토큰을 refresh한다.")
+    void refresh() throws Exception {
+        Member member = new Member("abc@gmail.com", passwordEncoder.encode("1q2w3e4r!"), "hong", null);
+        memberRepository.save(member);
+        String token = tokenProvider.createAccessToken(1L, Role.USER);
+
+        mockMvc.perform(post("/api/auth/refresh")
+                        .contentType(APPLICATION_JSON)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                )
+                .andExpect(status().isOk())
+                .andDo(document("auth-token-refresh",
+                        requestHeaders(
+                                headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer auth credentials")
+                        ),
+                        responseFields(
+                                fieldWithPath("accessToken").description("jwt token"),
+                                fieldWithPath("expiredTime").description("만료 밀리세컨드")
                         )
                 ));
     }

@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class AuthTokenExtractorTest {
 
     @Autowired
-    AuthTokenExtractor authTokenExtractor;
+    private AuthTokenExtractor authTokenExtractor;
 
     private static final String tokenType = "Bearer";
 

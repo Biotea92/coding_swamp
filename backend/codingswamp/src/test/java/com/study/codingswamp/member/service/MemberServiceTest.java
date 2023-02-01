@@ -2,6 +2,7 @@ package com.study.codingswamp.member.service;
 
 import com.study.codingswamp.auth.service.request.CommonLoginRequest;
 import com.study.codingswamp.common.exception.ConflictException;
+import com.study.codingswamp.common.exception.NotFoundException;
 import com.study.codingswamp.common.exception.UnauthorizedException;
 import com.study.codingswamp.member.domain.Member;
 import com.study.codingswamp.member.domain.Role;
@@ -108,6 +109,15 @@ class MemberServiceTest {
         );
         assertDoesNotThrow(
                 () -> memberService.duplicateEmailCheck("efg@gmail.com")
+        );
+    }
+
+    @DisplayName("사용자가 존재하지 않으면 예외를 발생시킨다.")
+    @Test
+    void checkExistMember() {
+        assertThrows(
+                NotFoundException.class,
+                () -> memberService.checkExistMember(1L)
         );
     }
 }

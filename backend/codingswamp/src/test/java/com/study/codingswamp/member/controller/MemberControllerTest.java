@@ -34,7 +34,7 @@ class MemberControllerTest {
     private MemberRepository memberRepository;
 
     @Autowired
-    JdbcTemplate jdbcTemplate;
+    private JdbcTemplate jdbcTemplate;
 
     @BeforeEach
     void clear() {
@@ -42,7 +42,7 @@ class MemberControllerTest {
     }
 
     @Test
-    @DisplayName("/api/member POST 요청시 회원가입이 완료된다.")
+    @DisplayName("회원가입 요청시 회원가입이 완료된다.")
     void signupSuccess() throws Exception {
         // given
         String email = "seediu95@gmail.com";
@@ -67,7 +67,7 @@ class MemberControllerTest {
 
 
     @Test
-    @DisplayName("/api/member POST 요청시 multipartFile을 제외한 모든 값은 필수다.")
+    @DisplayName("회원가입 요청시 multipartFile을 제외한 모든 값은 필수다.")
     void signup_Can_Not_Be_Blank() throws Exception {
         mockMvc.perform(post("/api/member?")
                 .contentType(APPLICATION_JSON)
@@ -82,7 +82,7 @@ class MemberControllerTest {
     }
 
     @Test
-    @DisplayName("/api/member POST 요청시 username은 3글자 이상이어야한다.")
+    @DisplayName("회원가입 요청시 username은 3글자 이상이어야한다.")
     void signup_username_length_grater_than_3() throws Exception {
         // given
         String email = "seediu95@gmail.com";
@@ -105,7 +105,7 @@ class MemberControllerTest {
     }
 
     @Test
-    @DisplayName("/api/member POST 요청시 password는 규칙을 따라야한다.")
+    @DisplayName("회원가입 요청시 password는 규칙을 따라야한다.")
     void signup_password_pattern_have_rule() throws Exception {
         // given
         String email = "seediu95@gmail.com";

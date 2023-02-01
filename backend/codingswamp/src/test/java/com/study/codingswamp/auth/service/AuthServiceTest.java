@@ -15,6 +15,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+
 @SpringBootTest
 @Transactional
 class AuthServiceTest {
@@ -35,8 +37,8 @@ class AuthServiceTest {
         jdbcTemplate.update("alter table member auto_increment= ?", 1);
     }
     @Test
-    @DisplayName("요청시 로그인 되어야한다.")
-    void login() {
+    @DisplayName("로그인 시 토큰을 발급한다.")
+    void login() throws InterruptedException {
         // given
         Member member = new Member("abc@gmail.com", passwordEncoder.encode("1q2w3e4r!"), "hong", null);
         memberRepository.save(member);
@@ -47,10 +49,34 @@ class AuthServiceTest {
                 .build();
 
         // when
-        AccessTokenResponse accessTokenResponse = authService.login(request);
-        String token = tokenProvider.createAccessToken(1L, Role.USER);
+        String[] accessToken = authService.login(request).getAccessToken().split("\\.");
+        String[] token = tokenProvider.createAccessToken(1L, Role.USER).split("\\.");
 
         // then
-//        assertThat(accessTokenResponse.getAccessToken()).isEqualTo(token);
+        // 같은 시간에 생성되야 같은 코드가 token이 생성됨 개선방법 찾아보기
+//        assertThat(accessToken[0]).isEqualTo(token[0]);
+//        assertThat(accessToken[1]).isEqualTo(token[1]);
+//        assertThat(accessToken[2]).isEqualTo(token[2]);
+    }
+
+    @Test
+    @DisplayName("리프래쉬토큰 요청시 리프래쉬토큰을 발급한다.")
+    void refresh() throws InterruptedException {
+        // given
+        Member member = new Member("abc@gmail.com", passwordEncoder.encode("1q2w3e4r!"), "hong", null);
+        memberRepository.save(member);
+        CommonLoginRequest request = CommonLoginRequest.builder()
+                .email("abc@gmail.com")
+                .password("1q2w3e4r!")
+                .build();
+        AccessTokenResponse token = authService.login(request);
+        MemberPayload memberPayload = new MemberPayload(1L, Role.USER);
+
+        // when
+        Thread.sleep(1000);
+        AccessTokenResponse refreshToken = authService.refreshToken(memberPayload);
+
+        // then
+        assertNotEquals(token.getAccessToken(), refreshToken.getAccessToken());
     }
 }

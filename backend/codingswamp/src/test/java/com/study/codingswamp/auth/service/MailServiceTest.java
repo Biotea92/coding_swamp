@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class MailServiceTest {
 
     @Autowired
-    MailService mailService;
+    private MailService mailService;
 
     @Test
     @DisplayName("메일을 주면 메일을 쏘고 인증번호를 생성한다.")
