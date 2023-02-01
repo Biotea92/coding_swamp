@@ -1,12 +1,11 @@
 package com.study.codingswamp.auth.config;
 
 import com.study.codingswamp.auth.controller.AuthenticatedMemberResolver;
-import com.study.codingswamp.auth.controller.interceptor.AuthenticationInterceptor;
+import com.study.codingswamp.auth.controller.AuthenticationInterceptor;
 import com.study.codingswamp.auth.token.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -39,8 +38,7 @@ public class AuthConfig implements WebMvcConfigurer {
         registry.addMapping("/**")
                 .allowedMethods("GET", "POST", "HEAD", "PUT", "PATCH", "DELETE", "TRACE", "OPTIONS")
                 .allowedOrigins("http://localhost:8080", "http://localhost:3000")
-                .allowCredentials(true)
-                .exposedHeaders(HttpHeaders.SET_COOKIE);
+                .allowCredentials(true);
     }
 
     @Bean

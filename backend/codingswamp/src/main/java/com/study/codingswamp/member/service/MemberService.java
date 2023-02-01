@@ -2,6 +2,7 @@ package com.study.codingswamp.member.service;
 
 import com.study.codingswamp.auth.service.request.CommonLoginRequest;
 import com.study.codingswamp.common.exception.ConflictException;
+import com.study.codingswamp.common.exception.NotFoundException;
 import com.study.codingswamp.common.exception.UnauthorizedException;
 import com.study.codingswamp.common.file.FileStore;
 import com.study.codingswamp.member.domain.Member;
@@ -51,6 +52,11 @@ public class MemberService {
         if (getByEmail(email).isPresent()) {
             throw new ConflictException("email", "이메일이 중복입니다.");
         }
+    }
+
+    public void checkExistMember(Long memberId) {
+        memberRepository.findById(memberId)
+                .orElseThrow(() -> new NotFoundException("member", "사용자를 찾을 수 없습니다."));
     }
 
     private Member getMemberByEmail(String email) {

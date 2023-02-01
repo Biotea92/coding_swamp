@@ -30,6 +30,8 @@ public class AuthenticatedMemberResolver implements HandlerMethodArgumentResolve
         if (authorizationHeader == null) {
             throw new UnauthorizedException("token", "토큰을 찾을 수 없습니다.");
         }
+        // TODO 데이터베이스 확인 작업 필요할까
+
         return tokenProvider.getPayload(authorizationHeader);
     }
 }

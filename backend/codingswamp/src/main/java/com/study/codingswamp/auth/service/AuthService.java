@@ -22,4 +22,11 @@ public class AuthService {
         String token = tokenProvider.createAccessToken(memberResponse.getId(), memberResponse.getRole());
         return new AccessTokenResponse(token, tokenProvider.getValidityInMilliseconds());
     }
+
+    public AccessTokenResponse refreshToken(MemberPayload memberPayload) {
+        memberService.checkExistMember(memberPayload.getId());
+
+        String token = tokenProvider.createAccessToken(memberPayload.getId(), memberPayload.getRole());
+        return new AccessTokenResponse(token, tokenProvider.getValidityInMilliseconds());
+    }
 }
