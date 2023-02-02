@@ -19,7 +19,7 @@ public class AuthService {
     @Transactional
     public AccessTokenResponse login(CommonLoginRequest request) {
         MemberResponse memberResponse = memberService.checkLogin(request);
-        String token = tokenProvider.createAccessToken(memberResponse.getId(), memberResponse.getRole());
+        String token = tokenProvider.createAccessToken(memberResponse.getMemberId(), memberResponse.getRole());
         return new AccessTokenResponse(token, tokenProvider.getValidityInMilliseconds());
     }
 

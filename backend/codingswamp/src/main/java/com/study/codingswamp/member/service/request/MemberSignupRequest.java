@@ -2,7 +2,6 @@ package com.study.codingswamp.member.service.request;
 
 import lombok.Builder;
 import lombok.Getter;
-import lombok.ToString;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -11,7 +10,6 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 
 @Getter
-@ToString
 public class MemberSignupRequest {
 
     @NotBlank

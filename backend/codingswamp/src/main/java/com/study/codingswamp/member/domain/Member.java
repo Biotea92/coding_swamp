@@ -1,6 +1,7 @@
 package com.study.codingswamp.member.domain;
 
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
@@ -15,6 +16,7 @@ public class Member {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "member_id")
     private Long id;
 
     private String email;
@@ -41,6 +43,7 @@ public class Member {
         this.joinedAt = LocalDateTime.now();
     }
 
+    @Builder
     public Member(String email, String password, String username, String imageUrl) {
         this.email = email;
         this.password = password;

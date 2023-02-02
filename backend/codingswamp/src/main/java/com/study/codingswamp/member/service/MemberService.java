@@ -27,16 +27,19 @@ public class MemberService {
     public MemberResponse signup(MemberSignupRequest memberSignupRequest) {
         String email = memberSignupRequest.getEmail();
         duplicateEmailCheck(email);
-
         String password = memberSignupRequest.getPassword();
         String encodedPassword = passwordEncoder.encode(password);
-
         String username = memberSignupRequest.getUsername();
         String imageUrl = fileStore.storeFile(memberSignupRequest.getImageFile());
 
-        Member member = new Member(email, encodedPassword, username, imageUrl);
-        memberRepository.save(member);
-        return new MemberResponse(member);
+        Member member = Member.builder()
+                .email(email)
+                .password(encodedPassword)
+                .username(username)
+                .imageUrl(imageUrl)
+                .build();
+
+        return new MemberResponse(memberRepository.save(member));
     }
 
     @Transactional

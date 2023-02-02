@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Getter
 public class MemberResponse {
-    private final Long id;
+    private final Long memberId;
     private final String email;
     private final Long githubId;
     private final String username;
@@ -20,7 +20,7 @@ public class MemberResponse {
     private final LocalDateTime joinedAt;
 
     public MemberResponse(Member member) {
-        this.id = member.getId();
+        this.memberId = member.getId();
         this.email = member.getEmail();
         this.githubId = member.getGithubId();
         this.username = member.getUsername();
