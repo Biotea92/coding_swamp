@@ -1,6 +1,9 @@
 package com.study.codingswamp.study.domain;
 
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
