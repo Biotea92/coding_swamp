@@ -1,0 +1,8 @@
+=== 회원가입
+- 요청
+include::{snippets}/member-signup/http-request.adoc[]
+include::{snippets}/member-signup/request-parameters.adoc[]
+include::{snippets}/member-signup/request-parts.adoc[]
+- 응답
+include::{snippets}/member-signup/http-response.adoc[]
+include::{snippets}/member-signup/response-fields.adoc[]

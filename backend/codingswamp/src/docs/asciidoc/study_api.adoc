@@ -1,0 +1,8 @@
+=== 스터디 생성
+- 요청
+include::{snippets}/study-create/http-request.adoc[]
+include::{snippets}/study-create/request-fields.adoc[]
+- 요청 Header
+include::{snippets}/study-create/request-headers.adoc[]
+- 응답
+include::{snippets}/study-create/http-response.adoc[]

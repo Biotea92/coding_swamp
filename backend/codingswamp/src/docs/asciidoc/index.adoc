@@ -3,46 +3,17 @@
 :icons: font
 :source-highlighter: highlights
 :toc: left
-:toclevels: 2
+:toclevels: 3
 :sectlinks:
 
-== 회원가입
-- 요청
-include::{snippets}/member-signup/http-request.adoc[]
-include::{snippets}/member-signup/request-parameters.adoc[]
-include::{snippets}/member-signup/request-parts.adoc[]
-- 응답
-include::{snippets}/member-signup/http-response.adoc[]
-include::{snippets}/member-signup/response-fields.adoc[]
+== Auth API
 
-== 이메일 인증
-- 요청
-include::{snippets}/auth-email/http-request.adoc[]
-include::{snippets}/auth-email/request-fields.adoc[]
-- 응답
-include::{snippets}/auth-email/http-response.adoc[]
-include::{snippets}/auth-email/response-fields.adoc[]
+include::auth_api.adoc[]
 
-== 로그인
-- 요청
-include::{snippets}/member-login/http-request.adoc[]
-include::{snippets}/member-login/request-fields.adoc[]
-- 응답
-include::{snippets}/member-login/http-response.adoc[]
-include::{snippets}/member-login/response-fields.adoc[]
+== Member API
 
-== 토큰 Refresh
-- 요청
-include::{snippets}/auth-token-refresh/http-request.adoc[]
-- 요청 Header
-include::{snippets}/auth-token-refresh/request-headers.adoc[]
-- 응답
-include::{snippets}/auth-token-refresh/http-response.adoc[]
-include::{snippets}/auth-token-refresh/response-fields.adoc[]
+include::member_api.adoc[]
 
-== 스터디 생성
-- 요청
-include::{snippets}/study-create/http-request.adoc[]
-include::{snippets}/study-create/request-fields.adoc[]
-- 요청 Header
-include::{snippets}/study-create/request-headers.adoc[]
+== Study API
+
+include::study_api.adoc[]
