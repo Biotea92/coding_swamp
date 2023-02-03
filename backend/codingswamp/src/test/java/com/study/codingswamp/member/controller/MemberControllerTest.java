@@ -58,7 +58,7 @@ class MemberControllerTest {
                         .param("password", password)
                 )
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.memberId").value(1L))
                 .andExpect(jsonPath("$.email").value(email))
                 .andExpect(jsonPath("$.username").value("hong"))
                 .andExpect(jsonPath("$.role").value("USER"))

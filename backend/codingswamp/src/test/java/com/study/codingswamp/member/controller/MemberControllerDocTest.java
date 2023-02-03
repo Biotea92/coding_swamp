@@ -72,7 +72,7 @@ public class MemberControllerDocTest {
                                 parameterWithName("username").description("사용자이름")
                         ),
                         responseFields(
-                                fieldWithPath("id").description("회원 고유번호"),
+                                fieldWithPath("memberId").description("회원 고유번호"),
                                 fieldWithPath("email").description("회원 이메일"),
                                 fieldWithPath("githubId").description("깃헙 고유아이디"),
                                 fieldWithPath("username").description("username or github username"),
