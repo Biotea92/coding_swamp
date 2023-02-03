@@ -17,6 +17,7 @@ public class MailService {
 
     private final JavaMailSender emailSender;
     private final MemberService memberService;
+    private static final String title = "코딩의늪 회원가입 인증 번호";
     private static final String fromEmail = "seediu95@gmail.com";
 
     private String authCode;
@@ -33,7 +34,6 @@ public class MailService {
 
     private MimeMessage createEmailForm(String toEmail) {
         createCode();
-        String title = "코딩의늪 회원가입 인증 번호";
 
         MimeMessage message = emailSender.createMimeMessage();
         try {
