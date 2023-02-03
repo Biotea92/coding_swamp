@@ -36,7 +36,6 @@ class StudyServiceTest {
 
     @BeforeEach
     void clear() {
-        jdbcTemplate.update("alter table member auto_increment= ?", 1);
         jdbcTemplate.update("alter table study auto_increment= ?", 1);
     }
 

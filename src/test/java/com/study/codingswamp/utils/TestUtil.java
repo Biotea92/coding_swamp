@@ -10,10 +10,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 public class TestUtil {
 
     public String saveMemberAndGetToken(TokenProvider tokenProvider, MemberRepository memberRepository, JdbcTemplate jdbcTemplate) {
-        memberRepository.deleteAll();
         jdbcTemplate.update("alter table member auto_increment= ?", 1);
-
-        Member member = new Member("abc@gmail.com", "1q2w3e4r!", "hong", null);
+        Member member = new Member("abc@gmail.com", "1q2w3e4r!", "hong", "https://firebasestorage.googleapis.com/v0/b/coding-swamp.appspot.com/o/default_image%2Fcrocodile.png?alt=media");
         memberRepository.save(member);
         return tokenProvider.createAccessToken(1L, Role.USER);
     }

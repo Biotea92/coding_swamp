@@ -5,6 +5,7 @@ import com.study.codingswamp.auth.token.TokenProvider;
 import com.study.codingswamp.member.domain.repository.MemberRepository;
 import com.study.codingswamp.study.service.request.StudyCreateRequest;
 import com.study.codingswamp.utils.TestUtil;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,11 @@ class StudyControllerTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    @BeforeEach
+    void clear() {
+        jdbcTemplate.update("alter table study auto_increment= ?", 1);
+    }
+
     @Test
     @DisplayName("스터디 생성 요청시 스터디가 생성되어야한다.")
     void createStudy() throws Exception {
@@ -54,8 +60,8 @@ class StudyControllerTest {
                 .tags(List.of("태그1", "태그2"))
                 .build();
 
-        TestUtil testUtil = new TestUtil();
-        String token = testUtil.saveMemberAndGetToken(tokenProvider, memberRepository, jdbcTemplate);
+        String token = new TestUtil()
+                .saveMemberAndGetToken(tokenProvider, memberRepository, jdbcTemplate);
         String json = objectMapper.writeValueAsString(request);
         // expected
 
@@ -67,6 +73,4 @@ class StudyControllerTest {
                 .andExpect(status().isCreated())
                 .andDo(print());
     }
-
-
 }
