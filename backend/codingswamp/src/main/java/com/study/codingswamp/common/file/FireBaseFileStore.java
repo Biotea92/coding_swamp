@@ -21,11 +21,12 @@ public class FireBaseFileStore implements FileStore{
     private String imageUrlPrefix;
 
     private static final String imageUrlSuffix = "?alt=media";
+    private static final String defaultImageUrl = "https://firebasestorage.googleapis.com/v0/b/coding-swamp.appspot.com/o/default_image%2Fcrocodile.png?alt=media";
 
     @Override
     public String storeFile(MultipartFile multipartFile) {
         if (multipartFile == null || multipartFile.isEmpty()) {
-            return null;
+            return defaultImageUrl;
         }
         String originalFilename = multipartFile.getOriginalFilename();
         String storeFileName = createStoreFileName(originalFilename);
