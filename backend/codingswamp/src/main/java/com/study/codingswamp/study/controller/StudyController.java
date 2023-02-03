@@ -6,6 +6,7 @@ import com.study.codingswamp.auth.service.MemberPayload;
 import com.study.codingswamp.study.domain.Study;
 import com.study.codingswamp.study.service.StudyService;
 import com.study.codingswamp.study.service.request.StudyCreateRequest;
+import com.study.codingswamp.study.service.response.StudyDetailResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -23,13 +24,15 @@ public class StudyController {
 
     @Login
     @PostMapping
-    public ResponseEntity<Void> create(@AuthenticatedMember MemberPayload memberPayload, @Validated @RequestBody StudyCreateRequest request) {
+    public ResponseEntity<Void> create(@AuthenticatedMember MemberPayload memberPayload,
+                                       @Validated @RequestBody StudyCreateRequest request) {
         Study study = studyService.createStudy(memberPayload, request);
         return ResponseEntity.created(URI.create("/api/study/" + study.getId())).build();
     }
 
     @GetMapping("/{studyId}")
-    public ResponseEntity<Long> getStudyDetails(@PathVariable Long studyId) {
-        return ResponseEntity.ok().body(studyId);
+    public ResponseEntity<StudyDetailResponse> getStudyDetails(@PathVariable Long studyId) {
+        StudyDetailResponse response = studyService.getStudyDetails(studyId);
+        return ResponseEntity.ok().body(response);
     }
 }

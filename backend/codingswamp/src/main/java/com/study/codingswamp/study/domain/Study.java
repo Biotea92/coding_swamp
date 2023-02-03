@@ -1,5 +1,6 @@
 package com.study.codingswamp.study.domain;
 
+import com.study.codingswamp.common.exception.NotFoundException;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,10 +9,7 @@ import org.springframework.data.annotation.CreatedDate;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static lombok.AccessLevel.PROTECTED;
 
@@ -93,5 +91,13 @@ public class Study {
         this.participants = participants;
         this.applicants = applicants;
         this.tags = tags;
+    }
+
+    public LocalDate getOwnerParticipationDate() {
+        return this.getParticipants().stream()
+                .filter(p -> Objects.equals(p.getMemberId(), ownerId))
+                .findAny()
+                .orElseThrow(() -> new NotFoundException("participant", "owner에 해당되는 참가자가 없습니다."))
+                .getParticipationDate();
     }
 }
