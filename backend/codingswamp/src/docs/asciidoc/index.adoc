@@ -39,3 +39,10 @@ include::{snippets}/auth-token-refresh/request-headers.adoc[]
 - 응답
 include::{snippets}/auth-token-refresh/http-response.adoc[]
 include::{snippets}/auth-token-refresh/response-fields.adoc[]
+
+== 스터디 생성
+- 요청
+include::{snippets}/study-create/http-request.adoc[]
+include::{snippets}/study-create/request-fields.adoc[]
+- 요청 Header
+include::{snippets}/study-create/request-headers.adoc[]
