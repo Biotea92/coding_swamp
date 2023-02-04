@@ -24,7 +24,7 @@ public class AuthService {
     }
 
     public AccessTokenResponse refreshToken(MemberPayload memberPayload) {
-        memberService.checkExistMember(memberPayload.getId());
+        memberService.checkExistMemberAndGet(memberPayload.getId());
 
         String token = tokenProvider.createAccessToken(memberPayload.getId(), memberPayload.getRole());
         return new AccessTokenResponse(token, tokenProvider.getValidityInMilliseconds());

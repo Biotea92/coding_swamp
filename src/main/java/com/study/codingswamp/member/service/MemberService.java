@@ -51,14 +51,19 @@ public class MemberService {
         throw new UnauthorizedException("password", "잘못된 비밀번호입니다.");
     }
 
+    public MemberResponse getMember(Long memberId) {
+        Member member = checkExistMemberAndGet(memberId);
+        return new MemberResponse(member);
+    }
+
     public void duplicateEmailCheck(String email) {
         if (getByEmail(email).isPresent()) {
             throw new ConflictException("email", "이메일이 중복입니다.");
         }
     }
 
-    public void checkExistMember(Long memberId) {
-        memberRepository.findById(memberId)
+    public Member checkExistMemberAndGet(Long memberId) {
+        return memberRepository.findById(memberId)
                 .orElseThrow(() -> new NotFoundException("member", "사용자를 찾을 수 없습니다."));
     }
 

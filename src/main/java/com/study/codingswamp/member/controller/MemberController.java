@@ -5,9 +5,7 @@ import com.study.codingswamp.member.service.request.MemberSignupRequest;
 import com.study.codingswamp.member.service.response.MemberResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -19,5 +17,10 @@ public class MemberController {
     @PostMapping
     public MemberResponse signup(@Validated MemberSignupRequest memberSignupRequest) {
         return memberService.signup(memberSignupRequest);
+    }
+
+    @GetMapping("/{memberId}")
+    public MemberResponse getMember(@PathVariable Long memberId) {
+        return memberService.getMember(memberId);
     }
 }
