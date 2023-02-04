@@ -1,6 +1,8 @@
 package com.study.codingswamp.member.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.study.codingswamp.member.domain.Member;
+import com.study.codingswamp.member.domain.repository.MemberRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,6 +21,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.multipart;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
@@ -36,6 +39,8 @@ public class MemberControllerDocTest {
     private MockMvc mockMvc;
     @Autowired
     JdbcTemplate jdbcTemplate;
+    @Autowired
+    MemberRepository memberRepository;
 
     @BeforeEach
     public void setUp(WebApplicationContext webApplicationContext, RestDocumentationContextProvider restDocumentation) {
@@ -82,5 +87,34 @@ public class MemberControllerDocTest {
                                 fieldWithPath("joinedAt").description("가입일")
                         )
                 ));
+    }
+
+    @Test
+    @DisplayName("회원 단건조회가 완료되어야 한다.")
+    void getMember() throws Exception {
+        Member member = saveMember();
+
+        mockMvc.perform(get("/api/member/{memberId}", member.getId()))
+                .andExpect(status().isOk())
+                .andDo(document("member-get",
+                        pathParameters(
+                                parameterWithName("memberId").description("회원고유번호")
+                        ),
+                        responseFields(
+                                fieldWithPath("memberId").description("회원 고유번호"),
+                                fieldWithPath("email").description("회원 이메일"),
+                                fieldWithPath("githubId").description("깃헙 고유아이디"),
+                                fieldWithPath("username").description("username or github username"),
+                                fieldWithPath("imageUrl").description("회원 이미지"),
+                                fieldWithPath("profileUrl").description("깃헙 url"),
+                                fieldWithPath("role").description("권한"),
+                                fieldWithPath("joinedAt").description("가입일")
+                        )
+                ));
+    }
+
+    private Member saveMember() {
+        Member member = new Member("abc@gmail.com", "1q2w3e4r!", "hong", "https://firebasestorage.googleapis.com/v0/b/coding-swamp.appspot.com/o/default_image%2Fcrocodile.png?alt=media");
+        return memberRepository.save(member);
     }
 }

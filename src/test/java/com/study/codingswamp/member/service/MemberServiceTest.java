@@ -8,6 +8,7 @@ import com.study.codingswamp.member.domain.Member;
 import com.study.codingswamp.member.domain.Role;
 import com.study.codingswamp.member.domain.repository.MemberRepository;
 import com.study.codingswamp.member.service.request.MemberSignupRequest;
+import com.study.codingswamp.member.service.response.MemberResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -68,8 +69,7 @@ class MemberServiceTest {
     @Test
     void checkLogin() {
         // given
-        Member member = new Member("abc@gmail.com", passwordEncoder.encode("1q2w3e4r!"), "hong", null);
-        memberRepository.save(member);
+        saveMember();
         CommonLoginRequest request1 = CommonLoginRequest.builder()
                 .email("abc@gmail.com")
                 .password("1q2w3e4r!")
@@ -99,8 +99,7 @@ class MemberServiceTest {
     @Test
     void duplicateEmail() {
         // given
-        Member member = new Member("abc@gmail.com", passwordEncoder.encode("1q2w3e4r!"), "hong", null);
-        memberRepository.save(member);
+        Member member = saveMember();
 
         // expected
         assertThrows(
@@ -117,7 +116,32 @@ class MemberServiceTest {
     void checkExistMember() {
         assertThrows(
                 NotFoundException.class,
-                () -> memberService.checkExistMember(1L)
+                () -> memberService.checkExistMemberAndGet(1L)
         );
+    }
+
+    @DisplayName("사용자 단건조회")
+    @Test
+    void getMember() {
+        // given
+        Member member = saveMember();
+
+        // when
+        MemberResponse memberResponse = memberService.getMember(member.getId());
+
+        // then
+        assertThat(member.getId()).isEqualTo(memberResponse.getMemberId());
+        assertThat(member.getEmail()).isEqualTo(memberResponse.getEmail());
+        assertThat(member.getRole()).isEqualTo(memberResponse.getRole());
+        assertThat(member.getUsername()).isEqualTo(memberResponse.getUsername());
+        assertThat(member.getImageUrl()).isEqualTo(memberResponse.getImageUrl());
+        assertThat(member.getProfileUrl()).isEqualTo(memberResponse.getProfileUrl());
+        assertThat(member.getGithubId()).isEqualTo(memberResponse.getGithubId());
+        assertThat(member.getJoinedAt()).isEqualTo(memberResponse.getJoinedAt());
+    }
+
+    private Member saveMember() {
+        Member member = new Member("abc@gmail.com", passwordEncoder.encode("1q2w3e4r!"), "hong", null);
+        return memberRepository.save(member);
     }
 }
