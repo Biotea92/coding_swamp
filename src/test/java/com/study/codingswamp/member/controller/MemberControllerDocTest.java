@@ -47,7 +47,7 @@ public class MemberControllerDocTest {
     }
 
     @Test
-    @DisplayName("회원가입 테스트")
+    @DisplayName("회원가입 요청시 회원가입이 완료되어야 한다.")
     void signup() throws Exception {
         // given
         String email = "seediu95@gmail.com";
@@ -57,7 +57,7 @@ public class MemberControllerDocTest {
 
         // expected
         mockMvc.perform(multipart("/api/member")
-                        .file("imageFile", "imageFile".getBytes())
+                        .file(imageFile)
                         .param("email", email)
                         .param("password", password)
                         .param("username", username)

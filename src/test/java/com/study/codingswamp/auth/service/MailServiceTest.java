@@ -16,7 +16,7 @@ class MailServiceTest {
     private MailService mailService;
 
     @Test
-    @DisplayName("메일을 주면 메일을 쏘고 인증번호를 생성한다.")
+    @DisplayName("메일을 주면 메일을 발송하고 인증번호를 생성한다.")
     void sendMaile() {
         // given
         MailAuthenticationRequest request = new MailAuthenticationRequest("seediu95@gmail.com");

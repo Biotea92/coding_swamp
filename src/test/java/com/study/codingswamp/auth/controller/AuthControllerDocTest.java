@@ -64,7 +64,7 @@ public class AuthControllerDocTest {
     }
 
     @Test
-    @DisplayName("로그인 테스트")
+    @DisplayName("로그인 요청시 로그인되어야한다.")
     void login() throws Exception {
         Member member = new Member("abc@gmail.com", passwordEncoder.encode("1q2w3e4r!"), "hong", null);
         memberRepository.save(member);

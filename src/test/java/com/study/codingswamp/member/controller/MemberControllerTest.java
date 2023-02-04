@@ -42,35 +42,10 @@ class MemberControllerTest {
     }
 
     @Test
-    @DisplayName("회원가입 요청시 회원가입이 완료된다.")
-    void signupSuccess() throws Exception {
-        // given
-        String email = "seediu95@gmail.com";
-        String password = "1q2w3e4r!";
-        String username = "hong";
-        MockMultipartFile multipartFile = new MockMultipartFile("imageFile", "image".getBytes());
-
-        // expected
-        mockMvc.perform(multipart("/api/member")
-                        .file(multipartFile)
-                        .param("email", email)
-                        .param("username", username)
-                        .param("password", password)
-                )
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.memberId").value(1L))
-                .andExpect(jsonPath("$.email").value(email))
-                .andExpect(jsonPath("$.username").value("hong"))
-                .andExpect(jsonPath("$.role").value("USER"))
-                .andDo(print());
-    }
-
-
-    @Test
     @DisplayName("회원가입 요청시 multipartFile을 제외한 모든 값은 필수다.")
     void signup_Can_Not_Be_Blank() throws Exception {
         mockMvc.perform(post("/api/member?")
-                .contentType(APPLICATION_JSON)
+                        .contentType(APPLICATION_JSON)
                 )
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("400"))
