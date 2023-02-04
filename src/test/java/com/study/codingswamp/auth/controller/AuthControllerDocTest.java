@@ -16,6 +16,7 @@ import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDoc
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -93,26 +94,36 @@ public class AuthControllerDocTest {
     }
 
     @Test
-    @DisplayName("이메일 인증")
+    @DisplayName("이메일 인증 이메일 발송 및 인증번호 생성")
     void emailAuth() throws Exception {
-        MailAuthenticationRequest request = new MailAuthenticationRequest("abc@gmail.com");
+        MailAuthenticationRequest request = new MailAuthenticationRequest("seediu95@gmail.com");
 
         String json = objectMapper.writeValueAsString(request);
 
         mockMvc.perform(post("/api/auth/email")
                         .contentType(APPLICATION_JSON)
-                        .accept(APPLICATION_JSON)
                         .content(json)
-                ).andExpect(status().isOk())
+                )
+                .andExpect(status().isCreated())
                 .andDo(document("auth-email",
                         requestFields(
                                 fieldWithPath("email").description("메일발송 인증용 이메일")
-                        ),
-                        responseFields(
-                                fieldWithPath("email").description("인증 발송된 이메일"),
-                                fieldWithPath("authCode").description("인증 번호")
                         )
                 ));
+    }
+
+    @Test
+    @DisplayName("이메일 인증번호를 확인한다.")
+    void emailAuthCodeConfirm() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("authCode", "123456");
+        session.setMaxInactiveInterval(180);
+
+        mockMvc.perform(post("/api/auth/email/confirm")
+                        .param("authCode", "123456")
+                        .session(session)
+                )
+                .andExpect(status().isOk());
     }
 
     @Test
