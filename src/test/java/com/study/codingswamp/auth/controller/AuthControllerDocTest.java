@@ -31,6 +31,8 @@ import static org.springframework.restdocs.headers.HeaderDocumentation.requestHe
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -123,7 +125,12 @@ public class AuthControllerDocTest {
                         .param("authCode", "123456")
                         .session(session)
                 )
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andDo(document("auth-email-confirm",
+                        requestParameters(
+                                parameterWithName("authCode").description("메일 인증코드")
+                        )
+                ));
     }
 
     @Test

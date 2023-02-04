@@ -8,13 +8,19 @@
 
 == Auth API
 
-=== 이메일 인증
+=== 이메일 인증코드 발송
 - 요청
 include::{snippets}/auth-email/http-request.adoc[]
 include::{snippets}/auth-email/request-fields.adoc[]
 - 응답
 include::{snippets}/auth-email/http-response.adoc[]
-include::{snippets}/auth-email/response-fields.adoc[]
+
+=== 이메일 인증코드 확인
+- 요청
+include::{snippets}/auth-email-confirm/http-request.adoc[]
+include::{snippets}/auth-email-confirm/request-parameters.adoc[]
+- 응답
+include::{snippets}/auth-email-confirm/http-response.adoc[]
 
 === 로그인
 - 요청
