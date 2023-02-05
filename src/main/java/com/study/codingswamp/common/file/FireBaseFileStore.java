@@ -37,6 +37,9 @@ public class FireBaseFileStore implements FileStore{
 
     @Override
     public void deleteFile(String imageUrl) {
+        if (imageUrl.equals(defaultImageUrl)) {
+            return;
+        }
         String fileName = deleteFileNameExtract(imageUrl);
         Bucket bucket = StorageClient.getInstance().bucket(firebaseBucket);
         Blob blob = bucket.get(fileName);

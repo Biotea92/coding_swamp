@@ -1,25 +1,27 @@
 package com.study.codingswamp.member.service.request;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotBlank;
 
 @Getter
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
 public class MemberEditRequest {
 
     @NotBlank
     @Length(min = 3, message = "최소 3자 이상이어야 합니다.")
-    private String username;
+    private final String username;
 
-    private String profileUrl;
+    private final String profileUrl;
 
-    private MultipartFile imageFile;
+    private final MultipartFile imageFile;
+
+    @Builder
+    public MemberEditRequest(String username, String profileUrl, MultipartFile imageFile) {
+        this.username = username;
+        this.profileUrl = profileUrl;
+        this.imageFile = imageFile;
+    }
 }

@@ -29,9 +29,9 @@ public class MemberController {
     }
 
     @Login
-    @PatchMapping("/me/edit")
+    @PostMapping("/edit")
     public MemberResponse edit(@AuthenticatedMember MemberPayload memberPayload,
-                               @Validated @RequestBody MemberEditRequest memberEditRequest) {
+                               @Validated MemberEditRequest memberEditRequest) {
         return memberService.edit(memberPayload, memberEditRequest);
     }
 }

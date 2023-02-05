@@ -73,7 +73,7 @@ public class MemberService {
     public MemberResponse edit(MemberPayload memberPayload, MemberEditRequest request) {
         Long memberId = memberPayload.getId();
         Member member = checkExistMemberAndGet(memberId);
-        if (member.getGithubId() == null) {
+        if (member.getGithubId() != null) {
             throw new UnauthorizedException("github", "깃허브 사용자는 수정이 불가능합니다.");
         }
 
@@ -89,7 +89,7 @@ public class MemberService {
 
     private void fileUpdateOrSave(MemberEditRequest request, Member member) {
         if (request.getImageFile() != null) {
-            if (!member.getImageUrl().equals("null")) {
+            if (member.getImageUrl() != null) {
                 fileStore.deleteFile(member.getImageUrl());
             }
             String imageUrl = fileStore.storeFile(request.getImageFile());
