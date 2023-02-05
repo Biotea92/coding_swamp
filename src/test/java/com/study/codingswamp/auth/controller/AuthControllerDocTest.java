@@ -3,10 +3,8 @@ package com.study.codingswamp.auth.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.study.codingswamp.auth.oauth.GithubOauthClient;
 import com.study.codingswamp.auth.oauth.response.GithubProfileResponse;
-import com.study.codingswamp.auth.service.AuthService;
 import com.study.codingswamp.auth.service.request.CommonLoginRequest;
 import com.study.codingswamp.auth.service.request.MailAuthenticationRequest;
-import com.study.codingswamp.auth.service.response.AccessTokenResponse;
 import com.study.codingswamp.auth.token.TokenProvider;
 import com.study.codingswamp.member.domain.Member;
 import com.study.codingswamp.member.domain.repository.MemberRepository;
@@ -61,8 +59,6 @@ public class AuthControllerDocTest {
     private TokenProvider tokenProvider;
 
     @MockBean
-    private AuthService authService;
-    @MockBean
     private GithubOauthClient githubOauthClient;
 
     @BeforeEach
@@ -87,9 +83,8 @@ public class AuthControllerDocTest {
 
         String json = objectMapper.writeValueAsString(request);
 
-        mockMvc.perform(post("/api/auth/login/{loginType}", "common")
+        mockMvc.perform(post("/api/auth/login/common")
                         .contentType(APPLICATION_JSON)
-                        .accept(APPLICATION_JSON)
                         .content(json)
                 )
                 .andExpect(status().isOk())
@@ -179,8 +174,6 @@ public class AuthControllerDocTest {
 
         given(githubOauthClient.getProfile("AuthorizationCode"))
                 .willReturn(swamp);
-        given(authService.githubLogin(swamp))
-                .willReturn(new AccessTokenResponse("jwt token", 3600000L));
 
         mockMvc.perform(post("/api/auth/login/github")
                         .param("code", "AuthorizationCode")
