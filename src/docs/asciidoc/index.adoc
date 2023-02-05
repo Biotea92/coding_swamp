@@ -22,13 +22,21 @@ include::{snippets}/auth-email-confirm/request-parameters.adoc[]
 - 응답
 include::{snippets}/auth-email-confirm/http-response.adoc[]
 
-=== 로그인
+=== 로그인(일반)
 - 요청
 include::{snippets}/member-login/http-request.adoc[]
 include::{snippets}/member-login/request-fields.adoc[]
 - 응답
 include::{snippets}/member-login/http-response.adoc[]
 include::{snippets}/member-login/response-fields.adoc[]
+
+=== 로그인(github)
+- 요청
+include::{snippets}/auth-login-github/http-request.adoc[]
+include::{snippets}/auth-login-github/request-parameters.adoc[]
+- 응답
+include::{snippets}/auth-login-github/http-response.adoc[]
+include::{snippets}/auth-login-github/response-fields.adoc[]
 
 === 토큰 Refresh
 - 요청

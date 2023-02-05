@@ -1,8 +1,12 @@
 package com.study.codingswamp.auth.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.study.codingswamp.auth.oauth.GithubOauthClient;
+import com.study.codingswamp.auth.oauth.response.GithubProfileResponse;
+import com.study.codingswamp.auth.service.AuthService;
 import com.study.codingswamp.auth.service.request.CommonLoginRequest;
 import com.study.codingswamp.auth.service.request.MailAuthenticationRequest;
+import com.study.codingswamp.auth.service.response.AccessTokenResponse;
 import com.study.codingswamp.auth.token.TokenProvider;
 import com.study.codingswamp.member.domain.Member;
 import com.study.codingswamp.member.domain.repository.MemberRepository;
@@ -14,6 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpSession;
@@ -25,6 +30,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.mockito.BDDMockito.given;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
@@ -53,6 +59,11 @@ public class AuthControllerDocTest {
     private JdbcTemplate jdbcTemplate;
     @Autowired
     private TokenProvider tokenProvider;
+
+    @MockBean
+    private AuthService authService;
+    @MockBean
+    private GithubOauthClient githubOauthClient;
 
     @BeforeEach
     public void setUp(WebApplicationContext webApplicationContext, RestDocumentationContextProvider restDocumentation) {
@@ -147,6 +158,37 @@ public class AuthControllerDocTest {
                 .andDo(document("auth-token-refresh",
                         requestHeaders(
                                 headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer auth credentials")
+                        ),
+                        responseFields(
+                                fieldWithPath("accessToken").description("jwt token"),
+                                fieldWithPath("expiredTime").description("만료 밀리세컨드")
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("깃허브 로그인 요청")
+    void githubLogin() throws Exception {
+        GithubProfileResponse swamp = GithubProfileResponse.builder()
+                .githubId("1")
+                .imageUrl("http://imageUrl")
+                .username("swamp")
+                .profileUrl("http://profileUrl")
+                .email("swamp@gmail.com")
+                .build();
+
+        given(githubOauthClient.getProfile("AuthorizationCode"))
+                .willReturn(swamp);
+        given(authService.githubLogin(swamp))
+                .willReturn(new AccessTokenResponse("jwt token", 3600000L));
+
+        mockMvc.perform(post("/api/auth/login/github")
+                        .param("code", "AuthorizationCode")
+                )
+                .andExpect(status().isOk())
+                .andDo(document("auth-login-github",
+                        requestParameters(
+                                parameterWithName("code").description("Authorization code")
                         ),
                         responseFields(
                                 fieldWithPath("accessToken").description("jwt token"),
