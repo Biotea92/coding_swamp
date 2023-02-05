@@ -68,6 +68,18 @@ include::{snippets}/member-signup/response-fields.adoc[]
 
 '''
 
+=== 회원 정보 수정
+- 요청
+include::{snippets}/member-edit/http-request.adoc[]
+include::{snippets}/member-edit/request-headers.adoc[]
+include::{snippets}/member-edit/request-parameters.adoc[]
+include::{snippets}/member-edit/request-parts.adoc[]
+- 응답
+include::{snippets}/member-edit/http-response.adoc[]
+include::{snippets}/member-edit/response-fields.adoc[]
+
+'''
+
 === 회원 단건 조회
 - 요청
 include::{snippets}/member-get/http-request.adoc[]

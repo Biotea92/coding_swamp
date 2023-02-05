@@ -1,8 +1,10 @@
 package com.study.codingswamp.member.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.study.codingswamp.auth.token.TokenProvider;
 import com.study.codingswamp.member.domain.Member;
 import com.study.codingswamp.member.domain.repository.MemberRepository;
+import com.study.codingswamp.utils.TestUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,6 +21,9 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
@@ -41,6 +46,8 @@ public class MemberControllerDocTest {
     JdbcTemplate jdbcTemplate;
     @Autowired
     MemberRepository memberRepository;
+    @Autowired
+    TokenProvider tokenProvider;
 
     @BeforeEach
     public void setUp(WebApplicationContext webApplicationContext, RestDocumentationContextProvider restDocumentation) {
@@ -99,6 +106,44 @@ public class MemberControllerDocTest {
                 .andDo(document("member-get",
                         pathParameters(
                                 parameterWithName("memberId").description("회원고유번호")
+                        ),
+                        responseFields(
+                                fieldWithPath("memberId").description("회원 고유번호"),
+                                fieldWithPath("email").description("회원 이메일"),
+                                fieldWithPath("githubId").description("깃헙 고유아이디"),
+                                fieldWithPath("username").description("username or github username"),
+                                fieldWithPath("imageUrl").description("회원 이미지"),
+                                fieldWithPath("profileUrl").description("깃헙 url"),
+                                fieldWithPath("role").description("권한"),
+                                fieldWithPath("joinedAt").description("가입일")
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("회원 정보 수정이 완료되어야 한다.")
+    void edit() throws Exception {
+        String token = new TestUtil().saveMemberAndGetToken(tokenProvider, memberRepository, jdbcTemplate);
+
+        MockMultipartFile imageFile = new MockMultipartFile("imageFile", "image".getBytes());
+
+        mockMvc.perform(multipart("/api/member/edit")
+                        .file(imageFile)
+                        .header(AUTHORIZATION, "Bearer " + token)
+                        .param("username", "kim")
+                        .param("profileUrl", "http://profile")
+                )
+                .andExpect(status().isOk())
+                .andDo(document("member-edit",
+                        requestHeaders(
+                                headerWithName(AUTHORIZATION).description("Bearer auth credentials")
+                        ),
+                        requestParts(
+                                partWithName("imageFile").description("이미지 파일")
+                        ),
+                        requestParameters(
+                                parameterWithName("username").description("사용자이름"),
+                                parameterWithName("profileUrl").description("깃허브 프로필 Url")
                         ),
                         responseFields(
                                 fieldWithPath("memberId").description("회원 고유번호"),

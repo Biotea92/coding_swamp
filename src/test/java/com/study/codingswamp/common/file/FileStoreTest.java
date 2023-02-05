@@ -20,7 +20,7 @@ class FileStoreTest {
     private static final String imageUrlSuffix = "?alt=media";
 
     @Test
-    @DisplayName("multipartFile은 업로드 되고 imageUrl을 반환한다.")
+    @DisplayName("multipartFile은 업로드 되고 imageUrl을 반환한다. 마지막에는 삭제한다")
     void uploadFile() {
         // given
         MockMultipartFile mockMultipartFile = new MockMultipartFile("MockFile.png", "MockFile.png".getBytes());
@@ -31,5 +31,7 @@ class FileStoreTest {
         // then
         assertThat(imageUrl).startsWith(imageUrlPrefix);
         assertThat(imageUrl).endsWith(imageUrlSuffix);
+
+        fileStore.deleteFile(imageUrl);
     }
 }

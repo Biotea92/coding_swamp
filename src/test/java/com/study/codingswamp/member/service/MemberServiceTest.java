@@ -1,5 +1,6 @@
 package com.study.codingswamp.member.service;
 
+import com.study.codingswamp.auth.service.MemberPayload;
 import com.study.codingswamp.auth.service.request.CommonLoginRequest;
 import com.study.codingswamp.common.exception.ConflictException;
 import com.study.codingswamp.common.exception.NotFoundException;
@@ -7,6 +8,7 @@ import com.study.codingswamp.common.exception.UnauthorizedException;
 import com.study.codingswamp.member.domain.Member;
 import com.study.codingswamp.member.domain.Role;
 import com.study.codingswamp.member.domain.repository.MemberRepository;
+import com.study.codingswamp.member.service.request.MemberEditRequest;
 import com.study.codingswamp.member.service.request.MemberSignupRequest;
 import com.study.codingswamp.member.service.response.MemberResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -138,6 +141,27 @@ class MemberServiceTest {
         assertThat(member.getProfileUrl()).isEqualTo(memberResponse.getProfileUrl());
         assertThat(member.getGithubId()).isEqualTo(memberResponse.getGithubId());
         assertThat(member.getJoinedAt()).isEqualTo(memberResponse.getJoinedAt());
+    }
+
+    @DisplayName("사용자 정보 수정")
+    @Test
+    void edit() {
+        // given
+        Member member = saveMember();
+        MemberPayload memberPayload = new MemberPayload(member.getId(), member.getRole());
+        MemberEditRequest editRequest = MemberEditRequest.builder()
+                .username("kim")
+                .profileUrl("http://profile")
+                .imageFile(new MockMultipartFile("imageFile", "image".getBytes()))
+                .build();
+
+        // when
+        MemberResponse editResponse = memberService.edit(memberPayload, editRequest);
+
+        assertThat(editResponse.getMemberId()).isEqualTo(member.getId());
+        assertThat(editResponse.getUsername()).isEqualTo("kim");
+        assertThat(editResponse.getProfileUrl()).isEqualTo("http://profile");
+        assertThat(editResponse.getImageUrl()).isNotEqualTo("null");
     }
 
     private Member saveMember() {
