@@ -1,5 +1,6 @@
 package com.study.codingswamp.auth.service;
 
+import com.study.codingswamp.auth.oauth.response.GithubProfileResponse;
 import com.study.codingswamp.auth.service.request.CommonLoginRequest;
 import com.study.codingswamp.auth.service.response.AccessTokenResponse;
 import com.study.codingswamp.auth.token.TokenProvider;
@@ -19,14 +20,23 @@ public class AuthService {
     @Transactional
     public AccessTokenResponse login(CommonLoginRequest request) {
         MemberResponse memberResponse = memberService.checkLogin(request);
-        String token = tokenProvider.createAccessToken(memberResponse.getMemberId(), memberResponse.getRole());
-        return new AccessTokenResponse(token, tokenProvider.getValidityInMilliseconds());
+        return getAccessTokenResponse(memberResponse);
     }
 
     public AccessTokenResponse refreshToken(MemberPayload memberPayload) {
         memberService.checkExistMemberAndGet(memberPayload.getId());
 
         String token = tokenProvider.createAccessToken(memberPayload.getId(), memberPayload.getRole());
+        return new AccessTokenResponse(token, tokenProvider.getValidityInMilliseconds());
+    }
+
+    public AccessTokenResponse githubLogin(GithubProfileResponse profileResponse) {
+        MemberResponse memberResponse = memberService.saveOrUpdate(profileResponse.toMember());
+        return getAccessTokenResponse(memberResponse);
+    }
+
+    private AccessTokenResponse getAccessTokenResponse(MemberResponse memberResponse) {
+        String token = tokenProvider.createAccessToken(memberResponse.getMemberId(), memberResponse.getRole());
         return new AccessTokenResponse(token, tokenProvider.getValidityInMilliseconds());
     }
 }

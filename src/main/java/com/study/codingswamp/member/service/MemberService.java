@@ -56,6 +56,18 @@ public class MemberService {
         return new MemberResponse(member);
     }
 
+    @Transactional
+    public MemberResponse saveOrUpdate(Member loginMember) {
+        Optional<Member> findMember = memberRepository.findByGithubId(loginMember.getGithubId());
+        if (findMember.isPresent()) {
+            findMember.get().update(
+                    loginMember.getUsername(), loginMember.getEmail(), loginMember.getImageUrl(), loginMember.getProfileUrl()
+            );
+            return new MemberResponse(findMember.get());
+        }
+        return new MemberResponse(memberRepository.save(loginMember));
+    }
+
     public void duplicateEmailCheck(String email) {
         if (getByEmail(email).isPresent()) {
             throw new ConflictException("email", "이메일이 중복입니다.");

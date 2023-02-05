@@ -2,6 +2,8 @@ package com.study.codingswamp.auth.controller;
 
 import com.study.codingswamp.auth.config.AuthenticatedMember;
 import com.study.codingswamp.auth.config.Login;
+import com.study.codingswamp.auth.oauth.GithubOauthClient;
+import com.study.codingswamp.auth.oauth.response.GithubProfileResponse;
 import com.study.codingswamp.auth.service.AuthService;
 import com.study.codingswamp.auth.service.MailService;
 import com.study.codingswamp.auth.service.MemberPayload;
@@ -26,6 +28,7 @@ public class AuthController {
 
     private final MailService mailService;
     private final AuthService authService;
+    private final GithubOauthClient githubOauthClient;
     private static final String AUTH_CODE = "authCode";
 
     @PostMapping("/email")
@@ -54,9 +57,15 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/login/{loginType}")
-    public AccessTokenResponse login(@PathVariable String loginType, @RequestBody CommonLoginRequest request) {
+    @PostMapping("/login/common")
+    public AccessTokenResponse login(@RequestBody CommonLoginRequest request) {
         return authService.login(request);
+    }
+
+    @PostMapping("/login/github")
+    public AccessTokenResponse githubLogin(String code) {
+        GithubProfileResponse profileResponse = githubOauthClient.getProfile(code);
+        return authService.githubLogin(profileResponse);
     }
 
     @Login

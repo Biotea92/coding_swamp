@@ -50,4 +50,19 @@ public class Member {
         this.username = username;
         this.imageUrl = imageUrl;
     }
+
+    public Member(String email, Long githubId, String username, String imageUrl, String profileUrl) {
+        this.email = email;
+        this.githubId = githubId;
+        this.username = username;
+        this.imageUrl = imageUrl;
+        this.profileUrl = profileUrl;
+    }
+
+    public void update(String username, String email, String imageUrl, String profileUrl) {
+        this.email = email;
+        this.username = username;
+        this.imageUrl = imageUrl;
+        this.profileUrl = profileUrl;
+    }
 }
