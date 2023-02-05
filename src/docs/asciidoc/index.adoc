@@ -15,12 +15,16 @@ include::{snippets}/auth-email/request-fields.adoc[]
 - 응답
 include::{snippets}/auth-email/http-response.adoc[]
 
+'''
+
 === 이메일 인증코드 확인
 - 요청
 include::{snippets}/auth-email-confirm/http-request.adoc[]
 include::{snippets}/auth-email-confirm/request-parameters.adoc[]
 - 응답
 include::{snippets}/auth-email-confirm/http-response.adoc[]
+
+'''
 
 === 로그인(일반)
 - 요청
@@ -30,6 +34,8 @@ include::{snippets}/member-login/request-fields.adoc[]
 include::{snippets}/member-login/http-response.adoc[]
 include::{snippets}/member-login/response-fields.adoc[]
 
+'''
+
 === 로그인(github)
 - 요청
 include::{snippets}/auth-login-github/http-request.adoc[]
@@ -37,6 +43,8 @@ include::{snippets}/auth-login-github/request-parameters.adoc[]
 - 응답
 include::{snippets}/auth-login-github/http-response.adoc[]
 include::{snippets}/auth-login-github/response-fields.adoc[]
+
+'''
 
 === 토큰 Refresh
 - 요청
@@ -58,6 +66,8 @@ include::{snippets}/member-signup/request-parts.adoc[]
 include::{snippets}/member-signup/http-response.adoc[]
 include::{snippets}/member-signup/response-fields.adoc[]
 
+'''
+
 === 회원 단건 조회
 - 요청
 include::{snippets}/member-get/http-request.adoc[]
@@ -76,6 +86,8 @@ include::{snippets}/study-create/request-fields.adoc[]
 include::{snippets}/study-create/request-headers.adoc[]
 - 응답
 include::{snippets}/study-create/http-response.adoc[]
+
+'''
 
 === 스터디 상세 단건 조회
 - 요청
