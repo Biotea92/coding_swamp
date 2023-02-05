@@ -1,6 +1,10 @@
 package com.study.codingswamp.member.controller;
 
+import com.study.codingswamp.auth.config.AuthenticatedMember;
+import com.study.codingswamp.auth.config.Login;
+import com.study.codingswamp.auth.service.MemberPayload;
 import com.study.codingswamp.member.service.MemberService;
+import com.study.codingswamp.member.service.request.MemberEditRequest;
 import com.study.codingswamp.member.service.request.MemberSignupRequest;
 import com.study.codingswamp.member.service.response.MemberResponse;
 import lombok.RequiredArgsConstructor;
@@ -22,5 +26,12 @@ public class MemberController {
     @GetMapping("/{memberId}")
     public MemberResponse getMember(@PathVariable Long memberId) {
         return memberService.getMember(memberId);
+    }
+
+    @Login
+    @PatchMapping("/me/edit")
+    public MemberResponse edit(@AuthenticatedMember MemberPayload memberPayload,
+                               @Validated @RequestBody MemberEditRequest memberEditRequest) {
+        return memberService.edit(memberPayload, memberEditRequest);
     }
 }

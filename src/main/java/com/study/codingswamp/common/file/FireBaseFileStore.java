@@ -1,5 +1,6 @@
 package com.study.codingswamp.common.file;
 
+import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.Bucket;
 import com.google.firebase.cloud.StorageClient;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,6 +35,14 @@ public class FireBaseFileStore implements FileStore{
         return imageUrl;
     }
 
+    @Override
+    public void deleteFile(String imageUrl) {
+        String fileName = deleteFileNameExtract(imageUrl);
+        Bucket bucket = StorageClient.getInstance().bucket(firebaseBucket);
+        Blob blob = bucket.get(fileName);
+        blob.delete();
+    }
+
     private String createStoreFileName(String originalFilename) {
         String ext = extractExt(originalFilename);
         String uuid = UUID.randomUUID().toString();
@@ -55,5 +64,10 @@ public class FireBaseFileStore implements FileStore{
         }
 
         return imageUrlPrefix + storeFileName + imageUrlSuffix;
+    }
+
+    private String deleteFileNameExtract(String imageUrl) {
+        int indexOfSuffix = imageUrl.indexOf(imageUrlSuffix);
+        return imageUrl.substring(imageUrlPrefix.length(), indexOfSuffix);
     }
 }
