@@ -3,6 +3,7 @@ package com.study.codingswamp.common.file;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.Bucket;
 import com.google.firebase.cloud.StorageClient;
+import com.study.codingswamp.common.exception.InvalidRequestException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,10 +30,18 @@ public class FireBaseFileStore implements FileStore{
         if (multipartFile == null || multipartFile.isEmpty()) {
             return defaultImageUrl;
         }
+        validateContentTypeImage(multipartFile);
+
         String originalFilename = multipartFile.getOriginalFilename();
         String storeFileName = createStoreFileName(originalFilename);
-        String imageUrl = upload(multipartFile, storeFileName);
-        return imageUrl;
+        return upload(multipartFile, storeFileName);
+    }
+
+    private static void validateContentTypeImage(MultipartFile multipartFile) {
+        String contentType = multipartFile.getContentType();
+        if (contentType != null && !contentType.startsWith("image")) {
+            throw new InvalidRequestException("imageFile", "image 파일이 아닙니다.");
+        }
     }
 
     @Override
