@@ -6,6 +6,7 @@ import com.study.codingswamp.common.exception.NotFoundException;
 import com.study.codingswamp.member.domain.Member;
 import com.study.codingswamp.member.domain.repository.MemberRepository;
 import com.study.codingswamp.study.domain.Applicant;
+import com.study.codingswamp.study.domain.Participant;
 import com.study.codingswamp.study.domain.Study;
 import com.study.codingswamp.study.domain.Tag;
 import com.study.codingswamp.study.domain.repository.StudyRepository;
@@ -17,6 +18,7 @@ import com.study.codingswamp.study.service.response.ParticipantResponse;
 import com.study.codingswamp.study.service.response.StudyDetailResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -50,30 +52,45 @@ public class StudyService {
                 .build();
     }
 
+    @Transactional
     public void apply(MemberPayload memberPayload, Long studyId, ApplyRequest applyRequest) {
         Member member = findMember(memberPayload.getId(), "member", "신청자를 찾을 수 없습니다.");
         Study findStudy = findStudy(studyId);
 
         validateStudyMaxMember(findStudy);
+        checkParticipant(member, findStudy);
+        checkApplicant(member, findStudy);
 
+        findStudy.addApplicant(new Applicant(member.getId(), applyRequest.getReasonForApplication(), LocalDate.now()));
+    }
+
+    private static void checkApplicant(Member member, Study findStudy) {
         Optional<Applicant> findApplicant = findStudy.getApplicants().stream()
                 .filter(applicant -> applicant.getMemberId().equals(member.getId()))
                 .findAny();
         if (findApplicant.isPresent()) {
             throw new ConflictException("applicant", "이미 신청한 사용자입니다.");
         }
-
-        findStudy.addApplicant(new Applicant(member.getId(), applyRequest.getReasonForApplication(), LocalDate.now()));
     }
 
-    private static void validateStudyMaxMember(Study study) {
+    private void checkParticipant(Member member, Study findStudy) {
+        Optional<Participant> findParticipant = findStudy.getParticipants().stream()
+                .filter(participant -> participant.getMemberId().equals(member.getId()))
+                .findAny();
+        if (findParticipant.isPresent()) {
+            throw new ConflictException("participant", "이미 참가한 인원입니다.");
+        }
+    }
+
+    private void validateStudyMaxMember(Study study) {
         if (study.getCurrentMemberCount() == study.getMaxMemberCount()) {
             throw new ConflictException("study", "최대 정원인 스터디입니다.");
         }
     }
 
     private Study findStudy(Long studyId) {
-        return studyRepository.findById(studyId).orElseThrow(() -> new NotFoundException("studyId", "스터디를 찾을 수 없습니다."));
+        return studyRepository.findById(studyId)
+                .orElseThrow(() -> new NotFoundException("studyId", "스터디를 찾을 수 없습니다."));
     }
 
     private List<ParticipantResponse> getParticipationResponses(Study study) {
