@@ -54,9 +54,7 @@ public class StudyService {
         Member member = findMember(memberPayload.getId(), "member", "신청자를 찾을 수 없습니다.");
         Study findStudy = findStudy(studyId);
 
-        if (findStudy.getCurrentMemberCount() == findStudy.getMaxMemberCount()) {
-            throw new ConflictException("study", "최대 정원인 스터디입니다.");
-        }
+        validateStudyMaxMember(findStudy);
 
         Optional<Applicant> findApplicant = findStudy.getApplicants().stream()
                 .filter(applicant -> applicant.getMemberId().equals(member.getId()))
@@ -66,6 +64,12 @@ public class StudyService {
         }
 
         findStudy.addApplicant(new Applicant(member.getId(), applyRequest.getReasonForApplication(), LocalDate.now()));
+    }
+
+    private static void validateStudyMaxMember(Study study) {
+        if (study.getCurrentMemberCount() == study.getMaxMemberCount()) {
+            throw new ConflictException("study", "최대 정원인 스터디입니다.");
+        }
     }
 
     private Study findStudy(Long studyId) {
