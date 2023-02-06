@@ -40,7 +40,7 @@ public class AuthController {
         HttpSession session = request.getSession(true);
         session.setMaxInactiveInterval(300);
         session.setAttribute(AUTH_CODE, response.getAuthCode());
-        return ResponseEntity.created(URI.create("/email/confirm")).build();
+        return ResponseEntity.created(URI.create("/api/auth/email/confirm")).build();
     }
 
     @PostMapping("/email/confirm")

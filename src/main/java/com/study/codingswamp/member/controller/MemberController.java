@@ -8,6 +8,7 @@ import com.study.codingswamp.member.service.request.MemberEditRequest;
 import com.study.codingswamp.member.service.request.MemberSignupRequest;
 import com.study.codingswamp.member.service.response.MemberResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,5 +34,12 @@ public class MemberController {
     public MemberResponse edit(@AuthenticatedMember MemberPayload memberPayload,
                                @Validated MemberEditRequest memberEditRequest) {
         return memberService.edit(memberPayload, memberEditRequest);
+    }
+
+    @Login
+    @DeleteMapping
+    public ResponseEntity<Void> delete(@AuthenticatedMember MemberPayload memberPayload) {
+        memberService.delete(memberPayload);
+        return ResponseEntity.noContent().build();
     }
 }

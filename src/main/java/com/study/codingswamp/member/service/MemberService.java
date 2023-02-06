@@ -70,6 +70,7 @@ public class MemberService {
         return new MemberResponse(memberRepository.save(loginMember));
     }
 
+    @Transactional
     public MemberResponse edit(MemberPayload memberPayload, MemberEditRequest request) {
         Long memberId = memberPayload.getId();
         Member member = checkExistMemberAndGet(memberId);
@@ -87,13 +88,29 @@ public class MemberService {
         return new MemberResponse(member);
     }
 
+    @Transactional
+    public void delete(MemberPayload memberPayload) {
+        Long memberId = memberPayload.getId();
+        Member member = checkExistMemberAndGet(memberId);
+        if (member.getGithubId() != null) {
+            throw new UnauthorizedException("github", "깃허브 사용자는 회원탈퇴가 불가능합니다. ");
+        }
+
+        deleteFileIfExists(member);
+        memberRepository.delete(member);
+    }
+
     private void fileUpdateOrSave(MemberEditRequest request, Member member) {
         if (request.getImageFile() != null) {
-            if (member.getImageUrl() != null) {
-                fileStore.deleteFile(member.getImageUrl());
-            }
+            deleteFileIfExists(member);
             String imageUrl = fileStore.storeFile(request.getImageFile());
             member.updateImageUrl(imageUrl);
+        }
+    }
+
+    private void deleteFileIfExists(Member member) {
+        if (member.getImageUrl() != null) {
+            fileStore.deleteFile(member.getImageUrl());
         }
     }
 
