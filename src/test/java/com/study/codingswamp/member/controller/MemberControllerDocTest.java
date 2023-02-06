@@ -74,7 +74,7 @@ public class MemberControllerDocTest {
                         .param("email", email)
                         .param("password", password)
                         .param("username", username)
-                ).andExpect(status().isOk())
+                ).andExpect(status().isCreated())
                 .andDo(document("member-signup",
                         requestParts(
                                 partWithName("imageFile").description("파일 업로드")
@@ -134,7 +134,7 @@ public class MemberControllerDocTest {
                         .param("username", "kim")
                         .param("profileUrl", "http://profile")
                 )
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andDo(document("member-edit",
                         requestHeaders(
                                 headerWithName(AUTHORIZATION).description("Bearer auth credentials")
@@ -158,7 +158,7 @@ public class MemberControllerDocTest {
                         )
                 ));
     }
-
+    
     @Test
     @DisplayName("회원 탈퇴가 완료되어야 한다.")
     void delete() throws Exception {
