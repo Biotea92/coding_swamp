@@ -5,6 +5,7 @@ import com.study.codingswamp.auth.config.Login;
 import com.study.codingswamp.auth.service.MemberPayload;
 import com.study.codingswamp.study.domain.Study;
 import com.study.codingswamp.study.service.StudyService;
+import com.study.codingswamp.study.service.request.ApplyRequest;
 import com.study.codingswamp.study.service.request.StudyCreateRequest;
 import com.study.codingswamp.study.service.response.StudyDetailResponse;
 import lombok.RequiredArgsConstructor;
@@ -34,5 +35,14 @@ public class StudyController {
     public ResponseEntity<StudyDetailResponse> getStudyDetails(@PathVariable Long studyId) {
         StudyDetailResponse response = studyService.getStudyDetails(studyId);
         return ResponseEntity.ok().body(response);
+    }
+
+    @Login
+    @PatchMapping("/{studyId}/apply")
+    public ResponseEntity<Void> apply(@AuthenticatedMember MemberPayload memberPayload,
+                                      @PathVariable Long studyId,
+                                      @Validated @RequestBody ApplyRequest applyRequest) {
+        studyService.apply(memberPayload, studyId, applyRequest);
+        return ResponseEntity.created(URI.create("/api/study/" + studyId)).build();
     }
 }

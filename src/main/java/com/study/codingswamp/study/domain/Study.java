@@ -100,4 +100,8 @@ public class Study {
                 .orElseThrow(() -> new NotFoundException("participant", "owner에 해당되는 참가자가 없습니다."))
                 .getParticipationDate();
     }
+
+    public void addApplicant(Applicant applicant) {
+        this.applicants.add(applicant);
+    }
 }
