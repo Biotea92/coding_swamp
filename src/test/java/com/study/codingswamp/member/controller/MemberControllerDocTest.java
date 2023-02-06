@@ -16,6 +16,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
+import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
@@ -154,6 +155,21 @@ public class MemberControllerDocTest {
                                 fieldWithPath("profileUrl").description("깃헙 url"),
                                 fieldWithPath("role").description("권한"),
                                 fieldWithPath("joinedAt").description("가입일")
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("회원 탈퇴가 완료되어야 한다.")
+    void delete() throws Exception {
+        String token = new TestUtil().saveMemberAndGetToken(tokenProvider, memberRepository, jdbcTemplate);
+
+        mockMvc.perform(RestDocumentationRequestBuilders.delete("/api/member")
+                        .header(AUTHORIZATION, "Bearer " + token)
+                ).andExpect(status().isNoContent())
+                .andDo(document("member-delete",
+                        requestHeaders(
+                                headerWithName(AUTHORIZATION).description("Bearer auth credentials")
                         )
                 ));
     }

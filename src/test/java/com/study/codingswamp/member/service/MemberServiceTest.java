@@ -164,6 +164,25 @@ class MemberServiceTest {
         assertThat(editResponse.getImageUrl()).isNotEqualTo("null");
     }
 
+    @DisplayName("사용자 탈퇴")
+    @Test
+    void delete() {
+        // given
+        Member member = saveMember();
+        MemberPayload memberPayload = new MemberPayload(member.getId(), member.getRole());
+
+        System.out.println(member.getImageUrl());
+
+        // when
+        memberService.delete(memberPayload);
+
+        // then
+        assertThrows(
+               RuntimeException.class,
+                () -> memberRepository.findById(member.getId()).orElseThrow(RuntimeException::new)
+        );
+    }
+
     private Member saveMember() {
         Member member = new Member("abc@gmail.com", passwordEncoder.encode("1q2w3e4r!"), "hong", null);
         return memberRepository.save(member);

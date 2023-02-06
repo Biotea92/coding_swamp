@@ -80,6 +80,15 @@ include::{snippets}/member-edit/response-fields.adoc[]
 
 '''
 
+=== 회원 탈퇴
+- 요청
+include::{snippets}/member-delete/http-request.adoc[]
+include::{snippets}/member-delete/request-headers.adoc[]
+- 응답
+include::{snippets}/member-delete/http-response.adoc[]
+
+'''
+
 === 회원 단건 조회
 - 요청
 include::{snippets}/member-get/http-request.adoc[]
