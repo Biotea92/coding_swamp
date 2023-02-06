@@ -116,7 +116,7 @@ public class StudyControllerDocTest {
         new TestUtil().saveMemberAndGetToken(tokenProvider, memberRepository, jdbcTemplate);
         Study study = saveStudy(1L);
         memberRepository.save(new Member("member2@gmail.com", "1q2w3e4r!", "hong", "https://firebasestorage.googleapis.com/v0/b/coding-swamp.appspot.com/o/default_image%2Fcrocodile.png?alt=media"));
-        study.getApplicants().add(new Applicant(2L, LocalDate.now()));
+        study.addApplicant(new Applicant(2L, "지원 동기", LocalDate.now()));
         Study saveStudy = studyRepository.save(study);
 
         // expected
@@ -154,6 +154,7 @@ public class StudyControllerDocTest {
                                 fieldWithPath("applicants[].username").description("신청자 닉네임"),
                                 fieldWithPath("applicants[].imageUrl").description("신청자 이미지"),
                                 fieldWithPath("applicants[].profileUrl").description("신청자 깃헙주소"),
+                                fieldWithPath("applicants[].reasonForApplication").description("지원 동기"),
                                 fieldWithPath("applicants[].applicationDate").description("신청자 참가일"),
                                 fieldWithPath("tags").description("태그 정보"),
                                 fieldWithPath("createdAt").description("스터디 등록일")
