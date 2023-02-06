@@ -1,12 +1,14 @@
 package com.study.codingswamp.study.service;
 
 import com.study.codingswamp.auth.service.MemberPayload;
+import com.study.codingswamp.common.exception.ConflictException;
 import com.study.codingswamp.common.exception.NotFoundException;
 import com.study.codingswamp.member.domain.Member;
 import com.study.codingswamp.member.domain.repository.MemberRepository;
 import com.study.codingswamp.study.domain.Study;
 import com.study.codingswamp.study.domain.StudyStatus;
 import com.study.codingswamp.study.domain.StudyType;
+import com.study.codingswamp.study.service.request.ApplyRequest;
 import com.study.codingswamp.study.service.request.StudyCreateRequest;
 import com.study.codingswamp.study.service.response.StudyDetailResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,7 +47,7 @@ class StudyServiceTest {
         // given
         Member member = createMember();
         MemberPayload memberPayload = new MemberPayload(member.getId(), member.getRole());
-        StudyCreateRequest request = getStudyCreateRequest();
+        StudyCreateRequest request = getStudyCreateRequest(30);
 
         // when
         Study study = studyService.createStudy(memberPayload, request);
@@ -71,7 +73,7 @@ class StudyServiceTest {
         // given
         Member member = createMember();
         MemberPayload memberPayload = new MemberPayload(member.getId(), member.getRole());
-        StudyCreateRequest request = getStudyCreateRequest();
+        StudyCreateRequest request = getStudyCreateRequest(30);
         Study study = studyService.createStudy(memberPayload, request);
 
         // when
@@ -99,7 +101,7 @@ class StudyServiceTest {
         // given
         Member member = createMember();
         MemberPayload memberPayload = new MemberPayload(member.getId(), member.getRole());
-        StudyCreateRequest request = getStudyCreateRequest();
+        StudyCreateRequest request = getStudyCreateRequest(30);
         studyService.createStudy(memberPayload, request);
 
         // expected
@@ -109,13 +111,77 @@ class StudyServiceTest {
         );
     }
 
+    @Test
+    @DisplayName("스터디 참가 신청시 스터디에 참가인원이 추가된다.")
+    void apply() {
+        // given
+        Member studyOwner = createMember();
+        MemberPayload memberPayload = new MemberPayload(studyOwner.getId(), studyOwner.getRole());
+        StudyCreateRequest studyCreateRequest = getStudyCreateRequest(30);
+        Study study = studyService.createStudy(memberPayload, studyCreateRequest);
+
+        Member applicantMember = new Member("abc@gmail.com", "1q2w3e4r!", "kim", null);
+        memberRepository.save(applicantMember);
+        MemberPayload applicantMemberPayload = new MemberPayload(applicantMember.getId(), applicantMember.getRole());
+        ApplyRequest applyRequest = new ApplyRequest("지원 동기입니다.");
+
+        // when
+        studyService.apply(applicantMemberPayload, study.getId(), applyRequest);
+
+        // then
+        assertThat(study.getApplicants().size()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("최대 정원인 스터디에 지원할 경우 error가 발생한다.")
+    void applyWhenMaxMemberCount() {
+        // given
+        Member studyOwner = createMember();
+        MemberPayload memberPayload = new MemberPayload(studyOwner.getId(), studyOwner.getRole());
+        StudyCreateRequest studyCreateRequest = getStudyCreateRequest(1);
+        Study study = studyService.createStudy(memberPayload, studyCreateRequest);
+
+        Member applicantMember = new Member("abc@gmail.com", "1q2w3e4r!", "kim", null);
+        memberRepository.save(applicantMember);
+        MemberPayload applicantMemberPayload = new MemberPayload(applicantMember.getId(), applicantMember.getRole());
+        ApplyRequest applyRequest = new ApplyRequest("지원 동기입니다.");
+
+        // expected
+        assertThrows(
+                ConflictException.class,
+                () -> studyService.apply(applicantMemberPayload, study.getId(), applyRequest)
+        );
+    }
+
+    @Test
+    @DisplayName("같은 곳에 두 번 지원하는 경우 error를 발생한다.")
+    void applyTwice() {
+        // given
+        Member studyOwner = createMember();
+        MemberPayload memberPayload = new MemberPayload(studyOwner.getId(), studyOwner.getRole());
+        StudyCreateRequest studyCreateRequest = getStudyCreateRequest(10);
+        Study study = studyService.createStudy(memberPayload, studyCreateRequest);
+
+        Member applicantMember = new Member("abc@gmail.com", "1q2w3e4r!", "kim", null);
+        memberRepository.save(applicantMember);
+        MemberPayload applicantMemberPayload = new MemberPayload(applicantMember.getId(), applicantMember.getRole());
+        ApplyRequest applyRequest = new ApplyRequest("지원 동기입니다.");
+        studyService.apply(applicantMemberPayload, study.getId(), applyRequest);
+
+        // expected
+        assertThrows(
+                ConflictException.class,
+                () -> studyService.apply(applicantMemberPayload, study.getId(), applyRequest)
+        );
+    }
+
     private Member createMember() {
         Member member = new Member("abc@gmail.com", "1q2w3e4r!", "hong", null);
         memberRepository.save(member);
         return member;
     }
 
-    private static StudyCreateRequest getStudyCreateRequest() {
+    private StudyCreateRequest getStudyCreateRequest(int maxMemberCount) {
         return StudyCreateRequest.builder()
                 .title("제목입니다.")
                 .description("설명입니다.")
@@ -123,7 +189,7 @@ class StudyServiceTest {
                 .thumbnail("#000000")
                 .startDate(LocalDate.of(2023, 2, 1))
                 .endDate(LocalDate.of(2023, 2, 3))
-                .maxMemberCount(30)
+                .maxMemberCount(maxMemberCount)
                 .tags(List.of("태그1", "태그2"))
                 .build();
     }

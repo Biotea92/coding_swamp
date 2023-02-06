@@ -7,6 +7,7 @@ import com.study.codingswamp.member.domain.repository.MemberRepository;
 import com.study.codingswamp.study.domain.Applicant;
 import com.study.codingswamp.study.domain.Study;
 import com.study.codingswamp.study.domain.repository.StudyRepository;
+import com.study.codingswamp.study.service.request.ApplyRequest;
 import com.study.codingswamp.study.service.request.StudyCreateRequest;
 import com.study.codingswamp.utils.TestUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,12 +17,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
-import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -31,10 +29,14 @@ import org.springframework.web.context.WebApplicationContext;
 import java.time.LocalDate;
 import java.util.List;
 
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.patch;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
@@ -87,14 +89,14 @@ public class StudyControllerDocTest {
         // expected
 
         mockMvc.perform(post("/api/study")
-                        .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(APPLICATION_JSON)
                         .content(json)
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                        .header(AUTHORIZATION, "Bearer " + token)
                 )
                 .andExpect(status().isCreated())
                 .andDo(document("study-create",
                         requestHeaders(
-                                headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer auth credentials")
+                                headerWithName(AUTHORIZATION).description("Bearer auth credentials")
                         ),
                         requestFields(
                                 fieldWithPath("title").description("제목"),
@@ -117,10 +119,10 @@ public class StudyControllerDocTest {
         Study study = saveStudy(1L);
         memberRepository.save(new Member("member2@gmail.com", "1q2w3e4r!", "hong", "https://firebasestorage.googleapis.com/v0/b/coding-swamp.appspot.com/o/default_image%2Fcrocodile.png?alt=media"));
         study.addApplicant(new Applicant(2L, "지원 동기", LocalDate.now()));
-        Study saveStudy = studyRepository.save(study);
+        studyRepository.save(study);
 
         // expected
-        mockMvc.perform(RestDocumentationRequestBuilders.get("/api/study/{studyId}", saveStudy.getId()))
+        mockMvc.perform(get("/api/study/{studyId}", study.getId()))
                 .andExpect(status().isOk())
                 .andDo(document("study-get-detail",
                         pathParameters(
@@ -162,6 +164,39 @@ public class StudyControllerDocTest {
                 ));
     }
 
+    @Test
+    @DisplayName("스터디 신청인이 스터디를 신청하면 스터디 신청자에 포함되어야 한다.")
+    void apply() throws Exception {
+        // given
+        String token = new TestUtil().saveMemberAndGetToken(tokenProvider, memberRepository, jdbcTemplate);
+        Member studyOwner = createMember();
+        Study study = saveStudy(studyOwner.getId());
+        studyRepository.save(study);
+
+        ApplyRequest applyRequest = new ApplyRequest("지원 동기입니다.");
+
+        String json = objectMapper.writeValueAsString(applyRequest);
+
+        // expected
+        mockMvc.perform(patch("/api/study/{studyId}/apply", study.getId())
+                        .contentType(APPLICATION_JSON)
+                        .content(json)
+                        .header(AUTHORIZATION, "Bearer " + token)
+                )
+                .andExpect(status().isCreated())
+                .andDo(document("study-apply",
+                        requestHeaders(
+                                headerWithName(AUTHORIZATION).description("Bearer auth credentials")
+                        ),
+                        pathParameters(
+                                parameterWithName("studyId").description("스터디 아이디 type(Long)")
+                        ),
+                        requestFields(
+                                fieldWithPath("reasonForApplication").description("지원 동기/ 지원 내용")
+                        )
+                ));
+    }
+
     Study saveStudy(Long ownerId) {
         StudyCreateRequest request = StudyCreateRequest.builder()
                 .title("제목입니다.")
@@ -175,5 +210,11 @@ public class StudyControllerDocTest {
                 .build();
 
         return request.mapToStudy(ownerId);
+    }
+
+    private Member createMember() {
+        Member member = new Member("abc@gmail.com", "1q2w3e4r!", "hong", null);
+        memberRepository.save(member);
+        return member;
     }
 }
