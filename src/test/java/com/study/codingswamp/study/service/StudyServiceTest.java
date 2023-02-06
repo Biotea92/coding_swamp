@@ -175,6 +175,24 @@ class StudyServiceTest {
         );
     }
 
+    @Test
+    @DisplayName("스터디 참가 신청시 이미 스터디원이면 예외가 발생한다.")
+    void applyIfParticipant() {
+        // given
+        Member studyOwner = createMember();
+        MemberPayload memberPayload = new MemberPayload(studyOwner.getId(), studyOwner.getRole());
+        StudyCreateRequest studyCreateRequest = getStudyCreateRequest(30);
+        Study study = studyService.createStudy(memberPayload, studyCreateRequest);
+
+        ApplyRequest applyRequest = new ApplyRequest("지원 동기입니다.");
+
+        // then
+        assertThrows(
+                ConflictException.class,
+                () -> studyService.apply(memberPayload, study.getId(), applyRequest)
+        );
+    }
+
     private Member createMember() {
         Member member = new Member("abc@gmail.com", "1q2w3e4r!", "hong", null);
         memberRepository.save(member);
