@@ -58,11 +58,12 @@ class StudyServiceTest {
         assertThat(study.getStudyType()).isEqualTo(StudyType.STUDY);
         assertThat(study.getThumbnail()).isEqualTo(request.getThumbnail());
         assertThat(study.getStudyStatus()).isEqualTo(StudyStatus.PREPARING);
-        assertThat(study.getStartDate()).isEqualTo(LocalDate.of(2023, 2, 1));
-        assertThat(study.getEndDate()).isEqualTo(LocalDate.of(2023, 2, 3));
-        assertThat(study.getOwnerId()).isEqualTo(member.getId());
+        assertThat(study.getStartDate()).isEqualTo(LocalDate.now().plusDays(1));
+        assertThat(study.getEndDate()).isEqualTo(LocalDate.now().plusDays(2));
+        assertThat(study.getOwner()).isEqualTo(member);
         assertThat(study.getCurrentMemberCount()).isEqualTo(1);
         assertThat(study.getApplicants().size()).isEqualTo(0);
+        assertThat(study.getParticipants().size()).isEqualTo(1);
         assertThat(study.getTags().get(0).getTagText()).isEqualTo("태그1");
         assertThat(study.getTags().get(1).getTagText()).isEqualTo("태그2");
     }
@@ -89,7 +90,7 @@ class StudyServiceTest {
         assertThat(response.getMaxMemberCount()).isEqualTo(study.getMaxMemberCount());
         assertThat(response.getStartDate()).isEqualTo(study.getStartDate());
         assertThat(response.getEndDate()).isEqualTo(study.getEndDate());
-        assertThat(response.getOwner().getMemberId()).isEqualTo(study.getOwnerId());
+        assertThat(response.getOwner().getMemberId()).isEqualTo(study.getOwner().getId());
         assertThat(response.getParticipants().size()).isEqualTo(study.getParticipants().size());
         assertThat(response.getApplicants().size()).isEqualTo(study.getApplicants().size());
         assertThat(response.getTags().size()).isEqualTo(study.getTags().size());
@@ -205,8 +206,8 @@ class StudyServiceTest {
                 .description("설명입니다.")
                 .studyType("STUDY")
                 .thumbnail("#000000")
-                .startDate(LocalDate.of(2023, 2, 1))
-                .endDate(LocalDate.of(2023, 2, 3))
+                .startDate(LocalDate.now().plusDays(1))
+                .endDate(LocalDate.now().plusDays(2))
                 .maxMemberCount(maxMemberCount)
                 .tags(List.of("태그1", "태그2"))
                 .build();

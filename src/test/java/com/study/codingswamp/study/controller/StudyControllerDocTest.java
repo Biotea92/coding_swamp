@@ -86,8 +86,8 @@ public class StudyControllerDocTest {
 
         String token = new TestUtil().saveMemberAndGetToken(tokenProvider, memberRepository, jdbcTemplate);
         String json = objectMapper.writeValueAsString(request);
-        // expected
 
+        // expected
         mockMvc.perform(post("/api/study")
                         .contentType(APPLICATION_JSON)
                         .content(json)
@@ -116,9 +116,9 @@ public class StudyControllerDocTest {
     void getStudyDetail() throws Exception {
         // given
         new TestUtil().saveMemberAndGetToken(tokenProvider, memberRepository, jdbcTemplate);
-        Study study = saveStudy(1L);
-        memberRepository.save(new Member("member2@gmail.com", "1q2w3e4r!", "hong", "https://firebasestorage.googleapis.com/v0/b/coding-swamp.appspot.com/o/default_image%2Fcrocodile.png?alt=media"));
-        study.addApplicant(new Applicant(2L, "지원 동기", LocalDate.now()));
+        Study study = saveStudy(memberRepository.findById(1L).orElseThrow(RuntimeException::new));
+        Member hong = memberRepository.save(new Member("member2@gmail.com", "1q2w3e4r!", "hong", "https://firebasestorage.googleapis.com/v0/b/coding-swamp.appspot.com/o/default_image%2Fcrocodile.png?alt=media"));
+        study.addApplicant(new Applicant(hong, "지원 동기", LocalDate.now()));
         studyRepository.save(study);
 
         // expected
@@ -170,7 +170,7 @@ public class StudyControllerDocTest {
         // given
         String token = new TestUtil().saveMemberAndGetToken(tokenProvider, memberRepository, jdbcTemplate);
         Member studyOwner = createMember();
-        Study study = saveStudy(studyOwner.getId());
+        Study study = saveStudy(studyOwner);
         studyRepository.save(study);
 
         ApplyRequest applyRequest = new ApplyRequest("지원 동기입니다.");
@@ -197,7 +197,7 @@ public class StudyControllerDocTest {
                 ));
     }
 
-    Study saveStudy(Long ownerId) {
+    Study saveStudy(Member owner) {
         StudyCreateRequest request = StudyCreateRequest.builder()
                 .title("제목입니다.")
                 .description("설명입니다.")
@@ -209,7 +209,7 @@ public class StudyControllerDocTest {
                 .tags(List.of("태그1", "태그2"))
                 .build();
 
-        return request.mapToStudy(ownerId);
+        return request.mapToStudy(owner);
     }
 
     private Member createMember() {

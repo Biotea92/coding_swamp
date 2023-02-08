@@ -1,6 +1,7 @@
 package com.study.codingswamp.study.service.request;
 
 import com.study.codingswamp.common.exception.InvalidRequestException;
+import com.study.codingswamp.member.domain.Member;
 import com.study.codingswamp.study.domain.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -48,17 +49,17 @@ public class StudyCreateRequest {
     @NotNull
     private List<String> tags;
 
-    public Study mapToStudy(Long ownerId) {
-        Set<Participant> participants = initParticipants(ownerId);
+    public Study mapToStudy(Member owner) {
+        Set<Participant> participants = initParticipants(owner);
         return Study.builder()
                 .title(this.title)
                 .description(this.description)
                 .studyType(validateStudyType())
                 .thumbnail(this.thumbnail)
-                .studyStatus(StudyStatus.PREPARING)
+                .studyStatus(getStudyStatus())
                 .startDate(this.startDate)
                 .endDate(this.endDate)
-                .ownerId(ownerId)
+                .owner(owner)
                 .currentMemberCount(participants.size())
                 .maxMemberCount(this.maxMemberCount)
                 .participants(participants)
@@ -67,9 +68,9 @@ public class StudyCreateRequest {
                 .build();
     }
 
-    private Set<Participant> initParticipants(Long ownerId) {
+    private Set<Participant> initParticipants(Member owner) {
         Set<Participant> participants = new HashSet<>();
-        Participant participant = new Participant(ownerId, LocalDate.now());
+        Participant participant = new Participant(owner, LocalDate.now());
         participants.add(participant);
         return participants;
     }
@@ -81,6 +82,17 @@ public class StudyCreateRequest {
             return StudyType.MOGAKKO;
         }
         throw new InvalidRequestException("studyType", "STUDY 또는 MOGAKKO 이어야 합니다.");
+    }
+
+    private StudyStatus getStudyStatus() {
+        LocalDate now = LocalDate.now();
+        if (endDate.isBefore(now)) {
+            return StudyStatus.COMPLETION;
+        }
+        if (startDate.isAfter(now)) {
+            return StudyStatus.PREPARING;
+        }
+        return StudyStatus.ONGOING;
     }
 
     private List<Tag> mapToTag() {

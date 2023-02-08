@@ -33,16 +33,14 @@ public class StudyService {
     private final MemberRepository memberRepository;
 
     public Study createStudy(MemberPayload memberPayload, StudyCreateRequest request) {
-        Member member = findMember(memberPayload.getId(), "member", "사용자를 찾을 수 없습니다.");
-        Long ownerId = member.getId();
-        Study study = request.mapToStudy(ownerId);
+        Member owner = findMember(memberPayload.getId(), "사용자를 찾을 수 없습니다.");
+        Study study = request.mapToStudy(owner);
         return studyRepository.save(study);
     }
 
     public StudyDetailResponse getStudyDetails(Long studyId) {
         Study study = findStudy(studyId);
-        Long ownerId = study.getOwnerId();
-        Member owner = findMember(ownerId, "owner", "스터디 주인을 찾을 수 없습니다.");
+        Member owner = study.getOwner();
         return StudyDetailResponse.builder()
                 .study(study)
                 .owner(new OwnerResponse(study, owner))
@@ -54,19 +52,19 @@ public class StudyService {
 
     @Transactional
     public void apply(MemberPayload memberPayload, Long studyId, ApplyRequest applyRequest) {
-        Member member = findMember(memberPayload.getId(), "member", "신청자를 찾을 수 없습니다.");
+        Member applicantMember = findMember(memberPayload.getId(), "신청자를 찾을 수 없습니다.");
         Study findStudy = findStudy(studyId);
 
         validateStudyMaxMember(findStudy);
-        checkParticipant(member, findStudy);
-        checkApplicant(member, findStudy);
+        checkParticipant(applicantMember, findStudy);
+        checkApplicant(applicantMember, findStudy);
 
-        findStudy.addApplicant(new Applicant(member.getId(), applyRequest.getReasonForApplication(), LocalDate.now()));
+        findStudy.addApplicant(new Applicant(applicantMember, applyRequest.getReasonForApplication(), LocalDate.now()));
     }
 
-    private static void checkApplicant(Member member, Study findStudy) {
+    private void checkApplicant(Member member, Study findStudy) {
         Optional<Applicant> findApplicant = findStudy.getApplicants().stream()
-                .filter(applicant -> applicant.getMemberId().equals(member.getId()))
+                .filter(applicant -> applicant.getMember().getId().equals(member.getId()))
                 .findAny();
         if (findApplicant.isPresent()) {
             throw new ConflictException("applicant", "이미 신청한 사용자입니다.");
@@ -75,7 +73,7 @@ public class StudyService {
 
     private void checkParticipant(Member member, Study findStudy) {
         Optional<Participant> findParticipant = findStudy.getParticipants().stream()
-                .filter(participant -> participant.getMemberId().equals(member.getId()))
+                .filter(participant -> participant.getMember() == member)
                 .findAny();
         if (findParticipant.isPresent()) {
             throw new ConflictException("participant", "이미 참가한 인원입니다.");
@@ -96,19 +94,15 @@ public class StudyService {
     private List<ParticipantResponse> getParticipationResponses(Study study) {
         return study.getParticipants()
                 .stream()
-                .map(participant -> {
-                    Member member = findMember(participant.getMemberId(), "participant", "참여자를 찾을 수 없습니다.");
-                    return new ParticipantResponse(member, participant.getParticipationDate());
-                }).collect(Collectors.toList());
+                .map(participant -> new ParticipantResponse(participant.getMember(), participant.getParticipationDate()))
+                .collect(Collectors.toList());
     }
 
     private List<ApplicantResponse> getApplicantResponse(Study study) {
         return study.getApplicants()
                 .stream()
-                .map(applicant -> {
-                    Member member = findMember(applicant.getMemberId(), "applicant", "신청자를 찾을 수 없습니다.");
-                    return new ApplicantResponse(member, applicant.getReasonForApplication(), applicant.getApplicantDate());
-                }).collect(Collectors.toList());
+                .map(applicant -> new ApplicantResponse(applicant.getMember(), applicant.getReasonForApplication(), applicant.getApplicantDate()))
+                .collect(Collectors.toList());
     }
 
     private List<String> getTags(List<Tag> tags) {
@@ -117,8 +111,8 @@ public class StudyService {
                 .collect(Collectors.toList());
     }
 
-    private Member findMember(Long memberPayload, String errorFieldName, String errorMessage) {
-        return memberRepository.findById(memberPayload)
-                .orElseThrow(() -> new NotFoundException(errorFieldName, errorMessage));
+    private Member findMember(Long memberId, String errorMessage) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new NotFoundException("member", errorMessage));
     }
 }
