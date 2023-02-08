@@ -1,0 +1,119 @@
+= 코딩의 늪 API
+:doctype: book
+:icons: font
+:source-highlighter: highlights
+:toc: left
+:toclevels: 3
+:sectlinks:
+
+== Auth API
+
+=== 이메일 인증코드 발송
+- 요청
+include::{snippets}/auth-email/http-request.adoc[]
+include::{snippets}/auth-email/request-fields.adoc[]
+- 응답
+include::{snippets}/auth-email/http-response.adoc[]
+
+'''
+
+=== 이메일 인증코드 확인
+- 요청
+include::{snippets}/auth-email-confirm/http-request.adoc[]
+include::{snippets}/auth-email-confirm/request-parameters.adoc[]
+- 응답
+include::{snippets}/auth-email-confirm/http-response.adoc[]
+
+'''
+
+=== 로그인(일반)
+- 요청
+include::{snippets}/member-login/http-request.adoc[]
+include::{snippets}/member-login/request-fields.adoc[]
+- 응답
+include::{snippets}/member-login/http-response.adoc[]
+include::{snippets}/member-login/response-fields.adoc[]
+
+'''
+
+=== 로그인(github)
+- 요청
+include::{snippets}/auth-login-github/http-request.adoc[]
+include::{snippets}/auth-login-github/request-parameters.adoc[]
+- 응답
+include::{snippets}/auth-login-github/http-response.adoc[]
+include::{snippets}/auth-login-github/response-fields.adoc[]
+
+'''
+
+=== 토큰 Refresh
+- 요청
+include::{snippets}/auth-token-refresh/http-request.adoc[]
+- 요청 Header
+include::{snippets}/auth-token-refresh/request-headers.adoc[]
+- 응답
+include::{snippets}/auth-token-refresh/http-response.adoc[]
+include::{snippets}/auth-token-refresh/response-fields.adoc[]
+
+== Member API
+
+=== 회원가입
+- 요청
+include::{snippets}/member-signup/http-request.adoc[]
+include::{snippets}/member-signup/request-parameters.adoc[]
+include::{snippets}/member-signup/request-parts.adoc[]
+- 응답
+include::{snippets}/member-signup/http-response.adoc[]
+include::{snippets}/member-signup/response-fields.adoc[]
+
+'''
+
+=== 회원 정보 수정
+- 요청
+include::{snippets}/member-edit/http-request.adoc[]
+include::{snippets}/member-edit/request-headers.adoc[]
+include::{snippets}/member-edit/request-parameters.adoc[]
+include::{snippets}/member-edit/request-parts.adoc[]
+- 응답
+include::{snippets}/member-edit/http-response.adoc[]
+include::{snippets}/member-edit/response-fields.adoc[]
+
+'''
+
+=== 회원 탈퇴
+- 요청
+include::{snippets}/member-delete/http-request.adoc[]
+include::{snippets}/member-delete/request-headers.adoc[]
+- 응답
+include::{snippets}/member-delete/http-response.adoc[]
+
+'''
+
+=== 회원 단건 조회
+- 요청
+include::{snippets}/member-get/http-request.adoc[]
+include::{snippets}/member-get/path-parameters.adoc[]
+-응답
+include::{snippets}/member-get/http-response.adoc[]
+include::{snippets}/member-get/response-fields.adoc[]
+
+== Study API
+
+=== 스터디 생성
+- 요청
+include::{snippets}/study-create/http-request.adoc[]
+include::{snippets}/study-create/request-fields.adoc[]
+- 요청 Header
+include::{snippets}/study-create/request-headers.adoc[]
+- 응답
+include::{snippets}/study-create/http-response.adoc[]
+
+'''
+
+=== 스터디 상세 단건 조회
+- 요청
+include::{snippets}/study-get-detail/http-request.adoc[]
+include::{snippets}/study-get-detail/path-parameters.adoc[]
+- 응답
+include::{snippets}/study-get-detail/http-response.adoc[]
+include::{snippets}/study-get-detail/response-fields.adoc[]
