@@ -2,6 +2,7 @@ package com.study.codingswamp.study.service;
 
 import com.study.codingswamp.auth.service.MemberPayload;
 import com.study.codingswamp.common.exception.ConflictException;
+import com.study.codingswamp.common.exception.ForbiddenException;
 import com.study.codingswamp.common.exception.NotFoundException;
 import com.study.codingswamp.member.domain.Member;
 import com.study.codingswamp.member.domain.repository.MemberRepository;
@@ -33,7 +34,7 @@ public class StudyService {
     private final MemberRepository memberRepository;
 
     public Study createStudy(MemberPayload memberPayload, StudyCreateRequest request) {
-        Member owner = findMember(memberPayload.getId(), "사용자를 찾을 수 없습니다.");
+        Member owner = findMember(memberPayload.getId());
         Study study = request.mapToStudy(owner);
         return studyRepository.save(study);
     }
@@ -52,7 +53,7 @@ public class StudyService {
 
     @Transactional
     public void apply(MemberPayload memberPayload, Long studyId, ApplyRequest applyRequest) {
-        Member applicantMember = findMember(memberPayload.getId(), "신청자를 찾을 수 없습니다.");
+        Member applicantMember = findMember(memberPayload.getId());
         Study findStudy = findStudy(studyId);
 
         validateStudyMaxMember(findStudy);
@@ -60,6 +61,23 @@ public class StudyService {
         checkApplicant(applicantMember, findStudy);
 
         findStudy.addApplicant(new Applicant(applicantMember, applyRequest.getReasonForApplication(), LocalDate.now()));
+    }
+
+    @Transactional
+    public void approve(MemberPayload memberPayload, Long studyId, Long applicantId) {
+        Member owner = findMember(memberPayload.getId());
+        Study findStudy = findStudy(studyId);
+        validateOwner(owner, findStudy);
+        validateStudyMaxMember(findStudy);
+        Member applicantMember = findMember(applicantId);
+        checkParticipant(applicantMember, findStudy);
+        findStudy.addParticipant(new Participant(applicantMember, LocalDate.now()));
+    }
+
+    private void validateOwner(Member member, Study findStudy) {
+        if (findStudy.getOwner() != member) {
+            throw new ForbiddenException("owner", "스터디 장이 아닙니다.");
+        }
     }
 
     private void checkApplicant(Member member, Study findStudy) {
@@ -111,8 +129,8 @@ public class StudyService {
                 .collect(Collectors.toList());
     }
 
-    private Member findMember(Long memberId, String errorMessage) {
+    private Member findMember(Long memberId) {
         return memberRepository.findById(memberId)
-                .orElseThrow(() -> new NotFoundException("member", errorMessage));
+                .orElseThrow(() -> new NotFoundException("member", "사용자를 찾을 수 없습니다."));
     }
 }

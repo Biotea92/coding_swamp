@@ -61,6 +61,7 @@ public class Study {
             name = "study_participant",
             joinColumns = @JoinColumn(name = "study_id")
     )
+    @OrderColumn
     private Set<Participant> participants = new HashSet<>();
 
     @ElementCollection
@@ -116,5 +117,15 @@ public class Study {
 
     public void addApplicant(Applicant applicant) {
         this.applicants.add(applicant);
+    }
+
+    public void addParticipant(Participant participant) {
+         this.applicants.remove(
+                 applicants.stream()
+                 .filter(applicant -> participant.getMember() == applicant.getMember())
+                 .findAny()
+                 .orElseThrow(() -> new NotFoundException("member", "신청자에 없습니다."))
+         );
+        this.participants.add(participant);
     }
 }

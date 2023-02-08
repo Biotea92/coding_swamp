@@ -22,6 +22,7 @@ public class Applicant {
     private Member member;
 
     @Lob
+    @Column(updatable = false, nullable = false)
     private String reasonForApplication;
 
     @Column(updatable = false, nullable = false)

@@ -45,4 +45,13 @@ public class StudyController {
         studyService.apply(memberPayload, studyId, applyRequest);
         return ResponseEntity.created(URI.create("/api/study/" + studyId)).build();
     }
+
+    @Login
+    @PatchMapping("/{studyId}/approve/{applicantId}")
+    public ResponseEntity<Void> approve(@AuthenticatedMember MemberPayload memberPayload,
+                                        @PathVariable Long studyId,
+                                        @PathVariable Long applicantId) {
+        studyService.approve(memberPayload, studyId, applicantId);
+        return ResponseEntity.created(URI.create("/api/study/" + studyId)).build();
+    }
 }
