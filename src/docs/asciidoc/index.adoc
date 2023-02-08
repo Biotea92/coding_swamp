@@ -125,5 +125,16 @@ include::{snippets}/study-get-detail/response-fields.adoc[]
 include::{snippets}/study-apply/http-request.adoc[]
 include::{snippets}/study-apply/request-headers.adoc[]
 include::{snippets}/study-apply/path-parameters.adoc[]
+include::{snippets}/study-apply/request-fields.adoc[]
 - 응답
 include::{snippets}/study-apply/http-response.adoc[]
+
+'''
+
+=== 스터디 신청 승인
+- 요청
+include::{snippets}/study-approve/http-request.adoc[]
+include::{snippets}/study-approve/request-headers.adoc[]
+include::{snippets}/study-approve/path-parameters.adoc[]
+- 응답
+include::{snippets}/study-approve/http-response.adoc[]

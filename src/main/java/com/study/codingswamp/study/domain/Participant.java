@@ -1,10 +1,7 @@
 package com.study.codingswamp.study.domain;
 
 import com.study.codingswamp.member.domain.Member;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -15,6 +12,7 @@ import static javax.persistence.FetchType.LAZY;
 @Embeddable
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
+@EqualsAndHashCode
 public class Participant {
 
     @ManyToOne(fetch = LAZY)

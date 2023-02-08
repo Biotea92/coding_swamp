@@ -197,6 +197,34 @@ public class StudyControllerDocTest {
                 ));
     }
 
+    @Test
+    @DisplayName("스터디 신청인원은 스터디장이 승인할 수 있다.")
+    void approve() throws Exception {
+        // given
+        String token = new TestUtil().saveMemberAndGetToken(tokenProvider, memberRepository, jdbcTemplate);
+        Member studyOwner = memberRepository.findById(1L).orElseThrow(RuntimeException::new);
+        Study study = saveStudy(studyOwner);
+        studyRepository.save(study);
+        Member member = memberRepository.save(new Member("applicant@gmail.com", "testpassword", "kim", null));
+        Applicant applicant = new Applicant(member, "지원동기", LocalDate.now());
+        study.addApplicant(applicant);
+
+        // expected
+        mockMvc.perform(patch("/api/study/{studyId}/approve/{applicantId}", study.getId(), member.getId())
+                        .header(AUTHORIZATION, "Bearer " + token)
+                )
+                .andExpect(status().isCreated())
+                .andDo(document("study-approve",
+                        requestHeaders(
+                                headerWithName(AUTHORIZATION).description("Bearer auth credentials")
+                        ),
+                        pathParameters(
+                                parameterWithName("studyId").description("스터디 아이디 type(Long)"),
+                                parameterWithName("applicantId").description("신청인 아이디")
+                        )
+                ));
+    }
+
     Study saveStudy(Member owner) {
         StudyCreateRequest request = StudyCreateRequest.builder()
                 .title("제목입니다.")

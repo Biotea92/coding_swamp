@@ -2,12 +2,11 @@ package com.study.codingswamp.study.service;
 
 import com.study.codingswamp.auth.service.MemberPayload;
 import com.study.codingswamp.common.exception.ConflictException;
+import com.study.codingswamp.common.exception.ForbiddenException;
 import com.study.codingswamp.common.exception.NotFoundException;
 import com.study.codingswamp.member.domain.Member;
 import com.study.codingswamp.member.domain.repository.MemberRepository;
-import com.study.codingswamp.study.domain.Study;
-import com.study.codingswamp.study.domain.StudyStatus;
-import com.study.codingswamp.study.domain.StudyType;
+import com.study.codingswamp.study.domain.*;
 import com.study.codingswamp.study.service.request.ApplyRequest;
 import com.study.codingswamp.study.service.request.StudyCreateRequest;
 import com.study.codingswamp.study.service.response.StudyDetailResponse;
@@ -191,6 +190,46 @@ class StudyServiceTest {
         assertThrows(
                 ConflictException.class,
                 () -> studyService.apply(memberPayload, study.getId(), applyRequest)
+        );
+    }
+
+    @Test
+    @DisplayName("스터디 신청 인원을 승인하면 참가자 인원이 된다.")
+    void approve() {
+        // given
+        Member studyOwner = createMember();
+        MemberPayload ownerPayload = new MemberPayload(studyOwner.getId(), studyOwner.getRole());
+        StudyCreateRequest studyCreateRequest = getStudyCreateRequest(30);
+        Study study = studyService.createStudy(ownerPayload, studyCreateRequest);
+        Member member = memberRepository.save(new Member("applicant@gmail.com", "testpassword", "kim", null));
+        Applicant applicant = new Applicant(member, "지원동기", LocalDate.now());
+        study.addApplicant(applicant);
+
+        // when
+        studyService.approve(ownerPayload, study.getId(), applicant.getMember().getId());
+
+        // then
+        assertThat(study.getApplicants()).isEmpty();
+        assertThat(study.getParticipants()).contains(new Participant(member, LocalDate.now()));
+    }
+
+    @Test
+    @DisplayName("스터디 장이 아니면 신청인원을 승인할 수 없다.")
+    void approveNotOwner() {
+        // given
+        Member studyOwner = createMember();
+        MemberPayload ownerPayload = new MemberPayload(studyOwner.getId(), studyOwner.getRole());
+        StudyCreateRequest studyCreateRequest = getStudyCreateRequest(30);
+        Study study = studyService.createStudy(ownerPayload, studyCreateRequest);
+        Member member = memberRepository.save(new Member("applicant@gmail.com", "testpassword", "kim", null));
+        Applicant applicant = new Applicant(member, "지원동기", LocalDate.now());
+        study.addApplicant(applicant);
+        MemberPayload memberPayload = new MemberPayload(member.getId(), member.getRole());
+
+        // then
+        assertThrows(
+                ForbiddenException.class,
+                () -> studyService.approve(memberPayload, study.getId(), applicant.getMember().getId())
         );
     }
 
