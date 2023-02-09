@@ -49,7 +49,6 @@ include::{snippets}/auth-login-github/response-fields.adoc[]
 === 토큰 Refresh
 - 요청
 include::{snippets}/auth-token-refresh/http-request.adoc[]
-- 요청 Header
 include::{snippets}/auth-token-refresh/request-headers.adoc[]
 - 응답
 include::{snippets}/auth-token-refresh/http-response.adoc[]
