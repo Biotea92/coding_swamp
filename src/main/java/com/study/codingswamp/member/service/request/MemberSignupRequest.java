@@ -24,7 +24,11 @@ public class MemberSignupRequest {
     private final String password;
 
     @NotBlank
-    @Length(min = 3, message = "최소 3자 이상이어야 합니다.")
+    @Length(min = 3, max = 20 , message = "최소 3자 이상 최대 20자 이하 이어야 합니다.")
+    @Pattern(
+            regexp = "^[0-9a-zA-Z가-힣_]*$",
+            message = "한글, 숫자, 영어, _ 만 가능합니다."
+    )
     private final String username;
 
     private final MultipartFile imageFile;

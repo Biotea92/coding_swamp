@@ -11,6 +11,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -47,6 +48,7 @@ public class StudyCreateRequest {
     private Integer maxMemberCount;
 
     @NotNull
+    @NotEmpty
     private List<String> tags;
 
     public Study mapToStudy(Member owner) {
