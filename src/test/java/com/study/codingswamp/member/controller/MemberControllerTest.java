@@ -75,7 +75,7 @@ class MemberControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("400"))
                 .andExpect(jsonPath("$.message").value("잘못된 요청입니다."))
-                .andExpect(jsonPath("$.validation.username").value("최소 3자 이상이어야 합니다."))
+                .andExpect(jsonPath("$.validation.username").value("최소 3자 이상 최대 20자 이하 이어야 합니다."))
                 .andDo(print());
     }
 

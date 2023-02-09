@@ -131,7 +131,7 @@ public class MemberService {
     }
 
     private Optional<Member> getByEmail(String email) {
-        return memberRepository.findByEmail(email);
+        return memberRepository.findByEmailAndGithubIdIsNull(email);
     }
 
     private boolean isMatchesPassword(String requestPassword, String password) {
