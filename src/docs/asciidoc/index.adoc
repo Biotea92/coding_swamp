@@ -137,3 +137,13 @@ include::{snippets}/study-approve/request-headers.adoc[]
 include::{snippets}/study-approve/path-parameters.adoc[]
 - 응답
 include::{snippets}/study-approve/http-response.adoc[]
+
+'''
+
+=== 스터디 여러건 조회 ex) 1 page
+- 요청
+include::{snippets}/study-get-studies/http-request.adoc[]
+include::{snippets}/study-get-studies/request-parameters.adoc[]
+- 응답
+include::{snippets}/study-get-studies/http-response.adoc[]
+include::{snippets}/study-get-studies/response-fields.adoc[]

@@ -7,8 +7,11 @@ import com.study.codingswamp.common.exception.NotFoundException;
 import com.study.codingswamp.member.domain.Member;
 import com.study.codingswamp.member.domain.repository.MemberRepository;
 import com.study.codingswamp.study.domain.*;
+import com.study.codingswamp.study.domain.repository.StudyRepository;
 import com.study.codingswamp.study.service.request.ApplyRequest;
+import com.study.codingswamp.study.service.request.StudiesPageableRequest;
 import com.study.codingswamp.study.service.request.StudyCreateRequest;
+import com.study.codingswamp.study.service.response.StudiesResponse;
 import com.study.codingswamp.study.service.response.StudyDetailResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -20,6 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -34,6 +39,9 @@ class StudyServiceTest {
     private MemberRepository memberRepository;
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private StudyRepository studyRepository;
 
     @BeforeEach
     void clear() {
@@ -231,6 +239,41 @@ class StudyServiceTest {
                 ForbiddenException.class,
                 () -> studyService.approve(memberPayload, study.getId(), applicant.getMember().getId())
         );
+    }
+
+    @Test
+    @DisplayName("스터디 여러건 조회 1페이지")
+    void getStudies() {
+        // given
+        Member studyOwner = createMember();
+        List<Study> studies = IntStream.range(0, 20)
+                .mapToObj(i -> Study.builder()
+                            .title("제목입니다. " + i)
+                            .description("설명입니다. " + i)
+                            .studyStatus(StudyStatus.PREPARING)
+                            .studyType(StudyType.STUDY)
+                            .startDate(LocalDate.now().plusDays(1))
+                            .endDate(LocalDate.now().plusDays(2))
+                            .owner(studyOwner)
+                            .currentMemberCount(1)
+                            .maxMemberCount(30)
+                            .thumbnail("#00000")
+                            .tags(List.of(new Tag("태그1"), new Tag("태그2")))
+                            .build()
+                )
+                .collect(Collectors.toList());
+        studyRepository.saveAll(studies);
+
+        StudiesPageableRequest studiesPageableRequest = new StudiesPageableRequest(1, 8);
+
+        // when
+        StudiesResponse response = studyService.getStudies(studiesPageableRequest);
+
+        // then
+        assertThat(3).isEqualTo(response.getTotalPage());
+        assertThat(response.getStudyResponses().get(0).getTitle()).isEqualTo("제목입니다. 19");
+        assertThat(response.getStudyResponses().get(7).getTitle()).isEqualTo("제목입니다. 12");
+        assertThat(response.getStudyResponses().size()).isEqualTo(8);
     }
 
     private Member createMember() {
