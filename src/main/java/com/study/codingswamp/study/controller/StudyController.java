@@ -6,7 +6,9 @@ import com.study.codingswamp.auth.service.MemberPayload;
 import com.study.codingswamp.study.domain.Study;
 import com.study.codingswamp.study.service.StudyService;
 import com.study.codingswamp.study.service.request.ApplyRequest;
+import com.study.codingswamp.study.service.request.StudiesPageableRequest;
 import com.study.codingswamp.study.service.request.StudyCreateRequest;
+import com.study.codingswamp.study.service.response.StudiesResponse;
 import com.study.codingswamp.study.service.response.StudyDetailResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +37,12 @@ public class StudyController {
     public ResponseEntity<StudyDetailResponse> getStudyDetails(@PathVariable Long studyId) {
         StudyDetailResponse response = studyService.getStudyDetails(studyId);
         return ResponseEntity.ok().body(response);
+    }
+
+    @GetMapping
+    public ResponseEntity<StudiesResponse> getStudies(@ModelAttribute StudiesPageableRequest request) {
+        StudiesResponse response = studyService.getStudies(request);
+        return ResponseEntity.ok(response);
     }
 
     @Login

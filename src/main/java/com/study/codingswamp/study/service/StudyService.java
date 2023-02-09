@@ -12,11 +12,9 @@ import com.study.codingswamp.study.domain.Study;
 import com.study.codingswamp.study.domain.Tag;
 import com.study.codingswamp.study.domain.repository.StudyRepository;
 import com.study.codingswamp.study.service.request.ApplyRequest;
+import com.study.codingswamp.study.service.request.StudiesPageableRequest;
 import com.study.codingswamp.study.service.request.StudyCreateRequest;
-import com.study.codingswamp.study.service.response.ApplicantResponse;
-import com.study.codingswamp.study.service.response.OwnerResponse;
-import com.study.codingswamp.study.service.response.ParticipantResponse;
-import com.study.codingswamp.study.service.response.StudyDetailResponse;
+import com.study.codingswamp.study.service.response.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -72,6 +70,16 @@ public class StudyService {
         Member applicantMember = findMember(applicantId);
         checkParticipant(applicantMember, findStudy);
         findStudy.addParticipant(new Participant(applicantMember, LocalDate.now()));
+    }
+
+    public StudiesResponse getStudies(StudiesPageableRequest request) {
+        List<StudyResponse> studyResponses = studyRepository.getStudies(request)
+                .stream()
+                .map(study -> new StudyResponse(study, getTags(study.getTags())))
+                .collect(Collectors.toList());
+        Long totalCount = studyRepository.getCount();
+
+        return new StudiesResponse(studyResponses, request.getTotalPage(totalCount));
     }
 
     private void validateOwner(Member member, Study findStudy) {
