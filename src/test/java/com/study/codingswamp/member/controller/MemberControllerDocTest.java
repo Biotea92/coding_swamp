@@ -29,6 +29,7 @@ import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.docu
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.multipart;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
@@ -53,7 +54,11 @@ public class MemberControllerDocTest {
     @BeforeEach
     public void setUp(WebApplicationContext webApplicationContext, RestDocumentationContextProvider restDocumentation) {
         this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
-                .apply(documentationConfiguration(restDocumentation))
+                .apply(documentationConfiguration(restDocumentation)
+                        .operationPreprocessors()
+                        .withRequestDefaults(prettyPrint())
+                        .withResponseDefaults(prettyPrint(), removeHeaders("Vary"))
+                )
                 .build();
 
         jdbcTemplate.update("alter table member auto_increment= ?", 1);
@@ -74,7 +79,7 @@ public class MemberControllerDocTest {
                         .param("email", email)
                         .param("password", password)
                         .param("username", username)
-                ).andExpect(status().isOk())
+                ).andExpect(status().isCreated())
                 .andDo(document("member-signup",
                         requestParts(
                                 partWithName("imageFile").description("파일 업로드")
@@ -134,7 +139,7 @@ public class MemberControllerDocTest {
                         .param("username", "kim")
                         .param("profileUrl", "http://profile")
                 )
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andDo(document("member-edit",
                         requestHeaders(
                                 headerWithName(AUTHORIZATION).description("Bearer auth credentials")
@@ -158,7 +163,7 @@ public class MemberControllerDocTest {
                         )
                 ));
     }
-
+    
     @Test
     @DisplayName("회원 탈퇴가 완료되어야 한다.")
     void delete() throws Exception {

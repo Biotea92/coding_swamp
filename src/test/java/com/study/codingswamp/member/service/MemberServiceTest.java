@@ -72,7 +72,7 @@ class MemberServiceTest {
     @Test
     void checkLogin() {
         // given
-        saveMember();
+        saveMemberAndGet();
         CommonLoginRequest request1 = CommonLoginRequest.builder()
                 .email("abc@gmail.com")
                 .password("1q2w3e4r!")
@@ -102,7 +102,7 @@ class MemberServiceTest {
     @Test
     void duplicateEmail() {
         // given
-        Member member = saveMember();
+        Member member = saveMemberAndGet();
 
         // expected
         assertThrows(
@@ -127,7 +127,7 @@ class MemberServiceTest {
     @Test
     void getMember() {
         // given
-        Member member = saveMember();
+        Member member = saveMemberAndGet();
 
         // when
         MemberResponse memberResponse = memberService.getMember(member.getId());
@@ -147,7 +147,7 @@ class MemberServiceTest {
     @Test
     void edit() {
         // given
-        Member member = saveMember();
+        Member member = saveMemberAndGet();
         MemberPayload memberPayload = new MemberPayload(member.getId(), member.getRole());
         MemberEditRequest editRequest = MemberEditRequest.builder()
                 .username("kim")
@@ -164,11 +164,30 @@ class MemberServiceTest {
         assertThat(editResponse.getImageUrl()).isNotEqualTo("null");
     }
 
+    @DisplayName("깃허브 사용자는 정보수정이 불가능 하다.")
+    @Test
+    void editGithubMember() {
+        // given
+        Member member = saveGithubMemberAndGet();
+        MemberPayload memberPayload = new MemberPayload(member.getId(), member.getRole());
+        MemberEditRequest editRequest = MemberEditRequest.builder()
+                .username("kim")
+                .profileUrl("http://profile")
+                .imageFile(new MockMultipartFile("imageFile", "image".getBytes()))
+                .build();
+
+        // expected
+        assertThrows(
+                UnauthorizedException.class,
+                () -> memberService.edit(memberPayload, editRequest)
+        );
+    }
+
     @DisplayName("사용자 탈퇴")
     @Test
     void delete() {
         // given
-        Member member = saveMember();
+        Member member = saveMemberAndGet();
         MemberPayload memberPayload = new MemberPayload(member.getId(), member.getRole());
 
         System.out.println(member.getImageUrl());
@@ -183,8 +202,28 @@ class MemberServiceTest {
         );
     }
 
-    private Member saveMember() {
+    @DisplayName("깃허브 사용자는 탈퇴가 불가능 하다.")
+    @Test
+    void deleteGithubMember() {
+        // given
+        Member member = saveGithubMemberAndGet();
+        MemberPayload memberPayload = new MemberPayload(member.getId(), member.getRole());
+
+        // expected
+        assertThrows(
+                UnauthorizedException.class,
+                () -> memberService.delete(memberPayload)
+        );
+    }
+
+    private Member saveMemberAndGet() {
         Member member = new Member("abc@gmail.com", passwordEncoder.encode("1q2w3e4r!"), "hong", null);
         return memberRepository.save(member);
+    }
+
+    private Member saveGithubMemberAndGet() {
+        Member member = new Member("seediu95@gmail.com", 102938L, "seediu", "https//image", "https//profile");
+        memberRepository.save(member);
+        return member;
     }
 }

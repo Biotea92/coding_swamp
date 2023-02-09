@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/member")
@@ -20,8 +22,11 @@ public class MemberController {
     private final MemberService memberService;
 
     @PostMapping
-    public MemberResponse signup(@Validated MemberSignupRequest memberSignupRequest) {
-        return memberService.signup(memberSignupRequest);
+    public ResponseEntity<MemberResponse> signup(@Validated MemberSignupRequest memberSignupRequest) {
+        MemberResponse response = memberService.signup(memberSignupRequest);
+        return ResponseEntity
+                .created(URI.create("/api/member/" + response.getMemberId()))
+                .body(response);
     }
 
     @GetMapping("/{memberId}")
@@ -31,9 +36,12 @@ public class MemberController {
 
     @Login
     @PostMapping("/edit")
-    public MemberResponse edit(@AuthenticatedMember MemberPayload memberPayload,
-                               @Validated MemberEditRequest memberEditRequest) {
-        return memberService.edit(memberPayload, memberEditRequest);
+    public ResponseEntity<MemberResponse> edit(@AuthenticatedMember MemberPayload memberPayload,
+                                               @Validated MemberEditRequest memberEditRequest) {
+        MemberResponse response = memberService.edit(memberPayload, memberEditRequest);
+        return ResponseEntity
+                .created(URI.create("/api/member/" + memberPayload.getId()))
+                .body(response);
     }
 
     @Login
