@@ -37,23 +37,13 @@ public class AuthController {
             HttpServletRequest request
     ) {
         MailAuthenticationResponse response = mailService.sendEmail(mailAuthenticationRequest);
-        HttpSession session = request.getSession(true);
-        session.setMaxInactiveInterval(300);
-        session.setAttribute(AUTH_CODE, response.getAuthCode());
+        setSession(request, response);
         return ResponseEntity.created(URI.create("/api/auth/email/confirm")).build();
     }
 
     @PostMapping("/email/confirm")
     public ResponseEntity<Void> authenticatedMailConfirm(HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        if (session == null) {
-            throw new UnauthorizedException(AUTH_CODE, "세션이 만료되었습니다.");
-        }
-        String authCode = (String) session.getAttribute(AUTH_CODE);
-        String requestAuthCode = request.getParameter(AUTH_CODE);
-        if (!authCode.equals(requestAuthCode)) {
-            throw new UnauthorizedException(AUTH_CODE, "인증번호가 일치하지않습니다.");
-        }
+        getSessionAndAuthenticate(request);
         return ResponseEntity.ok().build();
     }
 
@@ -77,5 +67,23 @@ public class AuthController {
     @GetMapping("/foo")
     public String foo() {
         return "ok";
+    }
+
+    private static void setSession(HttpServletRequest request, MailAuthenticationResponse response) {
+        HttpSession session = request.getSession(true);
+        session.setMaxInactiveInterval(300);
+        session.setAttribute(AUTH_CODE, response.getAuthCode());
+    }
+
+    private static void getSessionAndAuthenticate(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            throw new UnauthorizedException(AUTH_CODE, "세션이 만료되었습니다.");
+        }
+        String authCode = (String) session.getAttribute(AUTH_CODE);
+        String requestAuthCode = request.getParameter(AUTH_CODE);
+        if (!authCode.equals(requestAuthCode)) {
+            throw new UnauthorizedException(AUTH_CODE, "인증번호가 일치하지않습니다.");
+        }
     }
 }
