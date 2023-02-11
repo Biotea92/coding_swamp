@@ -4,10 +4,7 @@ import com.study.codingswamp.auth.controller.AuthenticatedMemberResolver;
 import com.study.codingswamp.auth.controller.AuthenticationInterceptor;
 import com.study.codingswamp.auth.token.TokenProvider;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -40,10 +37,5 @@ public class AuthConfig implements WebMvcConfigurer {
                 .allowedOrigins("http://localhost:8080", "http://localhost:3000")
 //                .allowedHeaders(HttpHeaders.AUTHORIZATION, HttpHeaders.CONTENT_TYPE)
                 .allowCredentials(true);
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 }

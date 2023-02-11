@@ -19,7 +19,6 @@ public class MailService {
     private final MemberService memberService;
     private static final String title = "코딩의늪 회원가입 인증 번호";
     private static final String fromEmail = "seediu95@gmail.com";
-
     private String authCode;
 
     public MailAuthenticationResponse sendEmail(MailAuthenticationRequest request) {

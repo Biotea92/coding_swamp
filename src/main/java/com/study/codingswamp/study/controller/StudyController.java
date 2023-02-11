@@ -62,4 +62,18 @@ public class StudyController {
         studyService.approve(memberPayload, studyId, applicantId);
         return ResponseEntity.created(URI.create("/api/study/" + studyId)).build();
     }
+
+    @Login
+    @GetMapping("/my/applies")
+    public ResponseEntity<StudiesResponse> getMyApplies(@AuthenticatedMember MemberPayload memberPayload) {
+        StudiesResponse response = studyService.getMyApplies(memberPayload);
+        return ResponseEntity.ok(response);
+    }
+
+    @Login
+    @GetMapping("/my/participates")
+    public ResponseEntity<StudiesResponse> getMyParticipates(@AuthenticatedMember MemberPayload memberPayload) {
+        StudiesResponse response = studyService.getMyParticipates(memberPayload);
+        return ResponseEntity.ok(response);
+    }
 }

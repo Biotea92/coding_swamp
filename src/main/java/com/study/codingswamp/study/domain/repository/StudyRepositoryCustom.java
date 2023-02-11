@@ -1,5 +1,6 @@
 package com.study.codingswamp.study.domain.repository;
 
+import com.study.codingswamp.member.domain.Member;
 import com.study.codingswamp.study.domain.Study;
 import com.study.codingswamp.study.service.request.StudiesPageableRequest;
 
@@ -10,4 +11,8 @@ public interface StudyRepositoryCustom {
     List<Study> getStudies(StudiesPageableRequest request);
 
     Long getCount();
+
+    List<Study> findMyApplies(Member member);
+
+    List<Study> findMyParticipates(Member member);
 }
