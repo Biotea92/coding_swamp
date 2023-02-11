@@ -82,6 +82,15 @@ public class StudyService {
         return new StudiesResponse(studyResponses, request.getTotalPage(totalCount));
     }
 
+    public StudiesResponse getMyApplies(MemberPayload memberPayload) {
+        Member member = findMember(memberPayload.getId());
+        List<StudyResponse> studyResponses = studyRepository.findMyAppliedStudy(member)
+                .stream()
+                .map(study -> new StudyResponse(study, getTags(study.getTags())))
+                .collect(Collectors.toList());
+        return new StudiesResponse(studyResponses, 1);
+    }
+
     private void validateOwner(Member member, Study findStudy) {
         if (findStudy.getOwner() != member) {
             throw new ForbiddenException("owner", "스터디 장이 아닙니다.");
