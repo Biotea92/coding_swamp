@@ -306,7 +306,7 @@ public class StudyControllerDocTest {
                         .endDate(LocalDate.now().plusDays(2))
                         .owner(studyOwner)
                         .currentMemberCount(1)
-                        .applicants(Set.of(new Applicant(applicantMember, "지원동기", LocalDate.now())))
+                        .applicants(Set.of(new Applicant(applicantMember, "지원동기", LocalDate.now().plusDays(i))))
                         .maxMemberCount(30)
                         .thumbnail("#00000")
                         .tags(List.of(new Tag("태그1"), new Tag("태그2")))
