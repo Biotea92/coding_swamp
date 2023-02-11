@@ -69,4 +69,11 @@ public class StudyController {
         StudiesResponse response = studyService.getMyApplies(memberPayload);
         return ResponseEntity.ok(response);
     }
+
+    @Login
+    @GetMapping("/my/participates")
+    public ResponseEntity<StudiesResponse> getMyParticipates(@AuthenticatedMember MemberPayload memberPayload) {
+        StudiesResponse response = studyService.getMyParticipates(memberPayload);
+        return ResponseEntity.ok(response);
+    }
 }

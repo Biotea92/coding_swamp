@@ -12,5 +12,7 @@ public interface StudyRepositoryCustom {
 
     Long getCount();
 
-    List<Study> findMyAppliedStudy(Member member);
+    List<Study> findMyApplies(Member member);
+
+    List<Study> findMyParticipates(Member member);
 }

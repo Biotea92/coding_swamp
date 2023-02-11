@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import java.util.List;
 
 import static com.study.codingswamp.study.domain.QApplicant.applicant;
+import static com.study.codingswamp.study.domain.QParticipant.participant;
 import static com.study.codingswamp.study.domain.QStudy.study;
 
 @RequiredArgsConstructor
@@ -33,11 +34,20 @@ public class StudyRepositoryImpl implements StudyRepositoryCustom {
     }
 
     @Override
-    public List<Study> findMyAppliedStudy(Member member) {
+    public List<Study> findMyApplies(Member member) {
         return jpaQueryFactory.selectFrom(study)
                 .leftJoin(study.applicants, applicant)
                 .where(applicant.member.id.eq(member.getId()))
                 .orderBy(applicant.applicantDate.desc())
+                .fetch();
+    }
+
+    @Override
+    public List<Study> findMyParticipates(Member member) {
+        return jpaQueryFactory.selectFrom(study)
+                .leftJoin(study.participants, participant)
+                .where(participant.member.id.eq(member.getId()))
+                .orderBy(participant.participationDate.desc())
                 .fetch();
     }
 }
