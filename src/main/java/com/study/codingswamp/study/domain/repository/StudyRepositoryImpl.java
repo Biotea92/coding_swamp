@@ -36,7 +36,7 @@ public class StudyRepositoryImpl implements StudyRepositoryCustom {
     public List<Study> findMyAppliedStudy(Member member) {
         return jpaQueryFactory.selectFrom(study)
                 .leftJoin(study.applicants, applicant)
-                .on(applicant.member.id.eq(member.getId()))
+                .where(applicant.member.id.eq(member.getId()))
                 .orderBy(applicant.applicantDate.desc())
                 .fetch();
     }
