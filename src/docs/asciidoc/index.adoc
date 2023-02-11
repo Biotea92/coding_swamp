@@ -157,3 +157,13 @@ include::{snippets}/study-get-myApplies/request-headers.adoc[]
 - 응답
 include::{snippets}/study-get-myApplies/http-response.adoc[]
 include::{snippets}/study-get-myApplies/response-fields.adoc[]
+
+'''
+
+=== 나의 참가 스터디 조회
+- 요청
+include::{snippets}/study-get-myParticipates/http-request.adoc[]
+include::{snippets}/study-get-myParticipates/request-headers.adoc[]
+- 응답
+include::{snippets}/study-get-myParticipates/http-response.adoc[]
+include::{snippets}/study-get-myParticipates/response-fields.adoc[]

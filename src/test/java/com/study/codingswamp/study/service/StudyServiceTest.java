@@ -277,6 +277,25 @@ class StudyServiceTest {
         assertThat(response.getStudyResponses().size()).isEqualTo(20);
     }
 
+    @Test
+    @DisplayName("본인이 참가한 스터디 목록만 가져오기")
+    void getMyParticipates() {
+        // given
+        List<Study> studies = 이십개_스터디_만들기();
+        Member member = createMember();
+        Applicant applicant = new Applicant(member, "지원 동기", LocalDate.now());
+        studies.forEach(study -> study.addApplicant(applicant));
+        Participant participant = new Participant(member, LocalDate.now());
+        studies.forEach(study -> study.addParticipant(participant));
+        MemberPayload memberPayload = new MemberPayload(member.getId(), member.getRole());
+
+        // when
+        StudiesResponse response = studyService.getMyParticipates(memberPayload);
+
+        // then
+        assertThat(response.getStudyResponses().size()).isEqualTo(20);
+    }
+
     private List<Study> 이십개_스터디_만들기() {
         Member studyOwner = createMember();
         List<Study> studies = IntStream.range(0, 20)
