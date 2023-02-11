@@ -100,7 +100,7 @@ class AuthControllerTest {
     @DisplayName("새로은 토큰을 refresh한다.")
     void refresh() throws Exception {
         TestUtil testUtil = new TestUtil();
-        String token = testUtil.saveMemberAndGetToken(tokenProvider, memberRepository, jdbcTemplate);
+        String token = testUtil.saveMemberAndGetToken(tokenProvider, memberRepository);
 
         mockMvc.perform(post("/api/auth/refresh")
                         .contentType(APPLICATION_JSON)

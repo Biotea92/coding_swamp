@@ -129,7 +129,7 @@ public class MemberControllerDocTest {
     @Test
     @DisplayName("회원 정보 수정이 완료되어야 한다.")
     void edit() throws Exception {
-        String token = new TestUtil().saveMemberAndGetToken(tokenProvider, memberRepository, jdbcTemplate);
+        String token = new TestUtil().saveMemberAndGetToken(tokenProvider, memberRepository);
 
         MockMultipartFile imageFile = new MockMultipartFile("imageFile", "image".getBytes());
 
@@ -167,7 +167,7 @@ public class MemberControllerDocTest {
     @Test
     @DisplayName("회원 탈퇴가 완료되어야 한다.")
     void delete() throws Exception {
-        String token = new TestUtil().saveMemberAndGetToken(tokenProvider, memberRepository, jdbcTemplate);
+        String token = new TestUtil().saveMemberAndGetToken(tokenProvider, memberRepository);
 
         mockMvc.perform(RestDocumentationRequestBuilders.delete("/api/member")
                         .header(AUTHORIZATION, "Bearer " + token)

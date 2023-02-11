@@ -147,3 +147,13 @@ include::{snippets}/study-get-studies/request-parameters.adoc[]
 - 응답
 include::{snippets}/study-get-studies/http-response.adoc[]
 include::{snippets}/study-get-studies/response-fields.adoc[]
+
+'''
+
+=== 나의 신청 스터디 조회
+- 요청
+include::{snippets}/study-get-myApplies/http-request.adoc[]
+include::{snippets}/study-get-myApplies/request-headers.adoc[]
+- 응답
+include::{snippets}/study-get-myApplies/http-response.adoc[]
+include::{snippets}/study-get-myApplies/response-fields.adoc[]

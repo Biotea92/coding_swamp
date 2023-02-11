@@ -22,6 +22,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -245,24 +246,7 @@ class StudyServiceTest {
     @DisplayName("스터디 여러건 조회 1페이지")
     void getStudies() {
         // given
-        Member studyOwner = createMember();
-        List<Study> studies = IntStream.range(0, 20)
-                .mapToObj(i -> Study.builder()
-                            .title("제목입니다. " + i)
-                            .description("설명입니다. " + i)
-                            .studyStatus(StudyStatus.PREPARING)
-                            .studyType(StudyType.STUDY)
-                            .startDate(LocalDate.now().plusDays(1))
-                            .endDate(LocalDate.now().plusDays(2))
-                            .owner(studyOwner)
-                            .currentMemberCount(1)
-                            .maxMemberCount(30)
-                            .thumbnail("#00000")
-                            .tags(List.of(new Tag("태그1"), new Tag("태그2")))
-                            .build()
-                )
-                .collect(Collectors.toList());
-        studyRepository.saveAll(studies);
+        이십개_스터디_만들기();
 
         StudiesPageableRequest studiesPageableRequest = new StudiesPageableRequest(1, 8);
 
@@ -274,6 +258,46 @@ class StudyServiceTest {
         assertThat(response.getStudyResponses().get(0).getTitle()).isEqualTo("제목입니다. 19");
         assertThat(response.getStudyResponses().get(7).getTitle()).isEqualTo("제목입니다. 12");
         assertThat(response.getStudyResponses().size()).isEqualTo(8);
+    }
+
+    @Test
+    @DisplayName("본인이 신청한 스터디 목록만 가져오기")
+    void getMyApplies() {
+        // given
+        List<Study> studies = 이십개_스터디_만들기();
+        Member member = createMember();
+        Applicant applicant = new Applicant(member, "지원동기", LocalDate.now());
+        studies.forEach(study -> study.addApplicant(applicant));
+        MemberPayload memberPayload = new MemberPayload(member.getId(), member.getRole());
+
+        // when
+        StudiesResponse response = studyService.getMyApplies(memberPayload);
+
+        // then
+        assertThat(response.getStudyResponses().size()).isEqualTo(20);
+    }
+
+    private List<Study> 이십개_스터디_만들기() {
+        Member studyOwner = createMember();
+        List<Study> studies = IntStream.range(0, 20)
+                .mapToObj(i -> Study.builder()
+                        .title("제목입니다. " + i)
+                        .description("설명입니다. " + i)
+                        .studyStatus(StudyStatus.PREPARING)
+                        .studyType(StudyType.STUDY)
+                        .startDate(LocalDate.now().plusDays(1))
+                        .endDate(LocalDate.now().plusDays(2))
+                        .owner(studyOwner)
+                        .currentMemberCount(1)
+                        .maxMemberCount(30)
+                        .thumbnail("#00000")
+                        .applicants(new HashSet<>())
+                        .participants(new HashSet<>())
+                        .tags(List.of(new Tag("태그1"), new Tag("태그2")))
+                        .build()
+                )
+                .collect(Collectors.toList());
+        return studyRepository.saveAll(studies);
     }
 
     private Member createMember() {
