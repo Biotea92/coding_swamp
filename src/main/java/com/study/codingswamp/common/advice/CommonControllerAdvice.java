@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+
 @Slf4j
 @RestControllerAdvice
 public class CommonControllerAdvice {
@@ -50,6 +52,21 @@ public class CommonControllerAdvice {
 
         return ResponseEntity
                 .status(statusCode)
+                .body(body);
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ErrorResponse> handleInternalServerError(RuntimeException e) {
+
+        ErrorResponse body = ErrorResponse.builder()
+                .code("500")
+                .message(e.getMessage())
+                .build();
+
+        log.info("RuntimeException ", e);
+
+        return ResponseEntity
+                .status(INTERNAL_SERVER_ERROR)
                 .body(body);
     }
 }
