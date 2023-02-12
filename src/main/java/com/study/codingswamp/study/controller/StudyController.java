@@ -7,7 +7,7 @@ import com.study.codingswamp.study.domain.Study;
 import com.study.codingswamp.study.service.StudyService;
 import com.study.codingswamp.study.service.request.ApplyRequest;
 import com.study.codingswamp.study.service.request.StudiesPageableRequest;
-import com.study.codingswamp.study.service.request.StudyCreateRequest;
+import com.study.codingswamp.study.service.request.StudyRequest;
 import com.study.codingswamp.study.service.response.StudiesResponse;
 import com.study.codingswamp.study.service.response.StudyDetailResponse;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,7 @@ public class StudyController {
     @Login
     @PostMapping
     public ResponseEntity<Void> create(@AuthenticatedMember MemberPayload memberPayload,
-                                       @Validated @RequestBody StudyCreateRequest request) {
+                                       @Validated @RequestBody StudyRequest request) {
         Study study = studyService.createStudy(memberPayload, request);
         return ResponseEntity.created(URI.create("/api/study/" + study.getId())).build();
     }
@@ -75,5 +75,14 @@ public class StudyController {
     public ResponseEntity<StudiesResponse> getMyParticipates(@AuthenticatedMember MemberPayload memberPayload) {
         StudiesResponse response = studyService.getMyParticipates(memberPayload);
         return ResponseEntity.ok(response);
+    }
+
+    @Login
+    @PutMapping("/{studyId}")
+    public ResponseEntity<Void> edit(@AuthenticatedMember MemberPayload memberPayload,
+                                     @PathVariable Long studyId,
+                                     @Validated @RequestBody StudyRequest request) {
+        Study study = studyService.edit(memberPayload, studyId, request);
+        return ResponseEntity.created(URI.create("/api/study/" + study.getId())).build();
     }
 }

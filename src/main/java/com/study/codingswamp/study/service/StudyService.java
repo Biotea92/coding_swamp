@@ -11,7 +11,7 @@ import com.study.codingswamp.study.domain.Tag;
 import com.study.codingswamp.study.domain.repository.StudyRepository;
 import com.study.codingswamp.study.service.request.ApplyRequest;
 import com.study.codingswamp.study.service.request.StudiesPageableRequest;
-import com.study.codingswamp.study.service.request.StudyCreateRequest;
+import com.study.codingswamp.study.service.request.StudyRequest;
 import com.study.codingswamp.study.service.response.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,7 +28,7 @@ public class StudyService {
     private final StudyRepository studyRepository;
     private final MemberRepository memberRepository;
 
-    public Study createStudy(MemberPayload memberPayload, StudyCreateRequest request) {
+    public Study createStudy(MemberPayload memberPayload, StudyRequest request) {
         Member owner = findMember(memberPayload.getId());
         Study study = request.mapToStudy(owner);
         return studyRepository.save(study);
@@ -95,6 +95,15 @@ public class StudyService {
                 .map(study -> new StudyResponse(study, getTags(study.getTags())))
                 .collect(Collectors.toList());
         return new StudiesResponse(studyResponses, 1);
+    }
+
+    @Transactional
+    public Study edit(MemberPayload memberPayload, Long studyId, StudyRequest request) {
+        Study findStudy = findStudy(studyId);
+        Member owner = findMember(memberPayload.getId());
+        findStudy.validateOwner(owner);
+        findStudy.update(request);
+        return findStudy;
     }
 
     private Study findStudy(Long studyId) {

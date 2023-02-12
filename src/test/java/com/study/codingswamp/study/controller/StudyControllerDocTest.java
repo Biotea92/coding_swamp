@@ -8,7 +8,7 @@ import com.study.codingswamp.member.domain.repository.MemberRepository;
 import com.study.codingswamp.study.domain.*;
 import com.study.codingswamp.study.domain.repository.StudyRepository;
 import com.study.codingswamp.study.service.request.ApplyRequest;
-import com.study.codingswamp.study.service.request.StudyCreateRequest;
+import com.study.codingswamp.study.service.request.StudyRequest;
 import com.study.codingswamp.utils.TestUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -82,13 +82,13 @@ public class StudyControllerDocTest {
     @DisplayName("스터디 생성 요청시 스터디가 생성되어야한다.")
     void createStudy() throws Exception {
         // given
-        StudyCreateRequest request = StudyCreateRequest.builder()
+        StudyRequest request = StudyRequest.builder()
                 .title("제목입니다.")
                 .description("설명입니다.")
                 .studyType("STUDY")
                 .thumbnail("#000000")
-                .startDate(LocalDate.of(2023, 2, 1))
-                .endDate(LocalDate.of(2023, 2, 3))
+                .startDate(LocalDate.now().plusDays(1))
+                .endDate(LocalDate.now().plusDays(2))
                 .maxMemberCount(30)
                 .tags(List.of("태그1", "태그2"))
                 .build();
@@ -400,7 +400,7 @@ public class StudyControllerDocTest {
     }
 
     Study getStudy(Member owner) {
-        StudyCreateRequest request = StudyCreateRequest.builder()
+        StudyRequest request = StudyRequest.builder()
                 .title("제목입니다.")
                 .description("설명입니다.")
                 .studyType("STUDY")

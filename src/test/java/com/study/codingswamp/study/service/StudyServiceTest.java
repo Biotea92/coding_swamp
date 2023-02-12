@@ -10,7 +10,7 @@ import com.study.codingswamp.study.domain.*;
 import com.study.codingswamp.study.domain.repository.StudyRepository;
 import com.study.codingswamp.study.service.request.ApplyRequest;
 import com.study.codingswamp.study.service.request.StudiesPageableRequest;
-import com.study.codingswamp.study.service.request.StudyCreateRequest;
+import com.study.codingswamp.study.service.request.StudyRequest;
 import com.study.codingswamp.study.service.response.StudiesResponse;
 import com.study.codingswamp.study.service.response.StudyDetailResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -55,7 +55,7 @@ class StudyServiceTest {
         // given
         Member member = createMember();
         MemberPayload memberPayload = new MemberPayload(member.getId(), member.getRole());
-        StudyCreateRequest request = getStudyCreateRequest(30);
+        StudyRequest request = getStudyCreateRequest(30);
 
         // when
         Study study = studyService.createStudy(memberPayload, request);
@@ -82,7 +82,7 @@ class StudyServiceTest {
         // given
         Member member = createMember();
         MemberPayload memberPayload = new MemberPayload(member.getId(), member.getRole());
-        StudyCreateRequest request = getStudyCreateRequest(30);
+        StudyRequest request = getStudyCreateRequest(30);
         Study study = studyService.createStudy(memberPayload, request);
 
         // when
@@ -110,7 +110,7 @@ class StudyServiceTest {
         // given
         Member member = createMember();
         MemberPayload memberPayload = new MemberPayload(member.getId(), member.getRole());
-        StudyCreateRequest request = getStudyCreateRequest(30);
+        StudyRequest request = getStudyCreateRequest(30);
         studyService.createStudy(memberPayload, request);
 
         // expected
@@ -126,8 +126,8 @@ class StudyServiceTest {
         // given
         Member studyOwner = createMember();
         MemberPayload memberPayload = new MemberPayload(studyOwner.getId(), studyOwner.getRole());
-        StudyCreateRequest studyCreateRequest = getStudyCreateRequest(30);
-        Study study = studyService.createStudy(memberPayload, studyCreateRequest);
+        StudyRequest studyRequest = getStudyCreateRequest(30);
+        Study study = studyService.createStudy(memberPayload, studyRequest);
 
         Member applicantMember = new Member("abc@gmail.com", "1q2w3e4r!", "kim", null);
         memberRepository.save(applicantMember);
@@ -147,8 +147,8 @@ class StudyServiceTest {
         // given
         Member studyOwner = createMember();
         MemberPayload memberPayload = new MemberPayload(studyOwner.getId(), studyOwner.getRole());
-        StudyCreateRequest studyCreateRequest = getStudyCreateRequest(1);
-        Study study = studyService.createStudy(memberPayload, studyCreateRequest);
+        StudyRequest studyRequest = getStudyCreateRequest(1);
+        Study study = studyService.createStudy(memberPayload, studyRequest);
 
         Member applicantMember = new Member("abc@gmail.com", "1q2w3e4r!", "kim", null);
         memberRepository.save(applicantMember);
@@ -168,8 +168,8 @@ class StudyServiceTest {
         // given
         Member studyOwner = createMember();
         MemberPayload memberPayload = new MemberPayload(studyOwner.getId(), studyOwner.getRole());
-        StudyCreateRequest studyCreateRequest = getStudyCreateRequest(10);
-        Study study = studyService.createStudy(memberPayload, studyCreateRequest);
+        StudyRequest studyRequest = getStudyCreateRequest(10);
+        Study study = studyService.createStudy(memberPayload, studyRequest);
 
         Member applicantMember = new Member("abc@gmail.com", "1q2w3e4r!", "kim", null);
         memberRepository.save(applicantMember);
@@ -190,8 +190,8 @@ class StudyServiceTest {
         // given
         Member studyOwner = createMember();
         MemberPayload memberPayload = new MemberPayload(studyOwner.getId(), studyOwner.getRole());
-        StudyCreateRequest studyCreateRequest = getStudyCreateRequest(30);
-        Study study = studyService.createStudy(memberPayload, studyCreateRequest);
+        StudyRequest studyRequest = getStudyCreateRequest(30);
+        Study study = studyService.createStudy(memberPayload, studyRequest);
 
         ApplyRequest applyRequest = new ApplyRequest("지원 동기입니다.");
 
@@ -208,8 +208,8 @@ class StudyServiceTest {
         // given
         Member studyOwner = createMember();
         MemberPayload ownerPayload = new MemberPayload(studyOwner.getId(), studyOwner.getRole());
-        StudyCreateRequest studyCreateRequest = getStudyCreateRequest(30);
-        Study study = studyService.createStudy(ownerPayload, studyCreateRequest);
+        StudyRequest studyRequest = getStudyCreateRequest(30);
+        Study study = studyService.createStudy(ownerPayload, studyRequest);
         Member member = memberRepository.save(new Member("applicant@gmail.com", "testpassword", "kim", null));
         Applicant applicant = new Applicant(member, "지원동기", LocalDate.now());
         study.addApplicant(applicant);
@@ -228,8 +228,8 @@ class StudyServiceTest {
         // given
         Member studyOwner = createMember();
         MemberPayload ownerPayload = new MemberPayload(studyOwner.getId(), studyOwner.getRole());
-        StudyCreateRequest studyCreateRequest = getStudyCreateRequest(30);
-        Study study = studyService.createStudy(ownerPayload, studyCreateRequest);
+        StudyRequest studyRequest = getStudyCreateRequest(30);
+        Study study = studyService.createStudy(ownerPayload, studyRequest);
         Member member = memberRepository.save(new Member("applicant@gmail.com", "testpassword", "kim", null));
         Applicant applicant = new Applicant(member, "지원동기", LocalDate.now());
         study.addApplicant(applicant);
@@ -325,8 +325,8 @@ class StudyServiceTest {
         return member;
     }
 
-    private StudyCreateRequest getStudyCreateRequest(int maxMemberCount) {
-        return StudyCreateRequest.builder()
+    private StudyRequest getStudyCreateRequest(int maxMemberCount) {
+        return StudyRequest.builder()
                 .title("제목입니다.")
                 .description("설명입니다.")
                 .studyType("STUDY")

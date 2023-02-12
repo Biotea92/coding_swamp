@@ -4,6 +4,7 @@ import com.study.codingswamp.common.exception.ConflictException;
 import com.study.codingswamp.common.exception.ForbiddenException;
 import com.study.codingswamp.common.exception.NotFoundException;
 import com.study.codingswamp.member.domain.Member;
+import com.study.codingswamp.study.service.request.StudyRequest;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -158,6 +159,25 @@ public class Study {
                 .findAny();
         if (findParticipant.isPresent()) {
             throw new ConflictException("participant", "이미 참가한 인원입니다.");
+        }
+    }
+
+    public void update(StudyRequest request) {
+        this.title = request.getTitle();
+        this.description = request.getDescription();
+        this.studyType = request.mapToStudyType();
+        this.thumbnail = request.getThumbnail();
+        this.startDate = request.getStartDate();
+        this.endDate = request.getEndDate();
+        this.studyStatus = request.checkStudyStatus();
+        validateMaxMemberCount(request);
+        this.maxMemberCount = request.getMaxMemberCount();
+        this.tags = request.mapToTag();
+    }
+
+    private void validateMaxMemberCount(StudyRequest request) {
+        if (currentMemberCount > request.getMaxMemberCount()) {
+            throw new ConflictException("maxMemberCount", "현재 인원이 정원보다 많습니다.");
         }
     }
 }
