@@ -101,11 +101,21 @@ include::{snippets}/member-get/response-fields.adoc[]
 === 스터디 생성
 - 요청
 include::{snippets}/study-create/http-request.adoc[]
+include::{snippets}/study-edit/request-headers.adoc[]
 include::{snippets}/study-create/request-fields.adoc[]
-- 요청 Header
-include::{snippets}/study-create/request-headers.adoc[]
 - 응답
 include::{snippets}/study-create/http-response.adoc[]
+
+'''
+
+=== 스터디 수정
+- 요청
+include::{snippets}/study-edit/http-request.adoc[]
+include::{snippets}/study-edit/request-headers.adoc[]
+include::{snippets}/study-edit/path-parameters.adoc[]
+include::{snippets}/study-edit/request-fields.adoc[]
+- 응답
+include::{snippets}/study-edit/http-response.adoc[]
 
 '''
 

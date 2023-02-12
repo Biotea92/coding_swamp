@@ -8,7 +8,7 @@ import com.study.codingswamp.member.domain.repository.MemberRepository;
 import com.study.codingswamp.study.domain.*;
 import com.study.codingswamp.study.domain.repository.StudyRepository;
 import com.study.codingswamp.study.service.request.ApplyRequest;
-import com.study.codingswamp.study.service.request.StudyCreateRequest;
+import com.study.codingswamp.study.service.request.StudyRequest;
 import com.study.codingswamp.utils.TestUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -37,8 +37,7 @@ import static org.springframework.restdocs.headers.HeaderDocumentation.headerWit
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.patch;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.removeHeaders;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
@@ -82,13 +81,13 @@ public class StudyControllerDocTest {
     @DisplayName("스터디 생성 요청시 스터디가 생성되어야한다.")
     void createStudy() throws Exception {
         // given
-        StudyCreateRequest request = StudyCreateRequest.builder()
+        StudyRequest request = StudyRequest.builder()
                 .title("제목입니다.")
                 .description("설명입니다.")
                 .studyType("STUDY")
                 .thumbnail("#000000")
-                .startDate(LocalDate.of(2023, 2, 1))
-                .endDate(LocalDate.of(2023, 2, 3))
+                .startDate(LocalDate.now().plusDays(1))
+                .endDate(LocalDate.now().plusDays(2))
                 .maxMemberCount(30)
                 .tags(List.of("태그1", "태그2"))
                 .build();
@@ -344,7 +343,7 @@ public class StudyControllerDocTest {
     }
 
     @Test
-    @DisplayName("나의 참가 스터디 여러건 조회")
+    @DisplayName("나의 참가 스터디 조회")
     void getMyParticipates() throws Exception {
         // given
         String token = new TestUtil().saveMemberAndGetToken(tokenProvider, memberRepository);
@@ -399,8 +398,55 @@ public class StudyControllerDocTest {
                 ));
     }
 
+    @Test
+    @DisplayName("스터디 수정하기")
+    void edit() throws Exception {
+        // given
+        String token = new TestUtil().saveMemberAndGetToken(tokenProvider, memberRepository);
+        MemberPayload payload = tokenProvider.getPayload("Bearer " + token);
+        Member owner = memberRepository.findById(payload.getId()).orElseThrow(RuntimeException::new);
+        Study study = studyRepository.save(getStudy(owner));
+
+        StudyRequest request = StudyRequest.builder()
+                .title("제목입니다. 수정")
+                .description("설명입니다. 수정")
+                .studyType("MOGAKKO")
+                .thumbnail("#000001")
+                .startDate(LocalDate.now().plusDays(2))
+                .endDate(LocalDate.now().plusDays(3))
+                .maxMemberCount(2)
+                .tags(List.of("태그1 수정", "태그2 수정"))
+                .build();
+
+        // expected
+        mockMvc.perform(put("/api/study/{studyId}", study.getId())
+                        .header(AUTHORIZATION, "Bearer " + token)
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                )
+                .andExpect(status().isCreated())
+                .andDo(document("study-edit",
+                        requestHeaders(
+                                headerWithName(AUTHORIZATION).description("Bearer auth credentials")
+                        ),
+                        pathParameters(
+                                parameterWithName("studyId").description("스터디 아이디 type(Long)")
+                        ),
+                        requestFields(
+                                fieldWithPath("title").description("제목"),
+                                fieldWithPath("description").description("설명"),
+                                fieldWithPath("studyType").description("스터디 타입 STUDY or MOGAKKO"),
+                                fieldWithPath("thumbnail").description("썸네일 색상코드"),
+                                fieldWithPath("startDate").description("스터디 시작일 포멧 (yy-MM-dd)"),
+                                fieldWithPath("endDate").description("스터디 종료일 포멧 (yy-MM-dd)"),
+                                fieldWithPath("maxMemberCount").description("스터디 최대인원"),
+                                fieldWithPath("tags").description("태그 type(List)")
+                        )
+                ));
+    }
+
     Study getStudy(Member owner) {
-        StudyCreateRequest request = StudyCreateRequest.builder()
+        StudyRequest request = StudyRequest.builder()
                 .title("제목입니다.")
                 .description("설명입니다.")
                 .studyType("STUDY")

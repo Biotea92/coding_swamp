@@ -1,7 +1,10 @@
 package com.study.codingswamp.study.domain;
 
+import com.study.codingswamp.common.exception.ConflictException;
+import com.study.codingswamp.common.exception.ForbiddenException;
 import com.study.codingswamp.common.exception.NotFoundException;
 import com.study.codingswamp.member.domain.Member;
+import com.study.codingswamp.study.service.request.StudyRequest;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -127,5 +130,54 @@ public class Study {
                  .orElseThrow(() -> new NotFoundException("member", "신청자에 없습니다."))
          );
         this.participants.add(participant);
+    }
+
+    public void validateOwner(Member member) {
+        if (this.owner != member) {
+            throw new ForbiddenException("owner", "스터디 장이 아닙니다.");
+        }
+    }
+
+    public void validateStudyMaxMember() {
+        if (this.currentMemberCount == maxMemberCount) {
+            throw new ConflictException("study", "최대 정원인 스터디입니다.");
+        }
+    }
+
+    public void checkApplicant(Member member) {
+        Optional<Applicant> findApplicant = applicants.stream()
+                .filter(applicant -> applicant.getMember().getId().equals(member.getId()))
+                .findAny();
+        if (findApplicant.isPresent()) {
+            throw new ConflictException("applicant", "이미 신청한 사용자입니다.");
+        }
+    }
+
+    public void checkParticipant(Member member) {
+        Optional<Participant> findParticipant = participants.stream()
+                .filter(participant -> participant.getMember() == member)
+                .findAny();
+        if (findParticipant.isPresent()) {
+            throw new ConflictException("participant", "이미 참가한 인원입니다.");
+        }
+    }
+
+    public void update(StudyRequest request) {
+        this.title = request.getTitle();
+        this.description = request.getDescription();
+        this.studyType = request.mapToStudyType();
+        this.thumbnail = request.getThumbnail();
+        this.startDate = request.getStartDate();
+        this.endDate = request.getEndDate();
+        this.studyStatus = request.checkStudyStatus();
+        validateMaxMemberCount(request);
+        this.maxMemberCount = request.getMaxMemberCount();
+        this.tags = request.mapToTag();
+    }
+
+    private void validateMaxMemberCount(StudyRequest request) {
+        if (currentMemberCount > request.getMaxMemberCount()) {
+            throw new ConflictException("maxMemberCount", "현재 인원이 정원보다 많습니다.");
+        }
     }
 }

@@ -3,7 +3,6 @@ package com.study.codingswamp.study.service.request;
 import com.study.codingswamp.common.exception.InvalidRequestException;
 import com.study.codingswamp.member.domain.Member;
 import com.study.codingswamp.study.domain.*;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,10 +19,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Getter
-@AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class StudyCreateRequest {
+public class StudyRequest {
 
     @NotBlank
     private String title;
@@ -51,14 +48,27 @@ public class StudyCreateRequest {
     @NotEmpty
     private List<String> tags;
 
+    @Builder
+    public StudyRequest(String title, String description, String studyType, String thumbnail,
+                        LocalDate startDate, LocalDate endDate, Integer maxMemberCount, List<String> tags) {
+        this.title = title;
+        this.description = description;
+        this.studyType = studyType;
+        this.thumbnail = thumbnail;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.maxMemberCount = maxMemberCount;
+        this.tags = tags;
+    }
+
     public Study mapToStudy(Member owner) {
         Set<Participant> participants = initParticipants(owner);
         return Study.builder()
                 .title(this.title)
                 .description(this.description)
-                .studyType(validateStudyType())
+                .studyType(mapToStudyType())
                 .thumbnail(this.thumbnail)
-                .studyStatus(getStudyStatus())
+                .studyStatus(checkStudyStatus())
                 .startDate(this.startDate)
                 .endDate(this.endDate)
                 .owner(owner)
@@ -77,7 +87,7 @@ public class StudyCreateRequest {
         return participants;
     }
 
-    private StudyType validateStudyType() {
+    public StudyType mapToStudyType() {
         if (this.studyType.equals("STUDY")) {
             return StudyType.STUDY;
         } else if (this.studyType.equals("MOGAKKO")) {
@@ -86,9 +96,9 @@ public class StudyCreateRequest {
         throw new InvalidRequestException("studyType", "STUDY 또는 MOGAKKO 이어야 합니다.");
     }
 
-    private StudyStatus getStudyStatus() {
+    public StudyStatus checkStudyStatus() {
         LocalDate now = LocalDate.now();
-        if (endDate.isBefore(now)) {
+        if (endDate != null && endDate.isBefore(now)) {
             return StudyStatus.COMPLETION;
         }
         if (startDate.isAfter(now)) {
@@ -97,7 +107,7 @@ public class StudyCreateRequest {
         return StudyStatus.ONGOING;
     }
 
-    private List<Tag> mapToTag() {
+    public List<Tag> mapToTag() {
         return tags.stream()
                 .map(Tag::new)
                 .collect(Collectors.toList());

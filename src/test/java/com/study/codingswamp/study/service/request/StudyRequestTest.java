@@ -15,13 +15,13 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class StudyCreateRequestTest {
+class StudyRequestTest {
 
     @Test
-    @DisplayName("StudyCreateRequest 객체를 Study 객체로 바꿔준다.")
+    @DisplayName("StudyRequest 객체를 Study 객체로 바꿔준다.")
     void mapToStudy() {
         // given
-        StudyCreateRequest request = StudyCreateRequest.builder()
+        StudyRequest request = StudyRequest.builder()
                 .title("제목입니다.")
                 .description("설명입니다.")
                 .studyType("STUDY")
@@ -53,7 +53,7 @@ class StudyCreateRequestTest {
     @DisplayName("studyStatus는 시간에 따라 check되어야 한다.")
     void studyStatusCheck() {
         // given
-        StudyCreateRequest request = StudyCreateRequest.builder()
+        StudyRequest request = StudyRequest.builder()
                 .title("제목입니다.")
                 .description("설명입니다.")
                 .studyType("STUDY")
@@ -76,7 +76,7 @@ class StudyCreateRequestTest {
     @DisplayName("studyType은 validate되어야 한다.")
     void studyTypeValidate() {
         // given
-        StudyCreateRequest request = StudyCreateRequest.builder()
+        StudyRequest request = StudyRequest.builder()
                 .title("제목입니다.")
                 .description("설명입니다.")
                 .studyType("validateTest")
