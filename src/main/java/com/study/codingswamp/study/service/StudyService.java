@@ -1,8 +1,6 @@
 package com.study.codingswamp.study.service;
 
 import com.study.codingswamp.auth.service.MemberPayload;
-import com.study.codingswamp.common.exception.ConflictException;
-import com.study.codingswamp.common.exception.ForbiddenException;
 import com.study.codingswamp.common.exception.NotFoundException;
 import com.study.codingswamp.member.domain.Member;
 import com.study.codingswamp.member.domain.repository.MemberRepository;
@@ -21,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -54,9 +51,9 @@ public class StudyService {
         Member applicantMember = findMember(memberPayload.getId());
         Study findStudy = findStudy(studyId);
 
-        validateStudyMaxMember(findStudy);
-        checkParticipant(applicantMember, findStudy);
-        checkApplicant(applicantMember, findStudy);
+        findStudy.validateStudyMaxMember();
+        findStudy.checkParticipant(applicantMember);
+        findStudy.checkApplicant(applicantMember);
 
         findStudy.addApplicant(new Applicant(applicantMember, applyRequest.getReasonForApplication(), LocalDate.now()));
     }
@@ -65,10 +62,10 @@ public class StudyService {
     public void approve(MemberPayload memberPayload, Long studyId, Long applicantId) {
         Member owner = findMember(memberPayload.getId());
         Study findStudy = findStudy(studyId);
-        validateOwner(owner, findStudy);
-        validateStudyMaxMember(findStudy);
+        findStudy.validateOwner(owner);
+        findStudy.validateStudyMaxMember();
         Member applicantMember = findMember(applicantId);
-        checkParticipant(applicantMember, findStudy);
+        findStudy.checkParticipant(applicantMember);
         findStudy.addParticipant(new Participant(applicantMember, LocalDate.now()));
     }
 
@@ -98,36 +95,6 @@ public class StudyService {
                 .map(study -> new StudyResponse(study, getTags(study.getTags())))
                 .collect(Collectors.toList());
         return new StudiesResponse(studyResponses, 1);
-    }
-
-    private void validateOwner(Member member, Study findStudy) {
-        if (findStudy.getOwner() != member) {
-            throw new ForbiddenException("owner", "스터디 장이 아닙니다.");
-        }
-    }
-
-    private void checkApplicant(Member member, Study findStudy) {
-        Optional<Applicant> findApplicant = findStudy.getApplicants().stream()
-                .filter(applicant -> applicant.getMember().getId().equals(member.getId()))
-                .findAny();
-        if (findApplicant.isPresent()) {
-            throw new ConflictException("applicant", "이미 신청한 사용자입니다.");
-        }
-    }
-
-    private void checkParticipant(Member member, Study findStudy) {
-        Optional<Participant> findParticipant = findStudy.getParticipants().stream()
-                .filter(participant -> participant.getMember() == member)
-                .findAny();
-        if (findParticipant.isPresent()) {
-            throw new ConflictException("participant", "이미 참가한 인원입니다.");
-        }
-    }
-
-    private void validateStudyMaxMember(Study study) {
-        if (study.getCurrentMemberCount() == study.getMaxMemberCount()) {
-            throw new ConflictException("study", "최대 정원인 스터디입니다.");
-        }
     }
 
     private Study findStudy(Long studyId) {

@@ -1,5 +1,7 @@
 package com.study.codingswamp.study.domain;
 
+import com.study.codingswamp.common.exception.ConflictException;
+import com.study.codingswamp.common.exception.ForbiddenException;
 import com.study.codingswamp.common.exception.NotFoundException;
 import com.study.codingswamp.member.domain.Member;
 import lombok.Builder;
@@ -127,5 +129,35 @@ public class Study {
                  .orElseThrow(() -> new NotFoundException("member", "신청자에 없습니다."))
          );
         this.participants.add(participant);
+    }
+
+    public void validateOwner(Member member) {
+        if (this.owner != member) {
+            throw new ForbiddenException("owner", "스터디 장이 아닙니다.");
+        }
+    }
+
+    public void validateStudyMaxMember() {
+        if (this.currentMemberCount == maxMemberCount) {
+            throw new ConflictException("study", "최대 정원인 스터디입니다.");
+        }
+    }
+
+    public void checkApplicant(Member member) {
+        Optional<Applicant> findApplicant = applicants.stream()
+                .filter(applicant -> applicant.getMember().getId().equals(member.getId()))
+                .findAny();
+        if (findApplicant.isPresent()) {
+            throw new ConflictException("applicant", "이미 신청한 사용자입니다.");
+        }
+    }
+
+    public void checkParticipant(Member member) {
+        Optional<Participant> findParticipant = participants.stream()
+                .filter(participant -> participant.getMember() == member)
+                .findAny();
+        if (findParticipant.isPresent()) {
+            throw new ConflictException("participant", "이미 참가한 인원입니다.");
+        }
     }
 }
