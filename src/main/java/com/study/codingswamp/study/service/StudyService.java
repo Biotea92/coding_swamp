@@ -8,6 +8,8 @@ import com.study.codingswamp.study.domain.Applicant;
 import com.study.codingswamp.study.domain.Participant;
 import com.study.codingswamp.study.domain.Study;
 import com.study.codingswamp.study.domain.Tag;
+import com.study.codingswamp.study.domain.repository.ApplicantRepository;
+import com.study.codingswamp.study.domain.repository.ParticipantRepository;
 import com.study.codingswamp.study.domain.repository.StudyRepository;
 import com.study.codingswamp.study.service.request.ApplyRequest;
 import com.study.codingswamp.study.service.request.StudiesPageableRequest;
@@ -28,11 +30,16 @@ public class StudyService {
 
     private final StudyRepository studyRepository;
     private final MemberRepository memberRepository;
+    private final ApplicantRepository applicantRepository;
+    private final ParticipantRepository participantRepository;
 
     @Transactional
     public Study createStudy(MemberPayload memberPayload, StudyRequest request) {
         Member owner = findMember(memberPayload.getId());
         Study study = request.mapToStudy(owner);
+        Participant participant = new Participant(study, owner, LocalDate.now());
+        participantRepository.save(participant);
+        study.initParticipants(participant);
         return studyRepository.save(study);
     }
 
@@ -57,7 +64,9 @@ public class StudyService {
         findStudy.checkParticipant(applicantMember);
         findStudy.checkApplicant(applicantMember);
 
-        findStudy.addApplicant(new Applicant(applicantMember, applyRequest.getReasonForApplication(), LocalDate.now()));
+        Applicant applicant = new Applicant(findStudy, applicantMember, applyRequest.getReasonForApplication(), LocalDate.now());
+        applicantRepository.save(applicant);
+        findStudy.addApplicant(applicant);
     }
 
     @Transactional
@@ -68,7 +77,10 @@ public class StudyService {
         findStudy.validateStudyMaxMember();
         Member applicantMember = findMember(applicantId);
         findStudy.checkParticipant(applicantMember);
-        findStudy.addParticipant(new Participant(applicantMember, LocalDate.now()));
+
+        Participant participant = new Participant(findStudy, applicantMember, LocalDate.now());
+        participantRepository.save(participant);
+        findStudy.addParticipant(participant);
     }
 
     public StudiesResponse getStudies(StudiesPageableRequest request) {

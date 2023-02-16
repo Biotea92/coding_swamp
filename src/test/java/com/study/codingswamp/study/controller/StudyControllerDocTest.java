@@ -6,6 +6,8 @@ import com.study.codingswamp.auth.token.TokenProvider;
 import com.study.codingswamp.member.domain.Member;
 import com.study.codingswamp.member.domain.repository.MemberRepository;
 import com.study.codingswamp.study.domain.*;
+import com.study.codingswamp.study.domain.repository.ApplicantRepository;
+import com.study.codingswamp.study.domain.repository.ParticipantRepository;
 import com.study.codingswamp.study.domain.repository.StudyRepository;
 import com.study.codingswamp.study.service.request.ApplyRequest;
 import com.study.codingswamp.study.service.request.StudyRequest;
@@ -27,8 +29,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -61,6 +63,10 @@ public class StudyControllerDocTest {
     private MemberRepository memberRepository;
     @Autowired
     private StudyRepository studyRepository;
+    @Autowired
+    private ApplicantRepository applicantRepository;
+    @Autowired
+    private ParticipantRepository participantRepository;
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
@@ -124,10 +130,14 @@ public class StudyControllerDocTest {
     @DisplayName("스터디 상세 단건 조회하기")
     void getStudyDetail() throws Exception {
         // given
-        new TestUtil().saveMemberAndGetToken(tokenProvider, memberRepository);
+        String token = new TestUtil().saveMemberAndGetToken(tokenProvider, memberRepository);
+        MemberPayload payload = tokenProvider.getPayload("Bearer " + token);
+        Member member = memberRepository.findById(payload.getId()).orElseThrow();
         Study study = getStudy(memberRepository.findById(1L).orElseThrow(RuntimeException::new));
+        Participant participant = new Participant(study, member, LocalDate.now());
+        study.initParticipants(participant);
         Member hong = memberRepository.save(new Member("member2@gmail.com", "1q2w3e4r!", "hong", "https://firebasestorage.googleapis.com/v0/b/coding-swamp.appspot.com/o/default_image%2Fcrocodile.png?alt=media"));
-        study.addApplicant(new Applicant(hong, "지원 동기", LocalDate.now()));
+        study.addApplicant(new Applicant(study, hong, "지원 동기", LocalDate.now()));
         studyRepository.save(study);
 
         // expected
@@ -215,7 +225,7 @@ public class StudyControllerDocTest {
         Study study = getStudy(studyOwner);
         studyRepository.save(study);
         Member member = memberRepository.save(new Member("applicant@gmail.com", "testpassword", "kim", null));
-        Applicant applicant = new Applicant(member, "지원동기", LocalDate.now());
+        Applicant applicant = new Applicant(study, member, "지원동기", LocalDate.now());
         study.addApplicant(applicant);
 
         // expected
@@ -297,21 +307,26 @@ public class StudyControllerDocTest {
 
         Member studyOwner = createMember();
         List<Study> studies = IntStream.range(0, 10)
-                .mapToObj(i -> Study.builder()
-                        .title("제목입니다. " + i)
-                        .description("설명입니다. " + i)
-                        .studyStatus(StudyStatus.PREPARING)
-                        .studyType(StudyType.STUDY)
-                        .startDate(LocalDate.now().plusDays(1))
-                        .endDate(LocalDate.now().plusDays(2))
-                        .owner(studyOwner)
-                        .currentMemberCount(1)
-                        .applicants(Set.of(new Applicant(applicantMember, "지원동기", LocalDate.now().plusDays(i))))
-                        .maxMemberCount(30)
-                        .thumbnail("#00000")
-                        .tags(List.of(new Tag("태그1"), new Tag("태그2")))
-                        .build()
-                )
+                .mapToObj(i -> {
+                    Study study = Study.builder()
+                                    .title("제목입니다. " + i)
+                                    .description("설명입니다. " + i)
+                                    .studyStatus(StudyStatus.PREPARING)
+                                    .studyType(StudyType.STUDY)
+                                    .startDate(LocalDate.now().plusDays(1))
+                                    .endDate(LocalDate.now().plusDays(2))
+                                    .owner(studyOwner)
+                                    .currentMemberCount(1)
+                                    .applicants(new HashSet<>())
+                                    .maxMemberCount(30)
+                                    .thumbnail("#00000")
+                                    .tags(List.of(new Tag("태그1"), new Tag("태그2")))
+                                    .build();
+                    Applicant applicant = new Applicant(study, applicantMember, "지원동기", LocalDate.now().plusDays(i));
+                    applicantRepository.save(applicant);
+                    study.addApplicant(applicant);
+                    return study;
+                })
                 .collect(Collectors.toList());
         studyRepository.saveAll(studies);
 
@@ -353,21 +368,26 @@ public class StudyControllerDocTest {
 
         Member studyOwner = createMember();
         List<Study> studies = IntStream.range(0, 10)
-                .mapToObj(i -> Study.builder()
-                        .title("제목입니다. " + i)
-                        .description("설명입니다. " + i)
-                        .studyStatus(StudyStatus.PREPARING)
-                        .studyType(StudyType.STUDY)
-                        .startDate(LocalDate.now().plusDays(1))
-                        .endDate(LocalDate.now().plusDays(2))
-                        .owner(studyOwner)
-                        .currentMemberCount(1)
-                        .participants(Set.of(new Participant(applicantMember, LocalDate.now().plusDays(i))))
-                        .maxMemberCount(30)
-                        .thumbnail("#00000")
-                        .tags(List.of(new Tag("태그1"), new Tag("태그2")))
-                        .build()
-                )
+                .mapToObj(i -> {
+                    Study study = Study.builder()
+                                    .title("제목입니다. " + i)
+                                    .description("설명입니다. " + i)
+                                    .studyStatus(StudyStatus.PREPARING)
+                                    .studyType(StudyType.STUDY)
+                                    .startDate(LocalDate.now().plusDays(1))
+                                    .endDate(LocalDate.now().plusDays(2))
+                                    .owner(studyOwner)
+                                    .currentMemberCount(1)
+                                    .participants(new HashSet<>())
+                                    .maxMemberCount(30)
+                                    .thumbnail("#00000")
+                                    .tags(List.of(new Tag("태그1"), new Tag("태그2")))
+                                    .build();
+                    Participant participant = new Participant(study, applicantMember, LocalDate.now().plusDays(i));
+                    participantRepository.save(participant);
+                    study.initParticipants(participant);
+                    return study;
+                })
                 .collect(Collectors.toList());
         studyRepository.saveAll(studies);
 

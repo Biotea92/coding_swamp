@@ -7,6 +7,8 @@ import com.study.codingswamp.common.exception.NotFoundException;
 import com.study.codingswamp.member.domain.Member;
 import com.study.codingswamp.member.domain.repository.MemberRepository;
 import com.study.codingswamp.study.domain.*;
+import com.study.codingswamp.study.domain.repository.ApplicantRepository;
+import com.study.codingswamp.study.domain.repository.ParticipantRepository;
 import com.study.codingswamp.study.domain.repository.StudyRepository;
 import com.study.codingswamp.study.service.request.ApplyRequest;
 import com.study.codingswamp.study.service.request.StudiesPageableRequest;
@@ -24,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -44,6 +45,10 @@ class StudyServiceTest {
 
     @Autowired
     private StudyRepository studyRepository;
+    @Autowired
+    private ApplicantRepository applicantRepository;
+    @Autowired
+    private ParticipantRepository participantRepository;
 
     @BeforeEach
     void clear() {
@@ -212,15 +217,16 @@ class StudyServiceTest {
         StudyRequest studyRequest = getStudyCreateRequest(30);
         Study study = studyService.createStudy(ownerPayload, studyRequest);
         Member member = memberRepository.save(new Member("applicant@gmail.com", "testpassword", "kim", null));
-        Applicant applicant = new Applicant(member, "지원동기", LocalDate.now());
+        Applicant applicant = new Applicant(study, member, "지원동기", LocalDate.now());
         study.addApplicant(applicant);
 
         // when
         studyService.approve(ownerPayload, study.getId(), applicant.getMember().getId());
 
+
         // then
         assertThat(study.getApplicants()).isEmpty();
-        assertThat(study.getParticipants()).contains(new Participant(member, LocalDate.now()));
+        assertThat(study.getParticipants().size()).isEqualTo(2);
     }
 
     @Test
@@ -232,7 +238,7 @@ class StudyServiceTest {
         StudyRequest studyRequest = getStudyCreateRequest(30);
         Study study = studyService.createStudy(ownerPayload, studyRequest);
         Member member = memberRepository.save(new Member("applicant@gmail.com", "testpassword", "kim", null));
-        Applicant applicant = new Applicant(member, "지원동기", LocalDate.now());
+        Applicant applicant = new Applicant(study, member, "지원동기", LocalDate.now());
         study.addApplicant(applicant);
         MemberPayload memberPayload = new MemberPayload(member.getId(), member.getRole());
 
@@ -267,8 +273,11 @@ class StudyServiceTest {
         // given
         List<Study> studies = 이십개_스터디_만들기();
         Member member = createMember();
-        Applicant applicant = new Applicant(member, "지원동기", LocalDate.now());
-        studies.forEach(study -> study.addApplicant(applicant));
+        studies.forEach(study -> {
+            Applicant applicant = new Applicant(study, member, "지원동기", LocalDate.now());
+            applicantRepository.save(applicant);
+            study.addApplicant(applicant);
+        });
         MemberPayload memberPayload = new MemberPayload(member.getId(), member.getRole());
 
         // when
@@ -284,10 +293,16 @@ class StudyServiceTest {
         // given
         List<Study> studies = 이십개_스터디_만들기();
         Member member = createMember();
-        Applicant applicant = new Applicant(member, "지원 동기", LocalDate.now());
-        studies.forEach(study -> study.addApplicant(applicant));
-        Participant participant = new Participant(member, LocalDate.now());
-        studies.forEach(study -> study.addParticipant(participant));
+        studies.forEach(study -> {
+            Applicant applicant = new Applicant(study, member, "지원동기", LocalDate.now());
+            applicantRepository.save(applicant);
+            study.addApplicant(applicant);
+        });
+        studies.forEach(study -> {
+            Participant participant = new Participant(study, member, LocalDate.now());
+            participantRepository.save(participant);
+            study.addParticipant(participant);
+        });
         MemberPayload memberPayload = new MemberPayload(member.getId(), member.getRole());
 
         // when
@@ -381,9 +396,11 @@ class StudyServiceTest {
                 .maxMemberCount(30)
                 .thumbnail("#00000")
                 .applicants(new HashSet<>())
-                .participants(new HashSet<>(Set.of(new Participant(studyOwner, now), new Participant(member, now))))
+                .participants(new HashSet<>())
                 .tags(List.of(new Tag("태그1"), new Tag("태그2")))
                 .build();
+        study.initParticipants(new Participant(study, studyOwner, now));
+        study.initParticipants(new Participant(study, member, now));
         studyRepository.save(study);
         MemberPayload memberPayload = new MemberPayload(member.getId(), member.getRole());
 
@@ -392,29 +409,32 @@ class StudyServiceTest {
 
         // then
         assertEquals(1, study.getParticipants().size());
-        assertFalse(study.getParticipants().contains(new Participant(member, now)));
-        assertTrue(study.getParticipants().contains(new Participant(studyOwner, now)));
+        assertFalse(study.getParticipants().contains(new Participant(study, member, now)));
+        assertTrue(study.getParticipants().contains(new Participant(study, studyOwner, now)));
     }
 
     private List<Study> 이십개_스터디_만들기() {
         Member studyOwner = createMember();
         List<Study> studies = IntStream.range(0, 20)
-                .mapToObj(i -> Study.builder()
-                        .title("제목입니다. " + i)
-                        .description("설명입니다. " + i)
-                        .studyStatus(StudyStatus.PREPARING)
-                        .studyType(StudyType.STUDY)
-                        .startDate(LocalDate.now().plusDays(1))
-                        .endDate(LocalDate.now().plusDays(2))
-                        .owner(studyOwner)
-                        .currentMemberCount(1)
-                        .maxMemberCount(30)
-                        .thumbnail("#00000")
-                        .applicants(new HashSet<>())
-                        .participants(new HashSet<>())
-                        .tags(List.of(new Tag("태그1"), new Tag("태그2")))
-                        .build()
-                )
+                .mapToObj(i -> {
+                    Study study = Study.builder()
+                                    .title("제목입니다. " + i)
+                                    .description("설명입니다. " + i)
+                                    .studyStatus(StudyStatus.PREPARING)
+                                    .studyType(StudyType.STUDY)
+                                    .startDate(LocalDate.now().plusDays(1))
+                                    .endDate(LocalDate.now().plusDays(2))
+                                    .owner(studyOwner)
+                                    .currentMemberCount(1)
+                                    .maxMemberCount(30)
+                                    .thumbnail("#00000")
+                                    .applicants(new HashSet<>())
+                                    .participants(new HashSet<>())
+                                    .tags(List.of(new Tag("태그1"), new Tag("태그2")))
+                                    .build();
+                    study.initParticipants(new Participant(study, studyOwner, LocalDate.now()));
+                    return study;
+                })
                 .collect(Collectors.toList());
         return studyRepository.saveAll(studies);
     }

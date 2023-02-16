@@ -60,18 +60,20 @@ public class Study {
 
     private int maxMemberCount;
 
-    @ElementCollection
-    @CollectionTable(
-            name = "study_participant",
-            joinColumns = @JoinColumn(name = "study_id")
-    )
+//    @ElementCollection
+//    @CollectionTable(
+//            name = "study_participant",
+//            joinColumns = @JoinColumn(name = "study_id")
+//    )
+    @OneToMany(mappedBy = "study", fetch = LAZY)
     private Set<Participant> participants = new HashSet<>();
 
-    @ElementCollection
-    @CollectionTable(
-            name = "study_applicant",
-            joinColumns = @JoinColumn(name = "study_id")
-    )
+//    @ElementCollection
+//    @CollectionTable(
+//            name = "study_applicant",
+//            joinColumns = @JoinColumn(name = "study_id")
+//    )
+    @OneToMany(mappedBy = "study", fetch = LAZY)
     private Set<Applicant> applicants = new HashSet<>();
 
     @ElementCollection
@@ -105,9 +107,14 @@ public class Study {
         this.owner = owner;
         this.currentMemberCount = currentMemberCount;
         this.maxMemberCount = maxMemberCount;
-        this.participants = participants;
+        this.participants = new HashSet<>();
         this.applicants = applicants;
         this.tags = tags;
+    }
+
+    public void initParticipants(Participant participant) {
+        participants.add(participant);
+        currentMemberCount = participants.size();
     }
 
     public LocalDate getOwnerParticipationDate() {
@@ -130,6 +137,7 @@ public class Study {
                  .orElseThrow(() -> new NotFoundException("member", "신청자에 없습니다."))
          );
         this.participants.add(participant);
+        this.currentMemberCount = participants.size();
     }
 
     public void validateOwner(Member member) {

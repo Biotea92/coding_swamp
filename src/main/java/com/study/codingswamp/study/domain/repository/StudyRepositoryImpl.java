@@ -37,7 +37,8 @@ public class StudyRepositoryImpl implements StudyRepositoryCustom {
     @Override
     public List<Study> findMyApplies(Member member) {
         return jpaQueryFactory.selectFrom(study)
-                .leftJoin(study.applicants, applicant)
+                .leftJoin(applicant)
+                .on(study.id.eq(applicant.study.id))
                 .where(applicant.member.id.eq(member.getId()))
                 .orderBy(applicant.applicantDate.desc())
                 .fetchJoin().fetch();
@@ -46,7 +47,8 @@ public class StudyRepositoryImpl implements StudyRepositoryCustom {
     @Override
     public List<Study> findMyParticipates(Member member) {
         return jpaQueryFactory.selectFrom(study)
-                .leftJoin(study.participants, participant)
+                .leftJoin(participant)
+                .on(study.id.eq(participant.study.id))
                 .where(participant.member.id.eq(member.getId()))
                 .orderBy(participant.participationDate.desc())
                 .fetchJoin().fetch();
