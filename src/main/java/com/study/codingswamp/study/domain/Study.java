@@ -180,4 +180,14 @@ public class Study {
             throw new ConflictException("maxMemberCount", "현재 인원이 정원보다 많습니다.");
         }
     }
+
+    public void updateStudyStatus(LocalDate now) {
+        if (endDate != null && endDate.isBefore(now)) {
+            this.studyStatus = StudyStatus.COMPLETION;
+        } else if (startDate.isAfter(now)) {
+            this.studyStatus = StudyStatus.PREPARING;
+        } else {
+            this.studyStatus = StudyStatus.ONGOING;
+        }
+    }
 }

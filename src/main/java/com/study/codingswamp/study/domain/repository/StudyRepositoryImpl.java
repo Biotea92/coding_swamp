@@ -3,6 +3,7 @@ package com.study.codingswamp.study.domain.repository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.study.codingswamp.member.domain.Member;
 import com.study.codingswamp.study.domain.Study;
+import com.study.codingswamp.study.domain.StudyStatus;
 import com.study.codingswamp.study.service.request.StudiesPageableRequest;
 import lombok.RequiredArgsConstructor;
 
@@ -49,5 +50,12 @@ public class StudyRepositoryImpl implements StudyRepositoryCustom {
                 .where(participant.member.id.eq(member.getId()))
                 .orderBy(participant.participationDate.desc())
                 .fetchJoin().fetch();
+    }
+
+    @Override
+    public List<Study> findStudyStatusIsNotCompleted() {
+        return jpaQueryFactory.selectFrom(study)
+                .where(study.studyStatus.ne(StudyStatus.COMPLETION))
+                .fetch();
     }
 }
