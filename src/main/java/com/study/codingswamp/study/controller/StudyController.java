@@ -85,4 +85,12 @@ public class StudyController {
         Study study = studyService.edit(memberPayload, studyId, request);
         return ResponseEntity.created(URI.create("/api/study/" + study.getId())).build();
     }
+
+    @Login
+    @DeleteMapping("{studyId}")
+    public ResponseEntity<Void> delete(@AuthenticatedMember MemberPayload memberPayload,
+                                       @PathVariable Long studyId) {
+        studyService.delete(memberPayload, studyId);
+        return ResponseEntity.noContent().build();
+    }
 }

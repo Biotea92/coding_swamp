@@ -106,6 +106,14 @@ public class StudyService {
         return findStudy;
     }
 
+    @Transactional
+    public void delete(MemberPayload memberPayload, Long studyId) {
+        Study findStudy = findStudy(studyId);
+        Member owner = findMember(memberPayload.getId());
+        findStudy.validateOwner(owner);
+        studyRepository.delete(findStudy);
+    }
+
     private Study findStudy(Long studyId) {
         return studyRepository.findById(studyId)
                 .orElseThrow(() -> new NotFoundException("studyId", "스터디를 찾을 수 없습니다."));
