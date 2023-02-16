@@ -42,7 +42,6 @@ class StudyServiceTest {
     private MemberRepository memberRepository;
     @Autowired
     private JdbcTemplate jdbcTemplate;
-
     @Autowired
     private StudyRepository studyRepository;
     @Autowired
@@ -411,6 +410,42 @@ class StudyServiceTest {
         assertEquals(1, study.getParticipants().size());
         assertFalse(study.getParticipants().contains(new Participant(study, member, now)));
         assertTrue(study.getParticipants().contains(new Participant(study, studyOwner, now)));
+    }
+
+    @Test
+    @DisplayName("스터디장은 참가자를 kick 할 수 있다.")
+    void kick() {
+        // given
+        Member studyOwner = createMember();
+        Member member = createMember();
+        LocalDate now = LocalDate.now();
+        Study study = Study.builder()
+                .title("제목입니다.")
+                .description("설명입니다.")
+                .studyStatus(StudyStatus.PREPARING)
+                .studyType(StudyType.STUDY)
+                .startDate(LocalDate.now().plusDays(1))
+                .endDate(LocalDate.now().plusDays(2))
+                .owner(studyOwner)
+                .currentMemberCount(1)
+                .maxMemberCount(30)
+                .thumbnail("#00000")
+                .applicants(new HashSet<>())
+                .participants(new HashSet<>())
+                .tags(List.of(new Tag("태그1"), new Tag("태그2")))
+                .build();
+        Participant ownerParticipant = new Participant(study, studyOwner, now);
+        Participant participant = new Participant(study, member, now);
+        study.initParticipants(ownerParticipant);
+        study.initParticipants(participant);
+        studyRepository.save(study);
+        MemberPayload memberPayload = new MemberPayload(studyOwner.getId(), studyOwner.getRole());
+
+        // when
+        studyService.kickParticipant(memberPayload, study.getId(), member.getId());
+
+        // then
+        assertThat(study.getParticipants().size()).isEqualTo(1);
     }
 
     private List<Study> 이십개_스터디_만들기() {

@@ -518,6 +518,36 @@ public class StudyControllerDocTest {
                 ));
     }
 
+    @Test
+    @DisplayName("스터디 강퇴하기")
+    void kick() throws Exception {
+        // given
+        String token = new TestUtil().saveMemberAndGetToken(tokenProvider, memberRepository);
+        MemberPayload payload = tokenProvider.getPayload("Bearer " + token);
+        Member owner = memberRepository.findById(payload.getId()).orElseThrow();
+        Study study = studyRepository.save(getStudy(owner));
+
+        Member member = createMember();
+        Participant participant = new Participant(study, member, LocalDate.now());
+        participantRepository.save(participant);
+        study.initParticipants(participant);
+
+        // expected
+        mockMvc.perform(patch("/api/study/{studyId}/kick/{memberId}", study.getId(), member.getId())
+                        .header(AUTHORIZATION, "Bearer " + token)
+                )
+                .andExpect(status().isCreated())
+                .andDo(document("study-kick",
+                        requestHeaders(
+                                headerWithName(AUTHORIZATION).description("Bearer auth credentials")
+                        ),
+                        pathParameters(
+                                parameterWithName("studyId").description("스터디 아이디 type(Long)"),
+                                parameterWithName("memberId").description("참가자 memberId")
+                        )
+                ));
+    }
+
     Study getStudy(Member owner) {
         StudyRequest request = StudyRequest.builder()
                 .title("제목입니다.")
