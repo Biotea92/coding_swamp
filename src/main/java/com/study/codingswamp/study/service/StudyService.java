@@ -29,6 +29,7 @@ public class StudyService {
     private final StudyRepository studyRepository;
     private final MemberRepository memberRepository;
 
+    @Transactional
     public Study createStudy(MemberPayload memberPayload, StudyRequest request) {
         Member owner = findMember(memberPayload.getId());
         Study study = request.mapToStudy(owner);
@@ -118,7 +119,7 @@ public class StudyService {
     public void withdraw(MemberPayload memberPayload, Long studyId) {
         Study findStudy = findStudy(studyId);
         Member member = findMember(memberPayload.getId());
-        findStudy.withDrawParticipant(member);
+        findStudy.checkWithDrawParticipant(member);
     }
 
     private Study findStudy(Long studyId) {

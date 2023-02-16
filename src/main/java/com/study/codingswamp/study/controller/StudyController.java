@@ -99,6 +99,6 @@ public class StudyController {
     public ResponseEntity<Void> withdraw(@AuthenticatedMember MemberPayload memberPayload,
                                          @PathVariable Long studyId) {
         studyService.withdraw(memberPayload, studyId);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.created(URI.create("/api/study/" + studyId)).build();
     }
 }

@@ -65,7 +65,6 @@ public class Study {
             name = "study_participant",
             joinColumns = @JoinColumn(name = "study_id")
     )
-    @OrderColumn
     private Set<Participant> participants = new HashSet<>();
 
     @ElementCollection
@@ -163,15 +162,16 @@ public class Study {
         }
     }
 
-    public void withDrawParticipant(Member member) {
-        Participant participant = participants.stream()
-                .filter(p -> p.getMember() == member)
-                .findAny()
-                .orElseThrow(() -> new UnauthorizedException("participant", "참가자가 아닙니다."));
-        if (participant.getMember() == owner) {
-            throw new ConflictException("owner", "스터디장은 탈퇴할 수 없습니다.");
+    public void checkWithDrawParticipant(Member member) {
+        if (member == owner) {
+            throw new UnauthorizedException("owner", "스터디장은 탈퇴할 수 없습니다.");
         }
-        participants.remove(participant);
+        participants.remove(
+                participants.stream()
+                        .filter(participant -> participant.getMember() == member)
+                        .findAny()
+                        .orElseThrow(() -> new NotFoundException("participant", "참가자가 아닙니다."))
+        );
     }
 
     public void update(StudyRequest request) {
