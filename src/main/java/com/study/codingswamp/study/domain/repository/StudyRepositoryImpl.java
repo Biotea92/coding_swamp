@@ -39,7 +39,7 @@ public class StudyRepositoryImpl implements StudyRepositoryCustom {
                 .leftJoin(study.applicants, applicant)
                 .where(applicant.member.id.eq(member.getId()))
                 .orderBy(applicant.applicantDate.desc())
-                .fetch();
+                .fetchJoin().fetch();
     }
 
     @Override
@@ -48,6 +48,6 @@ public class StudyRepositoryImpl implements StudyRepositoryCustom {
                 .leftJoin(study.participants, participant)
                 .where(participant.member.id.eq(member.getId()))
                 .orderBy(participant.participationDate.desc())
-                .fetch();
+                .fetchJoin().fetch();
     }
 }
