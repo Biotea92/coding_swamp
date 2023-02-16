@@ -490,6 +490,34 @@ public class StudyControllerDocTest {
                 ));
     }
 
+    @Test
+    @DisplayName("스터디 탈퇴하기")
+    void withdraw() throws Exception {
+        // given
+        Member owner = createMember();
+        Study study = studyRepository.save(getStudy(owner));
+        String token = new TestUtil().saveMemberAndGetToken(tokenProvider, memberRepository);
+        MemberPayload payload = tokenProvider.getPayload("Bearer " + token);
+
+        Participant participant = new Participant(study, memberRepository.findById(payload.getId()).orElseThrow(), LocalDate.now());
+        participantRepository.save(participant);
+        study.initParticipants(participant);
+
+        // expected
+        mockMvc.perform(patch("/api/study/{studyId}/withdraw", study.getId())
+                        .header(AUTHORIZATION, "Bearer " + token)
+                )
+                .andExpect(status().isCreated())
+                .andDo(document("study-withdraw",
+                        requestHeaders(
+                                headerWithName(AUTHORIZATION).description("Bearer auth credentials")
+                        ),
+                        pathParameters(
+                                parameterWithName("studyId").description("스터디 아이디 type(Long)")
+                        )
+                ));
+    }
+
     Study getStudy(Member owner) {
         StudyRequest request = StudyRequest.builder()
                 .title("제목입니다.")

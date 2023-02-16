@@ -150,6 +150,16 @@ include::{snippets}/study-apply/http-response.adoc[]
 
 '''
 
+=== 스터디 탈퇴
+- 요청
+include::{snippets}/study-withdraw/http-request.adoc[]
+include::{snippets}/study-withdraw/request-headers.adoc[]
+include::{snippets}/study-withdraw/path-parameters.adoc[]
+- 응답
+include::{snippets}/study-withdraw/http-response.adoc[]
+
+'''
+
 === 스터디 신청 승인
 - 요청
 include::{snippets}/study-approve/http-request.adoc[]
