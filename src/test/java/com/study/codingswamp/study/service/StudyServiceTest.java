@@ -328,6 +328,39 @@ class StudyServiceTest {
         assertThat(editStudy.getTags().get(0).getTagText()).isEqualTo("태그1 수정");
     }
 
+    @Test
+    @DisplayName("스터디 장은 스터디를 삭제할 수 있다.")
+    void delete() {
+        // when
+        Member studyOwner = createMember();
+        MemberPayload memberPayload = new MemberPayload(studyOwner.getId(), studyOwner.getRole());
+        Study study = Study.builder()
+                .title("제목입니다.")
+                .description("설명입니다.")
+                .studyStatus(StudyStatus.PREPARING)
+                .studyType(StudyType.STUDY)
+                .startDate(LocalDate.now().plusDays(1))
+                .endDate(LocalDate.now().plusDays(2))
+                .owner(studyOwner)
+                .currentMemberCount(1)
+                .maxMemberCount(30)
+                .thumbnail("#00000")
+                .applicants(new HashSet<>())
+                .participants(new HashSet<>())
+                .tags(List.of(new Tag("태그1"), new Tag("태그2")))
+                .build();
+        studyRepository.save(study);
+
+        // when
+        studyService.delete(memberPayload, study.getId());
+
+        // then
+        assertThrows(
+            RuntimeException.class,
+            () -> studyRepository.findById(study.getId()).orElseThrow(RuntimeException::new)
+        );
+    }
+
     private List<Study> 이십개_스터디_만들기() {
         Member studyOwner = createMember();
         List<Study> studies = IntStream.range(0, 20)

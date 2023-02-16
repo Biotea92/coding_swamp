@@ -119,6 +119,16 @@ include::{snippets}/study-edit/http-response.adoc[]
 
 '''
 
+=== 스터디 삭제
+- 요청
+include::{snippets}/study-delete/http-request.adoc[]
+include::{snippets}/study-delete/request-headers.adoc[]
+include::{snippets}/study-delete/path-parameters.adoc[]
+- 응답
+include::{snippets}/study-delete/http-response.adoc[]
+
+'''
+
 === 스터디 상세 단건 조회
 - 요청
 include::{snippets}/study-get-detail/http-request.adoc[]

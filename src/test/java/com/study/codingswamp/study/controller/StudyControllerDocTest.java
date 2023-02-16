@@ -20,6 +20,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
+import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
@@ -441,6 +442,30 @@ public class StudyControllerDocTest {
                                 fieldWithPath("endDate").description("스터디 종료일 포멧 (yy-MM-dd)"),
                                 fieldWithPath("maxMemberCount").description("스터디 최대인원"),
                                 fieldWithPath("tags").description("태그 type(List)")
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("스터디 삭제하기")
+    void delete() throws Exception {
+        // given
+        String token = new TestUtil().saveMemberAndGetToken(tokenProvider, memberRepository);
+        MemberPayload payload = tokenProvider.getPayload("Bearer " + token);
+        Member owner = memberRepository.findById(payload.getId()).orElseThrow(RuntimeException::new);
+        Study study = studyRepository.save(getStudy(owner));
+
+        // expected
+        mockMvc.perform(RestDocumentationRequestBuilders.delete("/api/study/{studyId}", study.getId())
+                        .header(AUTHORIZATION, "Bearer " + token)
+                )
+                .andExpect(status().isNoContent())
+                .andDo(document("study-delete",
+                        requestHeaders(
+                                headerWithName(AUTHORIZATION).description("Bearer auth credentials")
+                        ),
+                        pathParameters(
+                                parameterWithName("studyId").description("스터디 아이디 type(Long)")
                         )
                 ));
     }
