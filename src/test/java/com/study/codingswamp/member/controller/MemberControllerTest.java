@@ -1,7 +1,5 @@
 package com.study.codingswamp.member.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.study.codingswamp.member.domain.repository.MemberRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,12 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class MemberControllerTest {
 
     @Autowired
-    private ObjectMapper objectMapper;
-    @Autowired
     private MockMvc mockMvc;
-
-    @Autowired
-    private MemberRepository memberRepository;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;

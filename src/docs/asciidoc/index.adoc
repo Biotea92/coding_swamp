@@ -119,13 +119,13 @@ include::{snippets}/study-edit/http-response.adoc[]
 
 '''
 
-=== 스터디 상세 단건 조회
+=== 스터디 삭제
 - 요청
-include::{snippets}/study-get-detail/http-request.adoc[]
-include::{snippets}/study-get-detail/path-parameters.adoc[]
+include::{snippets}/study-delete/http-request.adoc[]
+include::{snippets}/study-delete/request-headers.adoc[]
+include::{snippets}/study-delete/path-parameters.adoc[]
 - 응답
-include::{snippets}/study-get-detail/http-response.adoc[]
-include::{snippets}/study-get-detail/response-fields.adoc[]
+include::{snippets}/study-delete/http-response.adoc[]
 
 '''
 
@@ -140,6 +140,26 @@ include::{snippets}/study-apply/http-response.adoc[]
 
 '''
 
+=== 스터디 탈퇴
+- 요청
+include::{snippets}/study-withdraw/http-request.adoc[]
+include::{snippets}/study-withdraw/request-headers.adoc[]
+include::{snippets}/study-withdraw/path-parameters.adoc[]
+- 응답
+include::{snippets}/study-withdraw/http-response.adoc[]
+
+'''
+
+=== 스터디 강퇴
+- 요청
+include::{snippets}/study-kick/http-request.adoc[]
+include::{snippets}/study-kick/request-headers.adoc[]
+include::{snippets}/study-kick/path-parameters.adoc[]
+- 응답
+include::{snippets}/study-kick/http-response.adoc[]
+
+'''
+
 === 스터디 신청 승인
 - 요청
 include::{snippets}/study-approve/http-request.adoc[]
@@ -147,6 +167,16 @@ include::{snippets}/study-approve/request-headers.adoc[]
 include::{snippets}/study-approve/path-parameters.adoc[]
 - 응답
 include::{snippets}/study-approve/http-response.adoc[]
+
+'''
+
+=== 스터디 상세 단건 조회
+- 요청
+include::{snippets}/study-get-detail/http-request.adoc[]
+include::{snippets}/study-get-detail/path-parameters.adoc[]
+- 응답
+include::{snippets}/study-get-detail/http-response.adoc[]
+include::{snippets}/study-get-detail/response-fields.adoc[]
 
 '''
 

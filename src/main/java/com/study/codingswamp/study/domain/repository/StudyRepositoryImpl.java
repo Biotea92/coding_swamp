@@ -3,6 +3,7 @@ package com.study.codingswamp.study.domain.repository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.study.codingswamp.member.domain.Member;
 import com.study.codingswamp.study.domain.Study;
+import com.study.codingswamp.study.domain.StudyStatus;
 import com.study.codingswamp.study.service.request.StudiesPageableRequest;
 import lombok.RequiredArgsConstructor;
 
@@ -36,18 +37,27 @@ public class StudyRepositoryImpl implements StudyRepositoryCustom {
     @Override
     public List<Study> findMyApplies(Member member) {
         return jpaQueryFactory.selectFrom(study)
-                .leftJoin(study.applicants, applicant)
+                .leftJoin(applicant)
+                .on(study.id.eq(applicant.study.id))
                 .where(applicant.member.id.eq(member.getId()))
                 .orderBy(applicant.applicantDate.desc())
-                .fetch();
+                .fetchJoin().fetch();
     }
 
     @Override
     public List<Study> findMyParticipates(Member member) {
         return jpaQueryFactory.selectFrom(study)
-                .leftJoin(study.participants, participant)
+                .leftJoin(participant)
+                .on(study.id.eq(participant.study.id))
                 .where(participant.member.id.eq(member.getId()))
                 .orderBy(participant.participationDate.desc())
+                .fetchJoin().fetch();
+    }
+
+    @Override
+    public List<Study> findStudyStatusIsNotCompleted() {
+        return jpaQueryFactory.selectFrom(study)
+                .where(study.studyStatus.ne(StudyStatus.COMPLETION))
                 .fetch();
     }
 }

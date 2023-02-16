@@ -15,4 +15,6 @@ public interface StudyRepositoryCustom {
     List<Study> findMyApplies(Member member);
 
     List<Study> findMyParticipates(Member member);
+
+    List<Study> findStudyStatusIsNotCompleted();
 }

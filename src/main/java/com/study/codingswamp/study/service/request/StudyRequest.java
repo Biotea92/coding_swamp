@@ -2,7 +2,10 @@ package com.study.codingswamp.study.service.request;
 
 import com.study.codingswamp.common.exception.InvalidRequestException;
 import com.study.codingswamp.member.domain.Member;
-import com.study.codingswamp.study.domain.*;
+import com.study.codingswamp.study.domain.Study;
+import com.study.codingswamp.study.domain.StudyStatus;
+import com.study.codingswamp.study.domain.StudyType;
+import com.study.codingswamp.study.domain.Tag;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,7 +18,6 @@ import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Getter
@@ -62,7 +64,6 @@ public class StudyRequest {
     }
 
     public Study mapToStudy(Member owner) {
-        Set<Participant> participants = initParticipants(owner);
         return Study.builder()
                 .title(this.title)
                 .description(this.description)
@@ -72,19 +73,10 @@ public class StudyRequest {
                 .startDate(this.startDate)
                 .endDate(this.endDate)
                 .owner(owner)
-                .currentMemberCount(participants.size())
                 .maxMemberCount(this.maxMemberCount)
-                .participants(participants)
                 .applicants(new HashSet<>())
                 .tags(mapToTag())
                 .build();
-    }
-
-    private Set<Participant> initParticipants(Member owner) {
-        Set<Participant> participants = new HashSet<>();
-        Participant participant = new Participant(owner, LocalDate.now());
-        participants.add(participant);
-        return participants;
     }
 
     public StudyType mapToStudyType() {

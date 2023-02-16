@@ -44,7 +44,6 @@ class StudyRequestTest {
         assertThat(study.getStartDate()).isEqualTo(LocalDate.now().plusDays(1));
         assertThat(study.getEndDate()).isEqualTo(LocalDate.now().plusDays(2));
         assertThat(study.getOwner()).isEqualTo(owner);
-        assertThat(study.getCurrentMemberCount()).isEqualTo(1);
         assertThat(study.getApplicants().size()).isEqualTo(0);
         assertThat(study.getTags()).isEqualTo(List.of(new Tag("태그1"), new Tag("태그2")));
     }

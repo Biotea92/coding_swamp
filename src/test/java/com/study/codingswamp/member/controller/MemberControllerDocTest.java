@@ -1,6 +1,5 @@
 package com.study.codingswamp.member.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.study.codingswamp.auth.token.TokenProvider;
 import com.study.codingswamp.member.domain.Member;
 import com.study.codingswamp.member.domain.repository.MemberRepository;
@@ -29,7 +28,8 @@ import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.docu
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.multipart;
-import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.removeHeaders;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
@@ -40,9 +40,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(RestDocumentationExtension.class)
 @Transactional
 public class MemberControllerDocTest {
-
-    @Autowired
-    private ObjectMapper objectMapper;
     private MockMvc mockMvc;
     @Autowired
     JdbcTemplate jdbcTemplate;

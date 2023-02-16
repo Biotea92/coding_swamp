@@ -3,6 +3,7 @@ package com.study.codingswamp.study.domain;
 import com.study.codingswamp.common.exception.ConflictException;
 import com.study.codingswamp.common.exception.ForbiddenException;
 import com.study.codingswamp.common.exception.NotFoundException;
+import com.study.codingswamp.common.exception.UnauthorizedException;
 import com.study.codingswamp.member.domain.Member;
 import com.study.codingswamp.study.service.request.StudyRequest;
 import lombok.Builder;
@@ -59,19 +60,20 @@ public class Study {
 
     private int maxMemberCount;
 
-    @ElementCollection
-    @CollectionTable(
-            name = "study_participant",
-            joinColumns = @JoinColumn(name = "study_id")
-    )
-    @OrderColumn
+    //    @ElementCollection
+//    @CollectionTable(
+//            name = "study_participant",
+//            joinColumns = @JoinColumn(name = "study_id")
+//    )
+    @OneToMany(mappedBy = "study", fetch = LAZY)
     private Set<Participant> participants = new HashSet<>();
 
-    @ElementCollection
-    @CollectionTable(
-            name = "study_applicant",
-            joinColumns = @JoinColumn(name = "study_id")
-    )
+    //    @ElementCollection
+//    @CollectionTable(
+//            name = "study_applicant",
+//            joinColumns = @JoinColumn(name = "study_id")
+//    )
+    @OneToMany(mappedBy = "study", fetch = LAZY)
     private Set<Applicant> applicants = new HashSet<>();
 
     @ElementCollection
@@ -105,9 +107,14 @@ public class Study {
         this.owner = owner;
         this.currentMemberCount = currentMemberCount;
         this.maxMemberCount = maxMemberCount;
-        this.participants = participants;
+        this.participants = new HashSet<>();
         this.applicants = applicants;
         this.tags = tags;
+    }
+
+    public void initParticipants(Participant participant) {
+        participants.add(participant);
+        currentMemberCount = participants.size();
     }
 
     public LocalDate getOwnerParticipationDate() {
@@ -122,14 +129,15 @@ public class Study {
         this.applicants.add(applicant);
     }
 
-    public void addParticipant(Participant participant) {
-         this.applicants.remove(
-                 applicants.stream()
-                 .filter(applicant -> participant.getMember() == applicant.getMember())
-                 .findAny()
-                 .orElseThrow(() -> new NotFoundException("member", "신청자에 없습니다."))
-         );
+    public Applicant addParticipant(Participant participant) {
         this.participants.add(participant);
+        this.currentMemberCount = participants.size();
+        Applicant removeApplicant = applicants.stream()
+                .filter(applicant -> participant.getMember() == applicant.getMember())
+                .findAny()
+                .orElseThrow(() -> new NotFoundException("member", "신청자에 없습니다."));
+        this.applicants.remove(removeApplicant);
+        return removeApplicant;
     }
 
     public void validateOwner(Member member) {
@@ -162,6 +170,15 @@ public class Study {
         }
     }
 
+    public Participant checkWithDrawParticipant(Member member) {
+        if (member == owner) {
+            throw new UnauthorizedException("owner", "스터디장은 탈퇴할 수 없습니다.");
+        }
+        Participant removeParticipant = findParticipant(member);
+        this.participants.remove(removeParticipant);
+        return removeParticipant;
+    }
+
     public void update(StudyRequest request) {
         this.title = request.getTitle();
         this.description = request.getDescription();
@@ -179,5 +196,28 @@ public class Study {
         if (currentMemberCount > request.getMaxMemberCount()) {
             throw new ConflictException("maxMemberCount", "현재 인원이 정원보다 많습니다.");
         }
+    }
+
+    public void updateStudyStatus(LocalDate now) {
+        if (endDate != null && endDate.isBefore(now)) {
+            this.studyStatus = StudyStatus.COMPLETION;
+        } else if (startDate.isAfter(now)) {
+            this.studyStatus = StudyStatus.PREPARING;
+        } else {
+            this.studyStatus = StudyStatus.ONGOING;
+        }
+    }
+
+    private Participant findParticipant(Member member) {
+        return participants.stream()
+                .filter(participant -> participant.getMember() == member)
+                .findAny()
+                .orElseThrow(() -> new NotFoundException("participant", "참가자가 아닙니다."));
+    }
+
+    public Participant kickParticipant(Member participantMember) {
+        Participant removeParticipant = findParticipant(participantMember);
+        this.participants.remove(removeParticipant);
+        return removeParticipant;
     }
 }

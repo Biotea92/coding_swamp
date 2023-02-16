@@ -7,6 +7,8 @@ import com.study.codingswamp.common.exception.NotFoundException;
 import com.study.codingswamp.member.domain.Member;
 import com.study.codingswamp.member.domain.repository.MemberRepository;
 import com.study.codingswamp.study.domain.*;
+import com.study.codingswamp.study.domain.repository.ApplicantRepository;
+import com.study.codingswamp.study.domain.repository.ParticipantRepository;
 import com.study.codingswamp.study.domain.repository.StudyRepository;
 import com.study.codingswamp.study.service.request.ApplyRequest;
 import com.study.codingswamp.study.service.request.StudiesPageableRequest;
@@ -28,7 +30,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
@@ -40,9 +42,12 @@ class StudyServiceTest {
     private MemberRepository memberRepository;
     @Autowired
     private JdbcTemplate jdbcTemplate;
-
     @Autowired
     private StudyRepository studyRepository;
+    @Autowired
+    private ApplicantRepository applicantRepository;
+    @Autowired
+    private ParticipantRepository participantRepository;
 
     @BeforeEach
     void clear() {
@@ -211,15 +216,16 @@ class StudyServiceTest {
         StudyRequest studyRequest = getStudyCreateRequest(30);
         Study study = studyService.createStudy(ownerPayload, studyRequest);
         Member member = memberRepository.save(new Member("applicant@gmail.com", "testpassword", "kim", null));
-        Applicant applicant = new Applicant(member, "지원동기", LocalDate.now());
+        Applicant applicant = new Applicant(study, member, "지원동기", LocalDate.now());
         study.addApplicant(applicant);
 
         // when
         studyService.approve(ownerPayload, study.getId(), applicant.getMember().getId());
 
+
         // then
         assertThat(study.getApplicants()).isEmpty();
-        assertThat(study.getParticipants()).contains(new Participant(member, LocalDate.now()));
+        assertThat(study.getParticipants().size()).isEqualTo(2);
     }
 
     @Test
@@ -231,7 +237,7 @@ class StudyServiceTest {
         StudyRequest studyRequest = getStudyCreateRequest(30);
         Study study = studyService.createStudy(ownerPayload, studyRequest);
         Member member = memberRepository.save(new Member("applicant@gmail.com", "testpassword", "kim", null));
-        Applicant applicant = new Applicant(member, "지원동기", LocalDate.now());
+        Applicant applicant = new Applicant(study, member, "지원동기", LocalDate.now());
         study.addApplicant(applicant);
         MemberPayload memberPayload = new MemberPayload(member.getId(), member.getRole());
 
@@ -266,8 +272,11 @@ class StudyServiceTest {
         // given
         List<Study> studies = 이십개_스터디_만들기();
         Member member = createMember();
-        Applicant applicant = new Applicant(member, "지원동기", LocalDate.now());
-        studies.forEach(study -> study.addApplicant(applicant));
+        studies.forEach(study -> {
+            Applicant applicant = new Applicant(study, member, "지원동기", LocalDate.now());
+            applicantRepository.save(applicant);
+            study.addApplicant(applicant);
+        });
         MemberPayload memberPayload = new MemberPayload(member.getId(), member.getRole());
 
         // when
@@ -283,10 +292,16 @@ class StudyServiceTest {
         // given
         List<Study> studies = 이십개_스터디_만들기();
         Member member = createMember();
-        Applicant applicant = new Applicant(member, "지원 동기", LocalDate.now());
-        studies.forEach(study -> study.addApplicant(applicant));
-        Participant participant = new Participant(member, LocalDate.now());
-        studies.forEach(study -> study.addParticipant(participant));
+        studies.forEach(study -> {
+            Applicant applicant = new Applicant(study, member, "지원동기", LocalDate.now());
+            applicantRepository.save(applicant);
+            study.addApplicant(applicant);
+        });
+        studies.forEach(study -> {
+            Participant participant = new Participant(study, member, LocalDate.now());
+            participantRepository.save(participant);
+            study.addParticipant(participant);
+        });
         MemberPayload memberPayload = new MemberPayload(member.getId(), member.getRole());
 
         // when
@@ -316,37 +331,145 @@ class StudyServiceTest {
                 .build();
 
         // when
-        Study editStudy = studyService.edit(memberPayload, study.getId(), request);
+        studyService.edit(memberPayload, study.getId(), request);
 
-        assertThat(editStudy.getTitle()).isEqualTo("제목입니다. 수정");
-        assertThat(editStudy.getDescription()).isEqualTo("설명입니다. 수정");
-        assertThat(editStudy.getStudyType()).isEqualTo(StudyType.MOGAKKO);
-        assertThat(editStudy.getThumbnail()).isEqualTo("#000001");
-        assertThat(editStudy.getStartDate()).isEqualTo(LocalDate.now().plusDays(2));
-        assertThat(editStudy.getEndDate()).isEqualTo(LocalDate.now().plusDays(3));
-        assertThat(editStudy.getMaxMemberCount()).isEqualTo(2);
-        assertThat(editStudy.getTags().get(0).getTagText()).isEqualTo("태그1 수정");
+        assertThat(study.getTitle()).isEqualTo("제목입니다. 수정");
+        assertThat(study.getDescription()).isEqualTo("설명입니다. 수정");
+        assertThat(study.getStudyType()).isEqualTo(StudyType.MOGAKKO);
+        assertThat(study.getThumbnail()).isEqualTo("#000001");
+        assertThat(study.getStartDate()).isEqualTo(LocalDate.now().plusDays(2));
+        assertThat(study.getEndDate()).isEqualTo(LocalDate.now().plusDays(3));
+        assertThat(study.getMaxMemberCount()).isEqualTo(2);
+        assertThat(study.getTags().get(0).getTagText()).isEqualTo("태그1 수정");
+    }
+
+    @Test
+    @DisplayName("스터디 장은 스터디를 삭제할 수 있다.")
+    void delete() {
+        // when
+        Member studyOwner = createMember();
+        MemberPayload memberPayload = new MemberPayload(studyOwner.getId(), studyOwner.getRole());
+        Study study = Study.builder()
+                .title("제목입니다.")
+                .description("설명입니다.")
+                .studyStatus(StudyStatus.PREPARING)
+                .studyType(StudyType.STUDY)
+                .startDate(LocalDate.now().plusDays(1))
+                .endDate(LocalDate.now().plusDays(2))
+                .owner(studyOwner)
+                .currentMemberCount(1)
+                .maxMemberCount(30)
+                .thumbnail("#00000")
+                .applicants(new HashSet<>())
+                .participants(new HashSet<>())
+                .tags(List.of(new Tag("태그1"), new Tag("태그2")))
+                .build();
+        studyRepository.save(study);
+
+        // when
+        studyService.delete(memberPayload, study.getId());
+
+        // then
+        assertThrows(
+            RuntimeException.class,
+            () -> studyRepository.findById(study.getId()).orElseThrow(RuntimeException::new)
+        );
+    }
+
+    @Test
+    @DisplayName("참가자는 스터디를 탈퇴할 수 있다.")
+    void withdraw() {
+        // given
+        Member studyOwner = createMember();
+        Member member = createMember();
+        LocalDate now = LocalDate.now();
+        Study study = Study.builder()
+                .title("제목입니다.")
+                .description("설명입니다.")
+                .studyStatus(StudyStatus.PREPARING)
+                .studyType(StudyType.STUDY)
+                .startDate(LocalDate.now().plusDays(1))
+                .endDate(LocalDate.now().plusDays(2))
+                .owner(studyOwner)
+                .currentMemberCount(1)
+                .maxMemberCount(30)
+                .thumbnail("#00000")
+                .applicants(new HashSet<>())
+                .participants(new HashSet<>())
+                .tags(List.of(new Tag("태그1"), new Tag("태그2")))
+                .build();
+        study.initParticipants(new Participant(study, studyOwner, now));
+        study.initParticipants(new Participant(study, member, now));
+        studyRepository.save(study);
+        MemberPayload memberPayload = new MemberPayload(member.getId(), member.getRole());
+
+        // when
+        studyService.withdraw(memberPayload, study.getId());
+
+        // then
+        assertEquals(1, study.getParticipants().size());
+        assertFalse(study.getParticipants().contains(new Participant(study, member, now)));
+        assertTrue(study.getParticipants().contains(new Participant(study, studyOwner, now)));
+    }
+
+    @Test
+    @DisplayName("스터디장은 참가자를 kick 할 수 있다.")
+    void kick() {
+        // given
+        Member studyOwner = createMember();
+        Member member = createMember();
+        LocalDate now = LocalDate.now();
+        Study study = Study.builder()
+                .title("제목입니다.")
+                .description("설명입니다.")
+                .studyStatus(StudyStatus.PREPARING)
+                .studyType(StudyType.STUDY)
+                .startDate(LocalDate.now().plusDays(1))
+                .endDate(LocalDate.now().plusDays(2))
+                .owner(studyOwner)
+                .currentMemberCount(1)
+                .maxMemberCount(30)
+                .thumbnail("#00000")
+                .applicants(new HashSet<>())
+                .participants(new HashSet<>())
+                .tags(List.of(new Tag("태그1"), new Tag("태그2")))
+                .build();
+        Participant ownerParticipant = new Participant(study, studyOwner, now);
+        Participant participant = new Participant(study, member, now);
+        study.initParticipants(ownerParticipant);
+        study.initParticipants(participant);
+        studyRepository.save(study);
+        MemberPayload memberPayload = new MemberPayload(studyOwner.getId(), studyOwner.getRole());
+
+        // when
+        studyService.kickParticipant(memberPayload, study.getId(), member.getId());
+
+        // then
+        assertThat(study.getParticipants().size()).isEqualTo(1);
     }
 
     private List<Study> 이십개_스터디_만들기() {
         Member studyOwner = createMember();
         List<Study> studies = IntStream.range(0, 20)
-                .mapToObj(i -> Study.builder()
-                        .title("제목입니다. " + i)
-                        .description("설명입니다. " + i)
-                        .studyStatus(StudyStatus.PREPARING)
-                        .studyType(StudyType.STUDY)
-                        .startDate(LocalDate.now().plusDays(1))
-                        .endDate(LocalDate.now().plusDays(2))
-                        .owner(studyOwner)
-                        .currentMemberCount(1)
-                        .maxMemberCount(30)
-                        .thumbnail("#00000")
-                        .applicants(new HashSet<>())
-                        .participants(new HashSet<>())
-                        .tags(List.of(new Tag("태그1"), new Tag("태그2")))
-                        .build()
-                )
+                .mapToObj(i -> {
+                    Study study = Study.builder()
+                                    .title("제목입니다. " + i)
+                                    .description("설명입니다. " + i)
+                                    .studyStatus(StudyStatus.PREPARING)
+                                    .studyType(StudyType.STUDY)
+                                    .startDate(LocalDate.now().plusDays(1))
+                                    .endDate(LocalDate.now().plusDays(2))
+                                    .owner(studyOwner)
+                                    .currentMemberCount(1)
+                                    .maxMemberCount(30)
+                                    .thumbnail("#00000")
+                                    .applicants(new HashSet<>())
+                                    .participants(new HashSet<>())
+                                    .tags(List.of(new Tag("태그1"), new Tag("태그2")))
+                                    .build();
+                    study.initParticipants(new Participant(study, studyOwner, LocalDate.now()));
+                    return study;
+                })
                 .collect(Collectors.toList());
         return studyRepository.saveAll(studies);
     }
