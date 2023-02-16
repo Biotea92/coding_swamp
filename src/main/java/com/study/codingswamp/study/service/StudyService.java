@@ -80,7 +80,8 @@ public class StudyService {
 
         Participant participant = new Participant(findStudy, applicantMember, LocalDate.now());
         participantRepository.save(participant);
-        findStudy.addParticipant(participant);
+        Applicant applicant = findStudy.addParticipant(participant);
+        applicantRepository.delete(applicant);
     }
 
     public StudiesResponse getStudies(StudiesPageableRequest request) {
@@ -131,7 +132,8 @@ public class StudyService {
     public void withdraw(MemberPayload memberPayload, Long studyId) {
         Study findStudy = findStudy(studyId);
         Member member = findMember(memberPayload.getId());
-        findStudy.checkWithDrawParticipant(member);
+        Participant participant = findStudy.checkWithDrawParticipant(member);
+        participantRepository.delete(participant);
     }
 
     private Study findStudy(Long studyId) {

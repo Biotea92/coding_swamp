@@ -60,7 +60,7 @@ public class Study {
 
     private int maxMemberCount;
 
-//    @ElementCollection
+    //    @ElementCollection
 //    @CollectionTable(
 //            name = "study_participant",
 //            joinColumns = @JoinColumn(name = "study_id")
@@ -68,7 +68,7 @@ public class Study {
     @OneToMany(mappedBy = "study", fetch = LAZY)
     private Set<Participant> participants = new HashSet<>();
 
-//    @ElementCollection
+    //    @ElementCollection
 //    @CollectionTable(
 //            name = "study_applicant",
 //            joinColumns = @JoinColumn(name = "study_id")
@@ -129,15 +129,13 @@ public class Study {
         this.applicants.add(applicant);
     }
 
-    public void addParticipant(Participant participant) {
-         this.applicants.remove(
-                 applicants.stream()
-                 .filter(applicant -> participant.getMember() == applicant.getMember())
-                 .findAny()
-                 .orElseThrow(() -> new NotFoundException("member", "신청자에 없습니다."))
-         );
+    public Applicant addParticipant(Participant participant) {
         this.participants.add(participant);
         this.currentMemberCount = participants.size();
+        return applicants.stream()
+                .filter(applicant -> participant.getMember() == applicant.getMember())
+                .findAny()
+                .orElseThrow(() -> new NotFoundException("member", "신청자에 없습니다."));
     }
 
     public void validateOwner(Member member) {
@@ -170,16 +168,14 @@ public class Study {
         }
     }
 
-    public void checkWithDrawParticipant(Member member) {
+    public Participant checkWithDrawParticipant(Member member) {
         if (member == owner) {
             throw new UnauthorizedException("owner", "스터디장은 탈퇴할 수 없습니다.");
         }
-        participants.remove(
-                participants.stream()
-                        .filter(participant -> participant.getMember() == member)
-                        .findAny()
-                        .orElseThrow(() -> new NotFoundException("participant", "참가자가 아닙니다."))
-        );
+        return participants.stream()
+                .filter(participant -> participant.getMember() == member)
+                .findAny()
+                .orElseThrow(() -> new NotFoundException("participant", "참가자가 아닙니다."));
     }
 
     public void update(StudyRequest request) {
