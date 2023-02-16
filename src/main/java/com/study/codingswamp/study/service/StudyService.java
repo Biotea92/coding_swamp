@@ -143,7 +143,7 @@ public class StudyService {
         findStudy.validateOwner(owner);
 
         Member participantMember = findMember(memberId);
-        Participant participant = findStudy.findParticipant(participantMember);
+        Participant participant = findStudy.kickParticipant(participantMember);
         participantRepository.delete(participant);
     }
 
