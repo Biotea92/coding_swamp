@@ -172,10 +172,7 @@ public class Study {
         if (member == owner) {
             throw new UnauthorizedException("owner", "스터디장은 탈퇴할 수 없습니다.");
         }
-        return participants.stream()
-                .filter(participant -> participant.getMember() == member)
-                .findAny()
-                .orElseThrow(() -> new NotFoundException("participant", "참가자가 아닙니다."));
+        return findParticipant(member);
     }
 
     public void update(StudyRequest request) {
@@ -205,5 +202,12 @@ public class Study {
         } else {
             this.studyStatus = StudyStatus.ONGOING;
         }
+    }
+
+    public Participant findParticipant(Member member) {
+        return participants.stream()
+                .filter(participant -> participant.getMember() == member)
+                .findAny()
+                .orElseThrow(() -> new NotFoundException("participant", "참가자가 아닙니다."));
     }
 }

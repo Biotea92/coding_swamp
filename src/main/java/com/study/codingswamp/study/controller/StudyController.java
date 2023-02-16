@@ -101,4 +101,13 @@ public class StudyController {
         studyService.withdraw(memberPayload, studyId);
         return ResponseEntity.created(URI.create("/api/study/" + studyId)).build();
     }
+
+    @Login
+    @PatchMapping("/{studyId}/kick/{memberId}")
+    public ResponseEntity<Void> kick(@AuthenticatedMember MemberPayload memberPayload,
+                                     @PathVariable Long studyId,
+                                     @PathVariable Long memberId) {
+        studyService.kickParticipant(memberPayload, studyId, memberId);
+        return ResponseEntity.created(URI.create("/api/study/" + studyId)).build();
+    }
 }
