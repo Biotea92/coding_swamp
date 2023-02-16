@@ -21,8 +21,9 @@ public class AutoSetStudyStatus {
     public void scheduleTaskUsingCron() {
         LocalDate now = LocalDate.now();
         log.info("Time to Start scheduled cron={}", now);
-        List<Study> studyList = studyRepository.findStudyStatusIsNotCompleted();
-        log.info("Checking StudyList Size={}", studyList.size());
-        studyList.forEach(study -> study.updateStudyStatus(now));
+        List<Study> studies = studyRepository.findStudyStatusIsNotCompleted();
+        log.info("Checking StudyList Size={}", studies.size());
+        studies.forEach(study -> study.updateStudyStatus(now));
+        studyRepository.saveAll(studies);
     }
 }
