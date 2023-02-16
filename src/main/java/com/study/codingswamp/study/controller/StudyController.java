@@ -82,15 +82,23 @@ public class StudyController {
     public ResponseEntity<Void> edit(@AuthenticatedMember MemberPayload memberPayload,
                                      @PathVariable Long studyId,
                                      @Validated @RequestBody StudyRequest request) {
-        Study study = studyService.edit(memberPayload, studyId, request);
-        return ResponseEntity.created(URI.create("/api/study/" + study.getId())).build();
+        studyService.edit(memberPayload, studyId, request);
+        return ResponseEntity.created(URI.create("/api/study/" + studyId)).build();
     }
 
     @Login
-    @DeleteMapping("{studyId}")
+    @DeleteMapping("/{studyId}")
     public ResponseEntity<Void> delete(@AuthenticatedMember MemberPayload memberPayload,
                                        @PathVariable Long studyId) {
         studyService.delete(memberPayload, studyId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Login
+    @PatchMapping("/{studyId}/withdraw")
+    public ResponseEntity<Void> withdraw(@AuthenticatedMember MemberPayload memberPayload,
+                                         @PathVariable Long studyId) {
+        studyService.withdraw(memberPayload, studyId);
         return ResponseEntity.noContent().build();
     }
 }

@@ -3,6 +3,7 @@ package com.study.codingswamp.study.domain;
 import com.study.codingswamp.common.exception.ConflictException;
 import com.study.codingswamp.common.exception.ForbiddenException;
 import com.study.codingswamp.common.exception.NotFoundException;
+import com.study.codingswamp.common.exception.UnauthorizedException;
 import com.study.codingswamp.member.domain.Member;
 import com.study.codingswamp.study.service.request.StudyRequest;
 import lombok.Builder;
@@ -160,6 +161,17 @@ public class Study {
         if (findParticipant.isPresent()) {
             throw new ConflictException("participant", "이미 참가한 인원입니다.");
         }
+    }
+
+    public void withDrawParticipant(Member member) {
+        Participant participant = participants.stream()
+                .filter(p -> p.getMember() == member)
+                .findAny()
+                .orElseThrow(() -> new UnauthorizedException("participant", "참가자가 아닙니다."));
+        if (participant.getMember() == owner) {
+            throw new ConflictException("owner", "스터디장은 탈퇴할 수 없습니다.");
+        }
+        participants.remove(participant);
     }
 
     public void update(StudyRequest request) {

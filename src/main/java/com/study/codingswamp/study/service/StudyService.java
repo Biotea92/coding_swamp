@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class StudyService {
 
     private final StudyRepository studyRepository;
@@ -98,12 +99,11 @@ public class StudyService {
     }
 
     @Transactional
-    public Study edit(MemberPayload memberPayload, Long studyId, StudyRequest request) {
+    public void edit(MemberPayload memberPayload, Long studyId, StudyRequest request) {
         Study findStudy = findStudy(studyId);
         Member owner = findMember(memberPayload.getId());
         findStudy.validateOwner(owner);
         findStudy.update(request);
-        return findStudy;
     }
 
     @Transactional
@@ -112,6 +112,13 @@ public class StudyService {
         Member owner = findMember(memberPayload.getId());
         findStudy.validateOwner(owner);
         studyRepository.delete(findStudy);
+    }
+
+    @Transactional
+    public void withdraw(MemberPayload memberPayload, Long studyId) {
+        Study findStudy = findStudy(studyId);
+        Member member = findMember(memberPayload.getId());
+        findStudy.withDrawParticipant(member);
     }
 
     private Study findStudy(Long studyId) {
