@@ -548,6 +548,36 @@ public class StudyControllerDocTest {
                 ));
     }
 
+    @Test
+    @DisplayName("스터디 신청 취소하기")
+    void cancelApply() throws Exception {
+        // given
+        String token = new TestUtil().saveMemberAndGetToken(tokenProvider, memberRepository);
+        MemberPayload payload = tokenProvider.getPayload("Bearer " + token);
+        Member applicantMember = memberRepository.findById(payload.getId()).orElseThrow();
+
+        Member owner = createMember();
+        Study study = studyRepository.save(getStudy(owner));
+        Applicant applicant = new Applicant(study, applicantMember, "지원동기", LocalDate.now());
+        study.addApplicant(applicant);
+        applicantRepository.save(applicant);
+
+        // expected
+        mockMvc.perform(patch("/api/study/{studyId}/apply-cancel", study.getId())
+                        .header(AUTHORIZATION, "Bearer " + token)
+                )
+                .andExpect(status().isCreated())
+                .andDo(document("study-apply-cancel",
+                        requestHeaders(
+                                headerWithName(AUTHORIZATION).description("Bearer auth credentials")
+                        ),
+                        pathParameters(
+                                parameterWithName("studyId").description("스터디 아이디 type(Long)")
+                        )
+                ));
+
+    }
+
     Study getStudy(Member owner) {
         StudyRequest request = StudyRequest.builder()
                 .title("제목입니다.")

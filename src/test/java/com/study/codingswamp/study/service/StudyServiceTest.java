@@ -474,6 +474,40 @@ class StudyServiceTest {
         return studyRepository.saveAll(studies);
     }
 
+    @Test
+    @DisplayName("스터디 신청을 취소할 수 있다.")
+    void cancelApply() {
+        // given
+        Member studyOwner = createMember();
+        Study study = Study.builder()
+                .title("제목입니다.")
+                .description("설명입니다.")
+                .studyStatus(StudyStatus.PREPARING)
+                .studyType(StudyType.STUDY)
+                .startDate(LocalDate.now().plusDays(1))
+                .endDate(LocalDate.now().plusDays(2))
+                .owner(studyOwner)
+                .currentMemberCount(1)
+                .maxMemberCount(30)
+                .thumbnail("#00000")
+                .applicants(new HashSet<>())
+                .participants(new HashSet<>())
+                .tags(List.of(new Tag("태그1"), new Tag("태그2")))
+                .build();
+        studyRepository.save(study);
+        Member applicantMember = createMember();
+        Applicant applicant = new Applicant(study, applicantMember, "지원동기", LocalDate.now());
+        study.addApplicant(applicant);
+        applicantRepository.save(applicant);
+        MemberPayload memberPayload = new MemberPayload(applicantMember.getId(), applicantMember.getRole());
+
+        // when
+        studyService.cancelApply(memberPayload, study.getId());
+
+        // then
+        assertThat(study.getApplicants().size()).isEqualTo(0);
+    }
+
     private Member createMember() {
         Member member = new Member("abc@gmail.com", "1q2w3e4r!", "hong", null);
         memberRepository.save(member);

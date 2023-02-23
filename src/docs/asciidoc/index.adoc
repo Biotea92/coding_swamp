@@ -140,6 +140,16 @@ include::{snippets}/study-apply/http-response.adoc[]
 
 '''
 
+=== 스터디 신청 취소
+- 요청
+include::{snippets}/study-apply-cancel/http-request.adoc[]
+include::{snippets}/study-apply-cancel/request-headers.adoc[]
+include::{snippets}/study-apply-cancel/path-parameters.adoc[]
+- 응답
+include::{snippets}/study-apply-cancel/http-response.adoc[]
+
+'''
+
 === 스터디 탈퇴
 - 요청
 include::{snippets}/study-withdraw/http-request.adoc[]
