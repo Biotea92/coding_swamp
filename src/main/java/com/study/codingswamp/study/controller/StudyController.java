@@ -6,6 +6,7 @@ import com.study.codingswamp.auth.service.MemberPayload;
 import com.study.codingswamp.study.domain.Study;
 import com.study.codingswamp.study.service.StudyService;
 import com.study.codingswamp.study.service.request.ApplyRequest;
+import com.study.codingswamp.study.service.request.SearchCondition;
 import com.study.codingswamp.study.service.request.StudiesPageableRequest;
 import com.study.codingswamp.study.service.request.StudyRequest;
 import com.study.codingswamp.study.service.response.StudiesResponse;
@@ -109,5 +110,23 @@ public class StudyController {
                                      @PathVariable Long memberId) {
         studyService.kickParticipant(memberPayload, studyId, memberId);
         return ResponseEntity.created(URI.create("/api/study/" + studyId)).build();
+    }
+
+    @Login
+    @PatchMapping("/{studyId}/apply-cancel")
+    public ResponseEntity<Void> cancelApply(
+            @AuthenticatedMember MemberPayload memberPayload,
+            @PathVariable Long studyId) {
+        studyService.cancelApply(memberPayload, studyId);
+        return ResponseEntity.created(URI.create("/api/study/" + studyId)).build();
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<StudiesResponse> getSearchStudies(
+            @ModelAttribute SearchCondition condition
+    ) {
+        System.out.println("condition = " + condition);
+        StudiesResponse response = studyService.getSearchStudies(condition);
+        return ResponseEntity.ok(response);
     }
 }

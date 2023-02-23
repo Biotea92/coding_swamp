@@ -140,6 +140,16 @@ include::{snippets}/study-apply/http-response.adoc[]
 
 '''
 
+=== 스터디 신청 취소
+- 요청
+include::{snippets}/study-apply-cancel/http-request.adoc[]
+include::{snippets}/study-apply-cancel/request-headers.adoc[]
+include::{snippets}/study-apply-cancel/path-parameters.adoc[]
+- 응답
+include::{snippets}/study-apply-cancel/http-response.adoc[]
+
+'''
+
 === 스터디 탈퇴
 - 요청
 include::{snippets}/study-withdraw/http-request.adoc[]
@@ -187,6 +197,16 @@ include::{snippets}/study-get-studies/request-parameters.adoc[]
 - 응답
 include::{snippets}/study-get-studies/http-response.adoc[]
 include::{snippets}/study-get-studies/response-fields.adoc[]
+
+'''
+
+=== 스터디 검색 여러건 조회 ex) 1 page
+- 요청
+include::{snippets}/study-get-search-studies/http-request.adoc[]
+include::{snippets}/study-get-search-studies/request-parameters.adoc[]
+- 응답
+include::{snippets}/study-get-search-studies/http-response.adoc[]
+include::{snippets}/study-get-search-studies/response-fields.adoc[]
 
 '''
 

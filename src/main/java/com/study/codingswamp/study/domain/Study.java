@@ -60,19 +60,9 @@ public class Study {
 
     private int maxMemberCount;
 
-    //    @ElementCollection
-//    @CollectionTable(
-//            name = "study_participant",
-//            joinColumns = @JoinColumn(name = "study_id")
-//    )
     @OneToMany(mappedBy = "study", fetch = LAZY)
     private Set<Participant> participants = new HashSet<>();
 
-    //    @ElementCollection
-//    @CollectionTable(
-//            name = "study_applicant",
-//            joinColumns = @JoinColumn(name = "study_id")
-//    )
     @OneToMany(mappedBy = "study", fetch = LAZY)
     private Set<Applicant> applicants = new HashSet<>();
 
@@ -208,16 +198,25 @@ public class Study {
         }
     }
 
+    public Participant kickParticipant(Member participantMember) {
+        Participant removeParticipant = findParticipant(participantMember);
+        this.participants.remove(removeParticipant);
+        return removeParticipant;
+    }
+
+    public Applicant removeApplicant(Member member) {
+        Applicant removeApplicant = applicants.stream()
+                .filter(applicant -> member == applicant.getMember())
+                .findAny()
+                .orElseThrow(() -> new NotFoundException("member", "신청자에 없습니다."));
+        this.applicants.remove(removeApplicant);
+        return removeApplicant;
+    }
+
     private Participant findParticipant(Member member) {
         return participants.stream()
                 .filter(participant -> participant.getMember() == member)
                 .findAny()
                 .orElseThrow(() -> new NotFoundException("participant", "참가자가 아닙니다."));
-    }
-
-    public Participant kickParticipant(Member participantMember) {
-        Participant removeParticipant = findParticipant(participantMember);
-        this.participants.remove(removeParticipant);
-        return removeParticipant;
     }
 }

@@ -12,6 +12,7 @@ import com.study.codingswamp.study.domain.repository.ApplicantRepository;
 import com.study.codingswamp.study.domain.repository.ParticipantRepository;
 import com.study.codingswamp.study.domain.repository.StudyRepository;
 import com.study.codingswamp.study.service.request.ApplyRequest;
+import com.study.codingswamp.study.service.request.SearchCondition;
 import com.study.codingswamp.study.service.request.StudiesPageableRequest;
 import com.study.codingswamp.study.service.request.StudyRequest;
 import com.study.codingswamp.study.service.response.*;
@@ -38,8 +39,8 @@ public class StudyService {
         Member owner = findMember(memberPayload.getId());
         Study study = request.mapToStudy(owner);
         Participant participant = new Participant(study, owner, LocalDate.now());
-        participantRepository.save(participant);
         study.initParticipants(participant);
+        participantRepository.save(participant);
         return studyRepository.save(study);
     }
 
@@ -79,8 +80,8 @@ public class StudyService {
         findStudy.checkParticipant(applicantMember);
 
         Participant participant = new Participant(findStudy, applicantMember, LocalDate.now());
-        participantRepository.save(participant);
         Applicant applicant = findStudy.addParticipant(participant);
+        participantRepository.save(participant);
         applicantRepository.delete(applicant);
     }
 
@@ -92,6 +93,15 @@ public class StudyService {
         Long totalCount = studyRepository.getCount();
 
         return new StudiesResponse(studyResponses, request.getTotalPage(totalCount));
+    }
+
+    public StudiesResponse getSearchStudies(SearchCondition condition) {
+        List<StudyResponse> studyResponses = studyRepository.getSearchStudies(condition)
+                .stream()
+                .map(study -> new StudyResponse(study, getTags(study.getTags())))
+                .collect(Collectors.toList());
+        Long totalCount = studyRepository.getCount(condition);
+        return new StudiesResponse(studyResponses, condition.getTotalPage(totalCount));
     }
 
     public StudiesResponse getMyApplies(MemberPayload memberPayload) {
@@ -145,6 +155,15 @@ public class StudyService {
         Member participantMember = findMember(memberId);
         Participant participant = findStudy.kickParticipant(participantMember);
         participantRepository.delete(participant);
+    }
+
+    @Transactional
+    public void cancelApply(MemberPayload memberPayload, Long studyId) {
+        Study findStudy = findStudy(studyId);
+        Member applicantMember = findMember(memberPayload.getId());
+
+        Applicant applicant = findStudy.removeApplicant(applicantMember);
+        applicantRepository.delete(applicant);
     }
 
     private Study findStudy(Long studyId) {

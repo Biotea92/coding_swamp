@@ -11,6 +11,7 @@ import com.study.codingswamp.study.domain.repository.ApplicantRepository;
 import com.study.codingswamp.study.domain.repository.ParticipantRepository;
 import com.study.codingswamp.study.domain.repository.StudyRepository;
 import com.study.codingswamp.study.service.request.ApplyRequest;
+import com.study.codingswamp.study.service.request.SearchCondition;
 import com.study.codingswamp.study.service.request.StudiesPageableRequest;
 import com.study.codingswamp.study.service.request.StudyRequest;
 import com.study.codingswamp.study.service.response.StudiesResponse;
@@ -448,6 +449,24 @@ class StudyServiceTest {
         assertThat(study.getParticipants().size()).isEqualTo(1);
     }
 
+    @Test
+    @DisplayName("스터디 Search 여러건 조회 1페이지")
+    void getSearchStudies() {
+        // given
+        이십개_스터디_만들기();
+
+        SearchCondition searchCondition = new SearchCondition(1, 8, "제목", "STUDY", "태그");
+
+        // when
+        StudiesResponse response = studyService.getSearchStudies(searchCondition);
+
+        // then
+        assertThat(3).isEqualTo(response.getTotalPage());
+        assertThat(response.getStudyResponses().get(0).getTitle()).isEqualTo("제목입니다. 19");
+        assertThat(response.getStudyResponses().get(7).getTitle()).isEqualTo("제목입니다. 12");
+        assertThat(response.getStudyResponses().size()).isEqualTo(8);
+    }
+
     private List<Study> 이십개_스터디_만들기() {
         Member studyOwner = createMember();
         List<Study> studies = IntStream.range(0, 20)
@@ -472,6 +491,40 @@ class StudyServiceTest {
                 })
                 .collect(Collectors.toList());
         return studyRepository.saveAll(studies);
+    }
+
+    @Test
+    @DisplayName("스터디 신청을 취소할 수 있다.")
+    void cancelApply() {
+        // given
+        Member studyOwner = createMember();
+        Study study = Study.builder()
+                .title("제목입니다.")
+                .description("설명입니다.")
+                .studyStatus(StudyStatus.PREPARING)
+                .studyType(StudyType.STUDY)
+                .startDate(LocalDate.now().plusDays(1))
+                .endDate(LocalDate.now().plusDays(2))
+                .owner(studyOwner)
+                .currentMemberCount(1)
+                .maxMemberCount(30)
+                .thumbnail("#00000")
+                .applicants(new HashSet<>())
+                .participants(new HashSet<>())
+                .tags(List.of(new Tag("태그1"), new Tag("태그2")))
+                .build();
+        studyRepository.save(study);
+        Member applicantMember = createMember();
+        Applicant applicant = new Applicant(study, applicantMember, "지원동기", LocalDate.now());
+        study.addApplicant(applicant);
+        applicantRepository.save(applicant);
+        MemberPayload memberPayload = new MemberPayload(applicantMember.getId(), applicantMember.getRole());
+
+        // when
+        studyService.cancelApply(memberPayload, study.getId());
+
+        // then
+        assertThat(study.getApplicants().size()).isEqualTo(0);
     }
 
     private Member createMember() {
