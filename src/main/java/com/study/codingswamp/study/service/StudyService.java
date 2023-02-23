@@ -79,8 +79,8 @@ public class StudyService {
         findStudy.checkParticipant(applicantMember);
 
         Participant participant = new Participant(findStudy, applicantMember, LocalDate.now());
-        participantRepository.save(participant);
         Applicant applicant = findStudy.addParticipant(participant);
+        participantRepository.save(participant);
         applicantRepository.delete(applicant);
     }
 
@@ -145,6 +145,15 @@ public class StudyService {
         Member participantMember = findMember(memberId);
         Participant participant = findStudy.kickParticipant(participantMember);
         participantRepository.delete(participant);
+    }
+
+    @Transactional
+    public void cancelApply(MemberPayload memberPayload, Long studyId) {
+        Study findStudy = findStudy(studyId);
+        Member applicantMember = findMember(memberPayload.getId());
+
+        Applicant applicant = findStudy.removeApplicant(applicantMember);
+        applicantRepository.delete(applicant);
     }
 
     private Study findStudy(Long studyId) {

@@ -110,4 +110,13 @@ public class StudyController {
         studyService.kickParticipant(memberPayload, studyId, memberId);
         return ResponseEntity.created(URI.create("/api/study/" + studyId)).build();
     }
+
+    @Login
+    @PatchMapping("/{studyId}/apply-cancel")
+    public ResponseEntity<Void> cancelApply(
+            @AuthenticatedMember MemberPayload memberPayload,
+            @PathVariable Long studyId) {
+        studyService.cancelApply(memberPayload, studyId);
+        return ResponseEntity.created(URI.create("/api/study/" + studyId)).build();
+    }
 }
