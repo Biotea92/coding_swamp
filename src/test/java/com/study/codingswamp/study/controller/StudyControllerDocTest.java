@@ -578,6 +578,65 @@ public class StudyControllerDocTest {
 
     }
 
+    @Test
+    @DisplayName("스터디 Search 여러건 조회 1페이지")
+    void getSearchStudies() throws Exception {
+        // given
+        Member studyOwner = createMember();
+        List<Study> studies = IntStream.range(0, 20)
+                .mapToObj(i -> Study.builder()
+                        .title("제목입니다. " + i)
+                        .description("설명입니다. " + i)
+                        .studyStatus(StudyStatus.PREPARING)
+                        .studyType(StudyType.STUDY)
+                        .startDate(LocalDate.now().plusDays(1))
+                        .endDate(LocalDate.now().plusDays(2))
+                        .owner(studyOwner)
+                        .currentMemberCount(1)
+                        .maxMemberCount(30)
+                        .thumbnail("#00000")
+                        .tags(List.of(new Tag("태그1"), new Tag("태그2")))
+                        .build()
+                )
+                .collect(Collectors.toList());
+        studyRepository.saveAll(studies);
+
+        // expected
+        mockMvc.perform(get("/api/study")
+                        .param("page", "1")
+                        .param("size", "8")
+                        .param("title", "입니")
+                        .param("studyType", "STUDY")
+                        .param("tag", "태그1")
+                )
+                .andExpect(status().isOk())
+                .andDo(document("study-get-search-studies",
+                        requestParameters(
+                                parameterWithName("page").description("페이지"),
+                                parameterWithName("size").description("페이지 내 게시물 수"),
+                                parameterWithName("title").description("제목"),
+                                parameterWithName("studyType").description("STUDY or MOGAKKO"),
+                                parameterWithName("tag").description("태그")
+                        ),
+                        responseFields(
+                                fieldWithPath("totalPage").description("총 페이지 수"),
+                                fieldWithPath("studyResponses").description("스터디 게시물들"),
+                                fieldWithPath("studyResponses[].studyId").description("스터디 아이디"),
+                                fieldWithPath("studyResponses[].title").description("스터디 제목"),
+                                fieldWithPath("studyResponses[].studyType").description("스터디 타입"),
+                                fieldWithPath("studyResponses[].thumbnail").description("스터디 썸네일"),
+                                fieldWithPath("studyResponses[].studyStatus").description("스터디 상태"),
+                                fieldWithPath("studyResponses[].currentMemberCount").description("현재인원"),
+                                fieldWithPath("studyResponses[].maxMemberCount").description("정원"),
+                                fieldWithPath("studyResponses[].startDate").description("스터디 시작일"),
+                                fieldWithPath("studyResponses[].endDate").description("스터디 종료일"),
+                                fieldWithPath("studyResponses[].tags").description("스터디 태그들"),
+                                fieldWithPath("studyResponses[].tags[]").description("스터디 태그 정보"),
+                                fieldWithPath("studyResponses[].createdAt").description("스터디 등록일")
+                        )
+                ));
+    }
+
     Study getStudy(Member owner) {
         StudyRequest request = StudyRequest.builder()
                 .title("제목입니다.")

@@ -11,6 +11,7 @@ import com.study.codingswamp.study.domain.repository.ApplicantRepository;
 import com.study.codingswamp.study.domain.repository.ParticipantRepository;
 import com.study.codingswamp.study.domain.repository.StudyRepository;
 import com.study.codingswamp.study.service.request.ApplyRequest;
+import com.study.codingswamp.study.service.request.SearchCondition;
 import com.study.codingswamp.study.service.request.StudiesPageableRequest;
 import com.study.codingswamp.study.service.request.StudyRequest;
 import com.study.codingswamp.study.service.response.StudiesResponse;
@@ -446,6 +447,24 @@ class StudyServiceTest {
 
         // then
         assertThat(study.getParticipants().size()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("스터디 Search 여러건 조회 1페이지")
+    void getSearchStudies() {
+        // given
+        이십개_스터디_만들기();
+
+        SearchCondition searchCondition = new SearchCondition(1, 8, "제목", "STUDY", "태그");
+
+        // when
+        StudiesResponse response = studyService.getSearchStudies(searchCondition);
+
+        // then
+        assertThat(3).isEqualTo(response.getTotalPage());
+        assertThat(response.getStudyResponses().get(0).getTitle()).isEqualTo("제목입니다. 19");
+        assertThat(response.getStudyResponses().get(7).getTitle()).isEqualTo("제목입니다. 12");
+        assertThat(response.getStudyResponses().size()).isEqualTo(8);
     }
 
     private List<Study> 이십개_스터디_만들기() {
