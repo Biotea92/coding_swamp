@@ -122,10 +122,7 @@ public class StudyController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<StudiesResponse> getSearchStudies(
-            @ModelAttribute SearchCondition condition
-    ) {
-        System.out.println("condition = " + condition);
+    public ResponseEntity<StudiesResponse> getSearchStudies(@ModelAttribute SearchCondition condition) {
         StudiesResponse response = studyService.getSearchStudies(condition);
         return ResponseEntity.ok(response);
     }

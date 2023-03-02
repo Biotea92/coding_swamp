@@ -135,6 +135,8 @@ public class StudyService {
         Study findStudy = findStudy(studyId);
         Member owner = findMember(memberPayload.getId());
         findStudy.validateOwner(owner);
+        participantRepository.deleteAll(findStudy.getParticipants());
+        applicantRepository.deleteAll(findStudy.getApplicants());
         studyRepository.delete(findStudy);
     }
 
@@ -142,7 +144,7 @@ public class StudyService {
     public void withdraw(MemberPayload memberPayload, Long studyId) {
         Study findStudy = findStudy(studyId);
         Member member = findMember(memberPayload.getId());
-        Participant participant = findStudy.checkWithDrawParticipant(member);
+        Participant participant = findStudy.withDrawParticipant(member);
         participantRepository.delete(participant);
     }
 
