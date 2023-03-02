@@ -371,6 +371,7 @@ class StudyServiceTest {
         studyService.delete(memberPayload, study.getId());
 
         // then
+        assertThat(studyRepository.findById(study.getId())).isEmpty();
         assertThrows(
             RuntimeException.class,
             () -> studyRepository.findById(study.getId()).orElseThrow(RuntimeException::new)

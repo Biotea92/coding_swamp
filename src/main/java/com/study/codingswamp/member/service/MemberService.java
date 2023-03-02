@@ -97,6 +97,7 @@ public class MemberService {
         }
 
         deleteFileIfExists(member);
+        // TODO applicant, participant, study 외래키 제약조건 다 지워줄 수 있게 하기
         memberRepository.delete(member);
     }
 

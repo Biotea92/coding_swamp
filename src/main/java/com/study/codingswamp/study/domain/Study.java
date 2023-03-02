@@ -122,12 +122,7 @@ public class Study {
     public Applicant addParticipant(Participant participant) {
         this.participants.add(participant);
         this.currentMemberCount = participants.size();
-        Applicant removeApplicant = applicants.stream()
-                .filter(applicant -> participant.getMember() == applicant.getMember())
-                .findAny()
-                .orElseThrow(() -> new NotFoundException("member", "신청자에 없습니다."));
-        this.applicants.remove(removeApplicant);
-        return removeApplicant;
+        return removeApplicant(participant.getMember());
     }
 
     public void validateOwner(Member member) {
@@ -160,7 +155,7 @@ public class Study {
         }
     }
 
-    public Participant checkWithDrawParticipant(Member member) {
+    public Participant withDrawParticipant(Member member) {
         if (member == owner) {
             throw new UnauthorizedException("owner", "스터디장은 탈퇴할 수 없습니다.");
         }
@@ -205,12 +200,16 @@ public class Study {
     }
 
     public Applicant removeApplicant(Member member) {
-        Applicant removeApplicant = applicants.stream()
+        Applicant removeApplicant = findApplicant(member);
+        this.applicants.remove(removeApplicant);
+        return removeApplicant;
+    }
+
+    private Applicant findApplicant(Member member) {
+        return applicants.stream()
                 .filter(applicant -> member == applicant.getMember())
                 .findAny()
                 .orElseThrow(() -> new NotFoundException("member", "신청자에 없습니다."));
-        this.applicants.remove(removeApplicant);
-        return removeApplicant;
     }
 
     private Participant findParticipant(Member member) {
