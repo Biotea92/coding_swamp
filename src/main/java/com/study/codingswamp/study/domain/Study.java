@@ -218,4 +218,11 @@ public class Study {
                 .findAny()
                 .orElseThrow(() -> new NotFoundException("participant", "참가자가 아닙니다."));
     }
+
+    public void isParticipant(Member member) {
+        participants.stream()
+                .filter(participant -> participant.getMember() == member)
+                .findAny()
+                .orElseThrow(() -> new NotFoundException("participant", "참가자가 아닙니다."));
+    }
 }

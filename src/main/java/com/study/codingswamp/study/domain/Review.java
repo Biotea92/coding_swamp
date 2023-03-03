@@ -28,6 +28,10 @@ public class Review {
     @JoinColumn(name = "member_id")
     private Member member;
 
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "study_id")
+    private Study study;
+
     @CreatedDate
     @Column(updatable = false)
     private LocalDateTime createdAt;
@@ -37,8 +41,9 @@ public class Review {
         this.createdAt = LocalDateTime.now();
     }
 
-    public Review(String content, Member member) {
+    public Review(String content, Member member, Study study) {
         this.content = content;
         this.member = member;
+        this.study = study;
     }
 }
