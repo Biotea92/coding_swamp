@@ -1,7 +1,7 @@
 package com.study.codingswamp.utils.fixture.domain;
 
-import com.study.codingswamp.member.domain.Member;
-import com.study.codingswamp.member.domain.Role;
+import com.study.codingswamp.domain.member.entity.Member;
+import com.study.codingswamp.domain.member.entity.Role;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 

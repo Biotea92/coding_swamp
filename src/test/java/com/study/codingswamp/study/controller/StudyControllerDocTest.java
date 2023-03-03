@@ -1,16 +1,16 @@
 package com.study.codingswamp.study.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.study.codingswamp.auth.service.MemberPayload;
-import com.study.codingswamp.auth.token.TokenProvider;
-import com.study.codingswamp.member.domain.Member;
-import com.study.codingswamp.member.domain.repository.MemberRepository;
-import com.study.codingswamp.study.domain.*;
-import com.study.codingswamp.study.domain.repository.ApplicantRepository;
-import com.study.codingswamp.study.domain.repository.ParticipantRepository;
-import com.study.codingswamp.study.domain.repository.StudyRepository;
-import com.study.codingswamp.study.service.request.ApplyRequest;
-import com.study.codingswamp.study.service.request.StudyRequest;
+import com.study.codingswamp.application.auth.service.MemberPayload;
+import com.study.codingswamp.application.auth.token.TokenProvider;
+import com.study.codingswamp.domain.member.entity.Member;
+import com.study.codingswamp.domain.member.repository.MemberRepository;
+import com.study.codingswamp.domain.study.entity.*;
+import com.study.codingswamp.domain.study.repository.ApplicantRepository;
+import com.study.codingswamp.domain.study.repository.ParticipantRepository;
+import com.study.codingswamp.domain.study.repository.StudyRepository;
+import com.study.codingswamp.domain.study.dto.request.ApplyRequest;
+import com.study.codingswamp.domain.study.dto.request.StudyRequest;
 import com.study.codingswamp.utils.TestUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

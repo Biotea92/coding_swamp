@@ -1,13 +1,13 @@
 package com.study.codingswamp.auth.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.study.codingswamp.auth.oauth.GithubOauthClient;
-import com.study.codingswamp.auth.oauth.response.GithubProfileResponse;
-import com.study.codingswamp.auth.service.request.CommonLoginRequest;
-import com.study.codingswamp.auth.service.request.MailAuthenticationRequest;
-import com.study.codingswamp.auth.token.TokenProvider;
-import com.study.codingswamp.member.domain.Member;
-import com.study.codingswamp.member.domain.repository.MemberRepository;
+import com.study.codingswamp.application.auth.oauth.GithubOauthClient;
+import com.study.codingswamp.application.auth.oauth.response.GithubProfileResponse;
+import com.study.codingswamp.application.auth.service.request.CommonLoginRequest;
+import com.study.codingswamp.application.auth.service.request.MailAuthenticationRequest;
+import com.study.codingswamp.application.auth.token.TokenProvider;
+import com.study.codingswamp.domain.member.entity.Member;
+import com.study.codingswamp.domain.member.repository.MemberRepository;
 import com.study.codingswamp.utils.TestUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

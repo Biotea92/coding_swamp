@@ -1,8 +1,9 @@
 package com.study.codingswamp.auth.token;
 
-import com.study.codingswamp.auth.service.MemberPayload;
-import com.study.codingswamp.auth.utils.AuthTokenExtractor;
-import com.study.codingswamp.member.domain.Role;
+import com.study.codingswamp.application.auth.service.MemberPayload;
+import com.study.codingswamp.application.auth.token.TokenProvider;
+import com.study.codingswamp.application.auth.utils.AuthTokenExtractor;
+import com.study.codingswamp.domain.member.entity.Role;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

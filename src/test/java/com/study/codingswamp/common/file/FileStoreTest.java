@@ -1,5 +1,6 @@
 package com.study.codingswamp.common.file;
 
+import com.study.codingswamp.application.file.FileStore;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

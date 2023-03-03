@@ -1,11 +1,13 @@
 package com.study.codingswamp.auth.service;
 
-import com.study.codingswamp.auth.service.request.CommonLoginRequest;
-import com.study.codingswamp.auth.service.response.AccessTokenResponse;
-import com.study.codingswamp.auth.token.TokenProvider;
-import com.study.codingswamp.member.domain.Member;
-import com.study.codingswamp.member.domain.Role;
-import com.study.codingswamp.member.domain.repository.MemberRepository;
+import com.study.codingswamp.application.auth.service.AuthService;
+import com.study.codingswamp.application.auth.service.MemberPayload;
+import com.study.codingswamp.application.auth.service.request.CommonLoginRequest;
+import com.study.codingswamp.application.auth.service.response.AccessTokenResponse;
+import com.study.codingswamp.application.auth.token.TokenProvider;
+import com.study.codingswamp.domain.member.entity.Member;
+import com.study.codingswamp.domain.member.entity.Role;
+import com.study.codingswamp.domain.member.repository.MemberRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

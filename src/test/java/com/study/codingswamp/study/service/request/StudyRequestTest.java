@@ -1,11 +1,12 @@
 package com.study.codingswamp.study.service.request;
 
-import com.study.codingswamp.common.exception.InvalidRequestException;
-import com.study.codingswamp.member.domain.Member;
-import com.study.codingswamp.study.domain.Study;
-import com.study.codingswamp.study.domain.StudyStatus;
-import com.study.codingswamp.study.domain.StudyType;
-import com.study.codingswamp.study.domain.Tag;
+import com.study.codingswamp.exception.InvalidRequestException;
+import com.study.codingswamp.domain.member.entity.Member;
+import com.study.codingswamp.domain.study.entity.Study;
+import com.study.codingswamp.domain.study.entity.StudyStatus;
+import com.study.codingswamp.domain.study.entity.StudyType;
+import com.study.codingswamp.domain.study.entity.Tag;
+import com.study.codingswamp.domain.study.dto.request.StudyRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

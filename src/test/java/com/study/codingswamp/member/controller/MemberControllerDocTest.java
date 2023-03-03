@@ -1,8 +1,8 @@
 package com.study.codingswamp.member.controller;
 
-import com.study.codingswamp.auth.token.TokenProvider;
-import com.study.codingswamp.member.domain.Member;
-import com.study.codingswamp.member.domain.repository.MemberRepository;
+import com.study.codingswamp.application.auth.token.TokenProvider;
+import com.study.codingswamp.domain.member.entity.Member;
+import com.study.codingswamp.domain.member.repository.MemberRepository;
 import com.study.codingswamp.utils.TestUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

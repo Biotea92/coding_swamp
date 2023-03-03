@@ -1,6 +1,6 @@
 package com.study.codingswamp.utils.fixture.dto;
 
-import com.study.codingswamp.study.service.request.ReviewRequest;
+import com.study.codingswamp.domain.study.dto.request.ReviewRequest;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 

@@ -1,14 +1,15 @@
 package com.study.codingswamp.study.service;
 
-import com.study.codingswamp.member.domain.Member;
-import com.study.codingswamp.member.domain.repository.MemberRepository;
-import com.study.codingswamp.study.domain.Participant;
-import com.study.codingswamp.study.domain.Review;
-import com.study.codingswamp.study.domain.Study;
-import com.study.codingswamp.study.domain.repository.ParticipantRepository;
-import com.study.codingswamp.study.domain.repository.ReviewRepository;
-import com.study.codingswamp.study.domain.repository.StudyRepository;
-import com.study.codingswamp.study.service.request.ReviewRequest;
+import com.study.codingswamp.domain.member.entity.Member;
+import com.study.codingswamp.domain.member.repository.MemberRepository;
+import com.study.codingswamp.domain.study.entity.Participant;
+import com.study.codingswamp.domain.study.entity.Review;
+import com.study.codingswamp.domain.study.entity.Study;
+import com.study.codingswamp.domain.study.repository.ParticipantRepository;
+import com.study.codingswamp.domain.study.repository.ReviewRepository;
+import com.study.codingswamp.domain.study.repository.StudyRepository;
+import com.study.codingswamp.domain.study.service.ReviewService;
+import com.study.codingswamp.domain.study.dto.request.ReviewRequest;
 import com.study.codingswamp.utils.fixture.domain.MemberFixture;
 import com.study.codingswamp.utils.fixture.domain.ParticipantFixture;
 import com.study.codingswamp.utils.fixture.dto.ReviewRequestFixture;

@@ -1,7 +1,8 @@
 package com.study.codingswamp.auth.service;
 
-import com.study.codingswamp.auth.service.request.MailAuthenticationRequest;
-import com.study.codingswamp.auth.service.response.MailAuthenticationResponse;
+import com.study.codingswamp.application.auth.service.MailService;
+import com.study.codingswamp.application.auth.service.request.MailAuthenticationRequest;
+import com.study.codingswamp.application.auth.service.response.MailAuthenticationResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

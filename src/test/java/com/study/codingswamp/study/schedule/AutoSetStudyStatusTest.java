@@ -1,10 +1,11 @@
 package com.study.codingswamp.study.schedule;
 
-import com.study.codingswamp.study.domain.Study;
-import com.study.codingswamp.study.domain.StudyStatus;
-import com.study.codingswamp.study.domain.StudyType;
-import com.study.codingswamp.study.domain.Tag;
-import com.study.codingswamp.study.domain.repository.StudyRepository;
+import com.study.codingswamp.domain.study.entity.Study;
+import com.study.codingswamp.domain.study.entity.StudyStatus;
+import com.study.codingswamp.domain.study.entity.StudyType;
+import com.study.codingswamp.domain.study.entity.Tag;
+import com.study.codingswamp.domain.study.repository.StudyRepository;
+import com.study.codingswamp.domain.study.schedule.AutoSetStudyStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
