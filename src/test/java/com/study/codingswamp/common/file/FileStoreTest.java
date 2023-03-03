@@ -16,9 +16,11 @@ class FileStoreTest {
     @Autowired
     FileStore fileStore;
 
-    @Value ("${app.firebase-image-url}")
+    @Value ("${app.firebase-image-url-prefix}")
     private String imageUrlPrefix;
-    private static final String imageUrlSuffix = "?alt=media";
+
+    @Value("${app.firebase-image-url-suffix}")
+    private String imageUrlSuffix;
 
     @Test
     @DisplayName("multipartFile은 업로드 되고 imageUrl을 반환한다. 마지막에는 삭제한다")

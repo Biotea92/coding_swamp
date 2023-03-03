@@ -16,14 +16,21 @@ import java.util.UUID;
 @Component
 public class FireBaseFileStore implements FileStore{
 
-    @Value("${app.firebase-bucket}")
-    private String firebaseBucket;
+    private final String firebaseBucket;
+    private final String imageUrlPrefix;
+    private final String imageUrlSuffix;
+    private final String defaultImageUrl;
 
-    @Value("${app.firebase-image-url}")
-    private String imageUrlPrefix;
-
-    private static final String imageUrlSuffix = "?alt=media";
-    private static final String defaultImageUrl = "https://firebasestorage.googleapis.com/v0/b/coding-swamp.appspot.com/o/default_image%2Fcrocodile.png?alt=media";
+    public FireBaseFileStore(
+            @Value("${app.firebase-bucket}") String firebaseBucket,
+            @Value("${app.firebase-image-url-prefix}") String imageUrlPrefix,
+            @Value("${app.firebase-image-url-suffix}") String imageUrlSuffix,
+            @Value("${app.firebase-default-image-url}") String defaultImageUrl) {
+        this.firebaseBucket = firebaseBucket;
+        this.imageUrlPrefix = imageUrlPrefix;
+        this.imageUrlSuffix = imageUrlSuffix;
+        this.defaultImageUrl = defaultImageUrl;
+    }
 
     @Override
     public String storeFile(MultipartFile multipartFile) {

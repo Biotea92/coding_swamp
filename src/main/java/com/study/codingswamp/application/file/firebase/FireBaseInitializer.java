@@ -15,8 +15,11 @@ import java.io.IOException;
 @Component
 public class FireBaseInitializer {
 
-    @Value("${app.firebase-configuration-file}")
-    private String firebaseConfigPath;
+    private final String firebaseConfigPath;
+
+    public FireBaseInitializer(@Value("${app.firebase-configuration-file}") String firebaseConfigPath) {
+        this.firebaseConfigPath = firebaseConfigPath;
+    }
 
     @PostConstruct
     public void init() {
