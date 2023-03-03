@@ -13,13 +13,12 @@ import com.study.codingswamp.study.service.response.StudiesResponse;
 import com.study.codingswamp.study.service.response.StudyDetailResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/study")
 public class StudyController {
