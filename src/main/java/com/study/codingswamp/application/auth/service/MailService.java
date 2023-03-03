@@ -11,6 +11,8 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.util.Random;
 
+import static org.apache.commons.codec.CharEncoding.UTF_8;
+
 @Service
 @RequiredArgsConstructor
 public class MailService {
@@ -20,6 +22,7 @@ public class MailService {
     private static final String title = "코딩의늪 회원가입 인증 번호";
     private static final String fromEmail = "seediu95@gmail.com";
     private String authCode;
+    private static final String HTML = "html";
 
     public MailAuthenticationResponse sendEmail(MailAuthenticationRequest request) {
         String email = request.getEmail();
@@ -39,7 +42,7 @@ public class MailService {
             message.addRecipients(MimeMessage.RecipientType.TO, toEmail);
             message.setSubject(title);
             message.setFrom(fromEmail);
-            message.setText(setContext(authCode), "utf-8", "html");
+            message.setText(setContext(authCode), UTF_8, HTML);
         } catch (MessagingException e) {
             throw new RuntimeException(e);
         }
