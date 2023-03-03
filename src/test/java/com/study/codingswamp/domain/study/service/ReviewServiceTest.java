@@ -9,10 +9,10 @@ import com.study.codingswamp.domain.study.repository.ParticipantRepository;
 import com.study.codingswamp.domain.study.repository.ReviewRepository;
 import com.study.codingswamp.domain.study.repository.StudyRepository;
 import com.study.codingswamp.domain.study.dto.request.ReviewRequest;
-import com.study.codingswamp.util.fixture.domain.MemberFixture;
-import com.study.codingswamp.util.fixture.domain.ParticipantFixture;
-import com.study.codingswamp.util.fixture.dto.ReviewRequestFixture;
-import com.study.codingswamp.util.fixture.domain.StudyFixture;
+import com.study.codingswamp.util.fixture.entity.member.MemberFixture;
+import com.study.codingswamp.util.fixture.entity.study.ParticipantFixture;
+import com.study.codingswamp.util.fixture.dto.study.ReviewRequestFixture;
+import com.study.codingswamp.util.fixture.entity.study.StudyFixture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -54,7 +54,7 @@ class ReviewServiceTest {
         Member member = MemberFixture.create();
         memberRepository.save(member);
 
-        Study study = StudyFixture.create(member);
+        Study study = StudyFixture.createEasy(member);
         studyRepository.save(study);
 
         Participant participant = ParticipantFixture.create(member, study);

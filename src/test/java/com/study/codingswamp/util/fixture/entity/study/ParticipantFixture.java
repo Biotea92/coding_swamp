@@ -1,4 +1,4 @@
-package com.study.codingswamp.util.fixture.domain;
+package com.study.codingswamp.util.fixture.entity.study;
 
 import com.study.codingswamp.domain.member.entity.Member;
 import com.study.codingswamp.domain.study.entity.Participant;
@@ -12,8 +12,7 @@ import static org.jeasy.random.FieldPredicates.*;
 
 public class ParticipantFixture {
 
-
-    static public Participant create(Member member, Study study) {
+    public static Participant create(Member member, Study study) {
         var idPredicate = named("id")
                 .and(ofType(Long.class))
                 .and(inClass(Participant.class));

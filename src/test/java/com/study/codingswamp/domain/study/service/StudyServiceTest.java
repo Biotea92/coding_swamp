@@ -1,22 +1,26 @@
 package com.study.codingswamp.domain.study.service;
 
 import com.study.codingswamp.application.auth.MemberPayload;
-import com.study.codingswamp.exception.ConflictException;
-import com.study.codingswamp.exception.ForbiddenException;
-import com.study.codingswamp.exception.NotFoundException;
 import com.study.codingswamp.domain.member.entity.Member;
 import com.study.codingswamp.domain.member.repository.MemberRepository;
-import com.study.codingswamp.domain.study.entity.*;
-import com.study.codingswamp.domain.study.service.StudyService;
-import com.study.codingswamp.domain.study.repository.ApplicantRepository;
-import com.study.codingswamp.domain.study.repository.ParticipantRepository;
-import com.study.codingswamp.domain.study.repository.StudyRepository;
 import com.study.codingswamp.domain.study.dto.request.ApplyRequest;
 import com.study.codingswamp.domain.study.dto.request.SearchCondition;
 import com.study.codingswamp.domain.study.dto.request.StudiesPageableRequest;
 import com.study.codingswamp.domain.study.dto.request.StudyRequest;
 import com.study.codingswamp.domain.study.dto.response.StudiesResponse;
 import com.study.codingswamp.domain.study.dto.response.StudyDetailResponse;
+import com.study.codingswamp.domain.study.entity.*;
+import com.study.codingswamp.domain.study.repository.ApplicantRepository;
+import com.study.codingswamp.domain.study.repository.ParticipantRepository;
+import com.study.codingswamp.domain.study.repository.StudyRepository;
+import com.study.codingswamp.exception.ConflictException;
+import com.study.codingswamp.exception.ForbiddenException;
+import com.study.codingswamp.exception.NotFoundException;
+import com.study.codingswamp.util.fixture.dto.study.ApplyRequestFixture;
+import com.study.codingswamp.util.fixture.dto.study.StudyRequestFixture;
+import com.study.codingswamp.util.fixture.entity.member.MemberFixture;
+import com.study.codingswamp.util.fixture.entity.study.ApplicantFixture;
+import com.study.codingswamp.util.fixture.entity.study.StudyFixture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,8 +32,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -60,9 +62,10 @@ class StudyServiceTest {
     @DisplayName("스터디 생성된다.")
     void createStudy() {
         // given
-        Member member = createMember();
+        Member member = memberRepository.save(MemberFixture.create(true));
+
         MemberPayload memberPayload = new MemberPayload(member.getId(), member.getRole());
-        StudyRequest request = getStudyCreateRequest(30);
+        StudyRequest request = StudyRequestFixture.create();
 
         // when
         Study study = studyService.createStudy(memberPayload, request);
@@ -87,9 +90,9 @@ class StudyServiceTest {
     @DisplayName("스터디 상세 단건 가져오기")
     void getStudyDetail() {
         // given
-        Member member = createMember();
+        Member member = memberRepository.save(MemberFixture.create(true));
         MemberPayload memberPayload = new MemberPayload(member.getId(), member.getRole());
-        StudyRequest request = getStudyCreateRequest(30);
+        StudyRequest request = StudyRequestFixture.create();
         Study study = studyService.createStudy(memberPayload, request);
 
         // when
@@ -114,12 +117,6 @@ class StudyServiceTest {
     @Test
     @DisplayName("스터디 상세 단건 가져올시 스터디가 없는 경우")
     void getStudyDetailNotFoundStudy() {
-        // given
-        Member member = createMember();
-        MemberPayload memberPayload = new MemberPayload(member.getId(), member.getRole());
-        StudyRequest request = getStudyCreateRequest(30);
-        studyService.createStudy(memberPayload, request);
-
         // expected
         assertThrows(
                 NotFoundException.class,
@@ -131,15 +128,14 @@ class StudyServiceTest {
     @DisplayName("스터디 참가 신청시 스터디에 참가인원이 추가된다.")
     void apply() {
         // given
-        Member studyOwner = createMember();
+        Member studyOwner = memberRepository.save(MemberFixture.create(true));
         MemberPayload memberPayload = new MemberPayload(studyOwner.getId(), studyOwner.getRole());
-        StudyRequest studyRequest = getStudyCreateRequest(30);
+        StudyRequest studyRequest = StudyRequestFixture.create();
         Study study = studyService.createStudy(memberPayload, studyRequest);
 
-        Member applicantMember = new Member("abc@gmail.com", "1q2w3e4r!", "kim", null);
-        memberRepository.save(applicantMember);
+        Member applicantMember = memberRepository.save(MemberFixture.createGithubMember());
         MemberPayload applicantMemberPayload = new MemberPayload(applicantMember.getId(), applicantMember.getRole());
-        ApplyRequest applyRequest = new ApplyRequest("지원 동기입니다.");
+        ApplyRequest applyRequest = ApplyRequestFixture.create();
 
         // when
         studyService.apply(applicantMemberPayload, study.getId(), applyRequest);
@@ -152,15 +148,14 @@ class StudyServiceTest {
     @DisplayName("최대 정원인 스터디에 지원할 경우 error가 발생한다.")
     void applyWhenMaxMemberCount() {
         // given
-        Member studyOwner = createMember();
+        Member studyOwner = memberRepository.save(MemberFixture.create(true));;
         MemberPayload memberPayload = new MemberPayload(studyOwner.getId(), studyOwner.getRole());
-        StudyRequest studyRequest = getStudyCreateRequest(1);
+        StudyRequest studyRequest = StudyRequestFixture.create(1);
         Study study = studyService.createStudy(memberPayload, studyRequest);
 
-        Member applicantMember = new Member("abc@gmail.com", "1q2w3e4r!", "kim", null);
-        memberRepository.save(applicantMember);
+        Member applicantMember = memberRepository.save(MemberFixture.createGithubMember());;
         MemberPayload applicantMemberPayload = new MemberPayload(applicantMember.getId(), applicantMember.getRole());
-        ApplyRequest applyRequest = new ApplyRequest("지원 동기입니다.");
+        ApplyRequest applyRequest = ApplyRequestFixture.create();
 
         // expected
         assertThrows(
@@ -173,15 +168,14 @@ class StudyServiceTest {
     @DisplayName("같은 곳에 두 번 지원하는 경우 error를 발생한다.")
     void applyTwice() {
         // given
-        Member studyOwner = createMember();
+        Member studyOwner = memberRepository.save(MemberFixture.create(true));
         MemberPayload memberPayload = new MemberPayload(studyOwner.getId(), studyOwner.getRole());
-        StudyRequest studyRequest = getStudyCreateRequest(10);
+        StudyRequest studyRequest = StudyRequestFixture.create();
         Study study = studyService.createStudy(memberPayload, studyRequest);
 
-        Member applicantMember = new Member("abc@gmail.com", "1q2w3e4r!", "kim", null);
-        memberRepository.save(applicantMember);
+        Member applicantMember = memberRepository.save(MemberFixture.createGithubMember());
         MemberPayload applicantMemberPayload = new MemberPayload(applicantMember.getId(), applicantMember.getRole());
-        ApplyRequest applyRequest = new ApplyRequest("지원 동기입니다.");
+        ApplyRequest applyRequest = ApplyRequestFixture.create();
         studyService.apply(applicantMemberPayload, study.getId(), applyRequest);
 
         // expected
@@ -195,12 +189,12 @@ class StudyServiceTest {
     @DisplayName("스터디 참가 신청시 이미 스터디원이면 예외가 발생한다.")
     void applyIfParticipant() {
         // given
-        Member studyOwner = createMember();
+        Member studyOwner = memberRepository.save(MemberFixture.create(true));
         MemberPayload memberPayload = new MemberPayload(studyOwner.getId(), studyOwner.getRole());
-        StudyRequest studyRequest = getStudyCreateRequest(30);
+        StudyRequest studyRequest = StudyRequestFixture.create();
         Study study = studyService.createStudy(memberPayload, studyRequest);
 
-        ApplyRequest applyRequest = new ApplyRequest("지원 동기입니다.");
+        ApplyRequest applyRequest = ApplyRequestFixture.create();
 
         // then
         assertThrows(
@@ -213,17 +207,16 @@ class StudyServiceTest {
     @DisplayName("스터디 신청 인원을 승인하면 참가자 인원이 된다.")
     void approve() {
         // given
-        Member studyOwner = createMember();
+        Member studyOwner = memberRepository.save(MemberFixture.create(true));
         MemberPayload ownerPayload = new MemberPayload(studyOwner.getId(), studyOwner.getRole());
-        StudyRequest studyRequest = getStudyCreateRequest(30);
+        StudyRequest studyRequest = StudyRequestFixture.create();
         Study study = studyService.createStudy(ownerPayload, studyRequest);
-        Member member = memberRepository.save(new Member("applicant@gmail.com", "testpassword", "kim", null));
-        Applicant applicant = new Applicant(study, member, "지원동기", LocalDate.now());
+        Member member = memberRepository.save(MemberFixture.createGithubMember());
+        Applicant applicant = ApplicantFixture.create(study, member);
         study.addApplicant(applicant);
 
         // when
         studyService.approve(ownerPayload, study.getId(), applicant.getMember().getId());
-
 
         // then
         assertThat(study.getApplicants()).isEmpty();
@@ -234,12 +227,12 @@ class StudyServiceTest {
     @DisplayName("스터디 장이 아니면 신청인원을 승인할 수 없다.")
     void approveNotOwner() {
         // given
-        Member studyOwner = createMember();
+        Member studyOwner = memberRepository.save(MemberFixture.create(true));
         MemberPayload ownerPayload = new MemberPayload(studyOwner.getId(), studyOwner.getRole());
-        StudyRequest studyRequest = getStudyCreateRequest(30);
+        StudyRequest studyRequest = StudyRequestFixture.create();
         Study study = studyService.createStudy(ownerPayload, studyRequest);
-        Member member = memberRepository.save(new Member("applicant@gmail.com", "testpassword", "kim", null));
-        Applicant applicant = new Applicant(study, member, "지원동기", LocalDate.now());
+        Member member = memberRepository.save(MemberFixture.createGithubMember());
+        Applicant applicant = ApplicantFixture.create(study, member);
         study.addApplicant(applicant);
         MemberPayload memberPayload = new MemberPayload(member.getId(), member.getRole());
 
@@ -273,9 +266,9 @@ class StudyServiceTest {
     void getMyApplies() {
         // given
         List<Study> studies = 이십개_스터디_만들기();
-        Member member = createMember();
+        Member member = memberRepository.save(MemberFixture.create(true));
         studies.forEach(study -> {
-            Applicant applicant = new Applicant(study, member, "지원동기", LocalDate.now());
+            Applicant applicant = ApplicantFixture.create(study, member);
             applicantRepository.save(applicant);
             study.addApplicant(applicant);
         });
@@ -293,9 +286,9 @@ class StudyServiceTest {
     void getMyParticipates() {
         // given
         List<Study> studies = 이십개_스터디_만들기();
-        Member member = createMember();
+        Member member = memberRepository.save(MemberFixture.create(true));;
         studies.forEach(study -> {
-            Applicant applicant = new Applicant(study, member, "지원동기", LocalDate.now());
+            Applicant applicant = ApplicantFixture.create(study, member);
             applicantRepository.save(applicant);
             study.addApplicant(applicant);
         });
@@ -317,9 +310,9 @@ class StudyServiceTest {
     @DisplayName("스터디 게시물 수정")
     void edit() {
         // given
-        Member member = createMember();
+        Member member = memberRepository.save(MemberFixture.create(true));
         MemberPayload memberPayload = new MemberPayload(member.getId(), member.getRole());
-        Study study = studyService.createStudy(memberPayload, getStudyCreateRequest(30));
+        Study study = studyService.createStudy(memberPayload, StudyRequestFixture.create());
 
         StudyRequest request = StudyRequest.builder()
                 .title("제목입니다. 수정")
@@ -349,7 +342,7 @@ class StudyServiceTest {
     @DisplayName("스터디 장은 스터디를 삭제할 수 있다.")
     void delete() {
         // when
-        Member studyOwner = createMember();
+        Member studyOwner = memberRepository.save(MemberFixture.create(true));
         MemberPayload memberPayload = new MemberPayload(studyOwner.getId(), studyOwner.getRole());
         Study study = Study.builder()
                 .title("제목입니다.")
@@ -383,8 +376,8 @@ class StudyServiceTest {
     @DisplayName("참가자는 스터디를 탈퇴할 수 있다.")
     void withdraw() {
         // given
-        Member studyOwner = createMember();
-        Member member = createMember();
+        Member studyOwner = memberRepository.save(MemberFixture.create(true));;
+        Member member = memberRepository.save(MemberFixture.createGithubMember());
         LocalDate now = LocalDate.now();
         Study study = Study.builder()
                 .title("제목입니다.")
@@ -419,8 +412,8 @@ class StudyServiceTest {
     @DisplayName("스터디장은 참가자를 kick 할 수 있다.")
     void kick() {
         // given
-        Member studyOwner = createMember();
-        Member member = createMember();
+        Member studyOwner = memberRepository.save(MemberFixture.create(true));
+        Member member = memberRepository.save(MemberFixture.createGithubMember());
         LocalDate now = LocalDate.now();
         Study study = Study.builder()
                 .title("제목입니다.")
@@ -456,7 +449,6 @@ class StudyServiceTest {
     void getSearchStudies() {
         // given
         이십개_스터디_만들기();
-
         SearchCondition searchCondition = new SearchCondition(1, 8, "제목", "STUDY", "태그");
 
         // when
@@ -469,37 +461,11 @@ class StudyServiceTest {
         assertThat(response.getStudyResponses().size()).isEqualTo(8);
     }
 
-    private List<Study> 이십개_스터디_만들기() {
-        Member studyOwner = createMember();
-        List<Study> studies = IntStream.range(0, 20)
-                .mapToObj(i -> {
-                    Study study = Study.builder()
-                                    .title("제목입니다. " + i)
-                                    .description("설명입니다. " + i)
-                                    .studyStatus(StudyStatus.PREPARING)
-                                    .studyType(StudyType.STUDY)
-                                    .startDate(LocalDate.now().plusDays(1))
-                                    .endDate(LocalDate.now().plusDays(2))
-                                    .owner(studyOwner)
-                                    .currentMemberCount(1)
-                                    .maxMemberCount(30)
-                                    .thumbnail("#00000")
-                                    .applicants(new HashSet<>())
-                                    .participants(new HashSet<>())
-                                    .tags(List.of(new Tag("태그1"), new Tag("태그2")))
-                                    .build();
-                    study.initParticipants(new Participant(study, studyOwner, LocalDate.now()));
-                    return study;
-                })
-                .collect(Collectors.toList());
-        return studyRepository.saveAll(studies);
-    }
-
     @Test
     @DisplayName("스터디 신청을 취소할 수 있다.")
     void cancelApply() {
         // given
-        Member studyOwner = createMember();
+        Member studyOwner = memberRepository.save(MemberFixture.create(true));
         Study study = Study.builder()
                 .title("제목입니다.")
                 .description("설명입니다.")
@@ -516,8 +482,8 @@ class StudyServiceTest {
                 .tags(List.of(new Tag("태그1"), new Tag("태그2")))
                 .build();
         studyRepository.save(study);
-        Member applicantMember = createMember();
-        Applicant applicant = new Applicant(study, applicantMember, "지원동기", LocalDate.now());
+        Member applicantMember = memberRepository.save(MemberFixture.createGithubMember());
+        Applicant applicant = ApplicantFixture.create(study, applicantMember);
         study.addApplicant(applicant);
         applicantRepository.save(applicant);
         MemberPayload memberPayload = new MemberPayload(applicantMember.getId(), applicantMember.getRole());
@@ -529,22 +495,9 @@ class StudyServiceTest {
         assertThat(study.getApplicants().size()).isEqualTo(0);
     }
 
-    private Member createMember() {
-        Member member = new Member("abc@gmail.com", "1q2w3e4r!", "hong", null);
-        memberRepository.save(member);
-        return member;
-    }
-
-    private StudyRequest getStudyCreateRequest(int maxMemberCount) {
-        return StudyRequest.builder()
-                .title("제목입니다.")
-                .description("설명입니다.")
-                .studyType("STUDY")
-                .thumbnail("#000000")
-                .startDate(LocalDate.now().plusDays(1))
-                .endDate(LocalDate.now().plusDays(2))
-                .maxMemberCount(maxMemberCount)
-                .tags(List.of("태그1", "태그2"))
-                .build();
+    private List<Study> 이십개_스터디_만들기() {
+        Member studyOwner = memberRepository.save(MemberFixture.create(true));
+        List<Study> studies = StudyFixture.createStudies(studyOwner);
+        return studyRepository.saveAll(studies);
     }
 }

@@ -3,7 +3,7 @@ package com.study.codingswamp.presentation.member;
 import com.study.codingswamp.application.auth.token.TokenProvider;
 import com.study.codingswamp.domain.member.entity.Member;
 import com.study.codingswamp.domain.member.repository.MemberRepository;
-import com.study.codingswamp.util.TestUtil;
+import com.study.codingswamp.util.fixture.entity.member.MemberFixture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -47,6 +47,7 @@ public class MemberControllerDocTest {
     MemberRepository memberRepository;
     @Autowired
     TokenProvider tokenProvider;
+    private final MockMultipartFile imageFile = new MockMultipartFile("imageFile", "image".getBytes());
 
     @BeforeEach
     public void setUp(WebApplicationContext webApplicationContext, RestDocumentationContextProvider restDocumentation) {
@@ -68,7 +69,6 @@ public class MemberControllerDocTest {
         String email = "seediu95@gmail.com";
         String password = "1q2w3e4r!";
         String username = "hong";
-        MockMultipartFile imageFile = new MockMultipartFile("imageFile", "image".getBytes());
 
         // expected
         mockMvc.perform(multipart("/api/member")
@@ -102,7 +102,7 @@ public class MemberControllerDocTest {
     @Test
     @DisplayName("회원 단건조회가 완료되어야 한다.")
     void getMember() throws Exception {
-        Member member = saveMember();
+        Member member = memberRepository.save(MemberFixture.create(true));
 
         mockMvc.perform(get("/api/member/{memberId}", member.getId()))
                 .andExpect(status().isOk())
@@ -126,9 +126,8 @@ public class MemberControllerDocTest {
     @Test
     @DisplayName("회원 정보 수정이 완료되어야 한다.")
     void edit() throws Exception {
-        String token = new TestUtil().saveMemberAndGetToken(tokenProvider, memberRepository);
-
-        MockMultipartFile imageFile = new MockMultipartFile("imageFile", "image".getBytes());
+        Member member = memberRepository.save(MemberFixture.create(true));
+        String token = tokenProvider.createAccessToken(member.getId(), member.getRole());
 
         mockMvc.perform(multipart("/api/member/edit")
                         .file(imageFile)
@@ -164,7 +163,8 @@ public class MemberControllerDocTest {
     @Test
     @DisplayName("회원 탈퇴가 완료되어야 한다.")
     void delete() throws Exception {
-        String token = new TestUtil().saveMemberAndGetToken(tokenProvider, memberRepository);
+        Member member = memberRepository.save(MemberFixture.create(true));
+        String token = tokenProvider.createAccessToken(member.getId(), member.getRole());
 
         mockMvc.perform(RestDocumentationRequestBuilders.delete("/api/member")
                         .header(AUTHORIZATION, "Bearer " + token)
@@ -174,10 +174,5 @@ public class MemberControllerDocTest {
                                 headerWithName(AUTHORIZATION).description("Bearer auth credentials")
                         )
                 ));
-    }
-
-    private Member saveMember() {
-        Member member = new Member("abc@gmail.com", "1q2w3e4r!", "hong", "https://firebasestorage.googleapis.com/v0/b/coding-swamp.appspot.com/o/default_image%2Fcrocodile.png?alt=media");
-        return memberRepository.save(member);
     }
 }

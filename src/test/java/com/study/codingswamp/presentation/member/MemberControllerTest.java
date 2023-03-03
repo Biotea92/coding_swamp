@@ -1,12 +1,10 @@
 package com.study.codingswamp.presentation.member;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,17 +24,11 @@ class MemberControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    @BeforeEach
-    void clear() {
-        jdbcTemplate.update("alter table member auto_increment= ?", 1);
-    }
+    private final MockMultipartFile multipartFile = new MockMultipartFile("imageFile", "image".getBytes());
 
     @Test
     @DisplayName("회원가입 요청시 multipartFile을 제외한 모든 값은 필수다.")
-    void signup_Can_Not_Be_Blank() throws Exception {
+    void signup_can_not_be_blank() throws Exception {
         mockMvc.perform(post("/api/member?")
                         .contentType(APPLICATION_JSON)
                 )
@@ -56,7 +48,6 @@ class MemberControllerTest {
         String email = "seediu95@gmail.com";
         String password = "1q2w3e4r!";
         String username = "ho";
-        MockMultipartFile multipartFile = new MockMultipartFile("imageFile", "image".getBytes());
 
         // expected
         mockMvc.perform(multipart("/api/member")
@@ -79,7 +70,6 @@ class MemberControllerTest {
         String email = "seediu95@gmail.com";
         String password = "1q2w3e4r";
         String username = "hong";
-        MockMultipartFile multipartFile = new MockMultipartFile("imageFile", "image".getBytes());
 
         // expected
         mockMvc.perform(multipart("/api/member")

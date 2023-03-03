@@ -7,17 +7,19 @@ import com.study.codingswamp.domain.member.dto.response.MemberResponse;
 import com.study.codingswamp.domain.member.entity.Member;
 import com.study.codingswamp.domain.member.entity.Role;
 import com.study.codingswamp.domain.member.repository.MemberRepository;
-import com.study.codingswamp.domain.member.service.MemberService;
 import com.study.codingswamp.exception.ConflictException;
 import com.study.codingswamp.exception.NotFoundException;
 import com.study.codingswamp.exception.UnauthorizedException;
+import com.study.codingswamp.util.fixture.dto.member.CommonLoginRequestFixture;
+import com.study.codingswamp.util.fixture.dto.member.MemberEditRequestFixture;
+import com.study.codingswamp.util.fixture.dto.member.MemberSignupRequestFixture;
+import com.study.codingswamp.util.fixture.entity.member.MemberFixture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,11 +52,7 @@ class MemberServiceTest {
     @Test
     void signup() {
         // given
-        MemberSignupRequest memberSignupRequest = MemberSignupRequest.builder()
-                .email("abc@gmail.com")
-                .password("1q2w3e4r!")
-                .username("hong")
-                .build();
+        MemberSignupRequest memberSignupRequest = MemberSignupRequestFixture.create();
 
         // when
         memberService.signup(memberSignupRequest);
@@ -62,9 +60,9 @@ class MemberServiceTest {
         // then
         Member member = memberRepository.findById(1L).orElseThrow(RuntimeException::new);
         assertThat(member.getId()).isEqualTo(1L);
-        assertThat(member.getEmail()).isEqualTo("abc@gmail.com");
-        assertThat(passwordEncoder.matches("1q2w3e4r!", member.getPassword())).isTrue();
-        assertThat(member.getUsername()).isEqualTo("hong");
+        assertThat(member.getEmail()).isEqualTo(memberSignupRequest.getEmail());
+        assertThat(passwordEncoder.matches(memberSignupRequest.getPassword(), member.getPassword())).isTrue();
+        assertThat(member.getUsername()).isEqualTo(memberSignupRequest.getUsername());
         assertThat(member.getRole()).isEqualTo(Role.USER);
     }
 
@@ -72,19 +70,11 @@ class MemberServiceTest {
     @Test
     void checkLogin() {
         // given
-        saveMemberAndGet();
-        CommonLoginRequest request1 = CommonLoginRequest.builder()
-                .email("abc@gmail.com")
-                .password("1q2w3e4r!")
-                .build();
-        CommonLoginRequest request2 = CommonLoginRequest.builder()
-                .email("notExistEmail")
-                .password("1q2w3e4r!")
-                .build();
-        CommonLoginRequest request3 = CommonLoginRequest.builder()
-                .email("abc@gmail.com")
-                .password("wrongPassword")
-                .build();
+        Member member = MemberFixture.create("abc@gmail.com", passwordEncoder.encode("1q2w3e4r!"), "hong");
+        memberRepository.save(member);
+        CommonLoginRequest request1 = CommonLoginRequestFixture.create("abc@gmail.com", "1q2w3e4r!");
+        CommonLoginRequest request2 = CommonLoginRequestFixture.create("notExistEmail", "1q2w3e4r!");
+        CommonLoginRequest request3 = CommonLoginRequestFixture.create("abc@gmail.com", "wrongPassword");
 
         // expected
         assertDoesNotThrow(() -> memberService.checkLogin(request1));
@@ -102,7 +92,8 @@ class MemberServiceTest {
     @Test
     void duplicateEmail() {
         // given
-        Member member = saveMemberAndGet();
+        Member member = MemberFixture.create("abc@gmail.com", passwordEncoder.encode("1q2w3e4r!"), "hong");
+        memberRepository.save(member);
 
         // expected
         assertThrows(
@@ -127,7 +118,8 @@ class MemberServiceTest {
     @Test
     void getMember() {
         // given
-        Member member = saveMemberAndGet();
+        Member member = MemberFixture.create("abc@gmail.com", passwordEncoder.encode("1q2w3e4r!"), "hong");
+        memberRepository.save(member);
 
         // when
         MemberResponse memberResponse = memberService.getMember(member.getId());
@@ -147,32 +139,28 @@ class MemberServiceTest {
     @Test
     void edit() {
         // given
-        Member member = saveMemberAndGet();
-        MemberEditRequest editRequest = MemberEditRequest.builder()
-                .username("kim")
-                .profileUrl("http://profile")
-                .imageFile(new MockMultipartFile("imageFile", "image".getBytes()))
-                .build();
+        Member member = MemberFixture.create("abc@gmail.com", passwordEncoder.encode("1q2w3e4r!"), "hong");
+        memberRepository.save(member);
+        MemberEditRequest editRequest = MemberEditRequestFixture.create();
 
         // when
         MemberResponse editResponse = memberService.edit(member.getId(), editRequest);
 
+        // expected
         assertThat(editResponse.getMemberId()).isEqualTo(member.getId());
-        assertThat(editResponse.getUsername()).isEqualTo("kim");
-        assertThat(editResponse.getProfileUrl()).isEqualTo("http://profile");
-        assertThat(editResponse.getImageUrl()).isNotEqualTo("null");
+        assertThat(editResponse.getUsername()).isEqualTo(editRequest.getUsername());
+        assertThat(editResponse.getProfileUrl()).isEqualTo(editRequest.getProfileUrl());
+        assertThat(editResponse.getImageUrl()).isNotNull();
     }
 
     @DisplayName("깃허브 사용자는 정보수정이 불가능 하다.")
     @Test
     void editGithubMember() {
         // given
-        Member member = saveGithubMemberAndGet();
-        MemberEditRequest editRequest = MemberEditRequest.builder()
-                .username("kim")
-                .profileUrl("http://profile")
-                .imageFile(new MockMultipartFile("imageFile", "image".getBytes()))
-                .build();
+        Member member = MemberFixture.createGithubMember();
+        memberRepository.save(member);
+
+        MemberEditRequest editRequest = MemberEditRequestFixture.create();
 
         // expected
         assertThrows(
@@ -185,8 +173,8 @@ class MemberServiceTest {
     @Test
     void delete() {
         // given
-        Member member = saveMemberAndGet();
-        System.out.println(member.getImageUrl());
+        Member member = MemberFixture.create("abc@gmail.com", passwordEncoder.encode("1q2w3e4r!"), "hong");
+        memberRepository.save(member);
 
         // when
         memberService.delete(member.getId());
@@ -202,23 +190,13 @@ class MemberServiceTest {
     @Test
     void deleteGithubMember() {
         // given
-        Member member = saveGithubMemberAndGet();
+        Member member = MemberFixture.createGithubMember();
+        memberRepository.save(member);
 
         // expected
         assertThrows(
                 UnauthorizedException.class,
                 () -> memberService.delete(member.getId())
         );
-    }
-
-    private Member saveMemberAndGet() {
-        Member member = new Member("abc@gmail.com", passwordEncoder.encode("1q2w3e4r!"), "hong", null);
-        return memberRepository.save(member);
-    }
-
-    private Member saveGithubMemberAndGet() {
-        Member member = new Member("seediu95@gmail.com", 102938L, "seediu", "https//image", "https//profile");
-        memberRepository.save(member);
-        return member;
     }
 }

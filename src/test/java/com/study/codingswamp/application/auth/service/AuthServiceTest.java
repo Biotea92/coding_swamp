@@ -1,6 +1,5 @@
 package com.study.codingswamp.application.auth.service;
 
-import com.study.codingswamp.application.auth.service.AuthService;
 import com.study.codingswamp.application.auth.MemberPayload;
 import com.study.codingswamp.application.auth.service.request.CommonLoginRequest;
 import com.study.codingswamp.application.auth.service.response.AccessTokenResponse;
@@ -8,6 +7,8 @@ import com.study.codingswamp.application.auth.token.TokenProvider;
 import com.study.codingswamp.domain.member.entity.Member;
 import com.study.codingswamp.domain.member.entity.Role;
 import com.study.codingswamp.domain.member.repository.MemberRepository;
+import com.study.codingswamp.util.fixture.dto.member.CommonLoginRequestFixture;
+import com.study.codingswamp.util.fixture.entity.member.MemberFixture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,9 +29,9 @@ class AuthServiceTest {
     @Autowired
     private AuthService authService;
     @Autowired
-    private PasswordEncoder passwordEncoder;
-    @Autowired
     private TokenProvider tokenProvider;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
     @Autowired
     JdbcTemplate jdbcTemplate;
 
@@ -40,15 +41,12 @@ class AuthServiceTest {
     }
     @Test
     @DisplayName("로그인 시 토큰을 발급한다.")
-    void login() throws InterruptedException {
+    void login() {
         // given
-        Member member = new Member("abc@gmail.com", passwordEncoder.encode("1q2w3e4r!"), "hong", null);
+        Member member = MemberFixture.create("abc@gmail.com", passwordEncoder.encode("1q2w3e4r!"), "hong");
         memberRepository.save(member);
 
-        CommonLoginRequest request = CommonLoginRequest.builder()
-                .email("abc@gmail.com")
-                .password("1q2w3e4r!")
-                .build();
+        CommonLoginRequest request = CommonLoginRequestFixture.create("abc@gmail.com", "1q2w3e4r!");
 
         // when
         String[] accessToken = authService.login(request).getAccessToken().split("\\.");
@@ -65,12 +63,10 @@ class AuthServiceTest {
     @DisplayName("리프래쉬토큰 요청시 리프래쉬토큰을 발급한다.")
     void refresh() throws InterruptedException {
         // given
-        Member member = new Member("abc@gmail.com", passwordEncoder.encode("1q2w3e4r!"), "hong", null);
+        Member member = MemberFixture.create("abc@gmail.com", passwordEncoder.encode("1q2w3e4r!"), "hong");
         memberRepository.save(member);
-        CommonLoginRequest request = CommonLoginRequest.builder()
-                .email("abc@gmail.com")
-                .password("1q2w3e4r!")
-                .build();
+        CommonLoginRequest request = CommonLoginRequestFixture.create("abc@gmail.com", "1q2w3e4r!");
+
         AccessTokenResponse token = authService.login(request);
         MemberPayload memberPayload = new MemberPayload(1L, Role.USER);
 

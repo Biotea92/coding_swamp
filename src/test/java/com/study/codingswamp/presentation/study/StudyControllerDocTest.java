@@ -1,17 +1,19 @@
 package com.study.codingswamp.presentation.study;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.study.codingswamp.application.auth.MemberPayload;
 import com.study.codingswamp.application.auth.token.TokenProvider;
 import com.study.codingswamp.domain.member.entity.Member;
 import com.study.codingswamp.domain.member.repository.MemberRepository;
+import com.study.codingswamp.domain.study.dto.request.ApplyRequest;
+import com.study.codingswamp.domain.study.dto.request.StudyRequest;
 import com.study.codingswamp.domain.study.entity.*;
 import com.study.codingswamp.domain.study.repository.ApplicantRepository;
 import com.study.codingswamp.domain.study.repository.ParticipantRepository;
 import com.study.codingswamp.domain.study.repository.StudyRepository;
-import com.study.codingswamp.domain.study.dto.request.ApplyRequest;
-import com.study.codingswamp.domain.study.dto.request.StudyRequest;
-import com.study.codingswamp.util.TestUtil;
+import com.study.codingswamp.util.fixture.dto.study.ApplyRequestFixture;
+import com.study.codingswamp.util.fixture.entity.member.MemberFixture;
+import com.study.codingswamp.util.fixture.entity.study.ApplicantFixture;
+import com.study.codingswamp.util.fixture.entity.study.StudyFixture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -99,7 +101,9 @@ public class StudyControllerDocTest {
                 .tags(List.of("태그1", "태그2"))
                 .build();
 
-        String token = new TestUtil().saveMemberAndGetToken(tokenProvider, memberRepository);
+        Member member = memberRepository.save(MemberFixture.create(true));
+        String token = tokenProvider.createAccessToken(member.getId(), member.getRole());
+
         String json = objectMapper.writeValueAsString(request);
 
         // expected
@@ -130,14 +134,12 @@ public class StudyControllerDocTest {
     @DisplayName("스터디 상세 단건 조회하기")
     void getStudyDetail() throws Exception {
         // given
-        String token = new TestUtil().saveMemberAndGetToken(tokenProvider, memberRepository);
-        MemberPayload payload = tokenProvider.getPayload("Bearer " + token);
-        Member member = memberRepository.findById(payload.getId()).orElseThrow();
-        Study study = getStudy(memberRepository.findById(1L).orElseThrow(RuntimeException::new));
+        Member member = memberRepository.save(MemberFixture.create(true));
+        Study study = StudyFixture.create(member);
         Participant participant = new Participant(study, member, LocalDate.now());
         study.initParticipants(participant);
-        Member hong = memberRepository.save(new Member("member2@gmail.com", "1q2w3e4r!", "hong", "https://firebasestorage.googleapis.com/v0/b/coding-swamp.appspot.com/o/default_image%2Fcrocodile.png?alt=media"));
-        study.addApplicant(new Applicant(study, hong, "지원 동기", LocalDate.now()));
+        Member hong = memberRepository.save(MemberFixture.createGithubMember());
+        study.addApplicant(ApplicantFixture.create(study, hong));
         studyRepository.save(study);
 
         // expected
@@ -187,12 +189,14 @@ public class StudyControllerDocTest {
     @DisplayName("스터디 신청인이 스터디를 신청하면 스터디 신청자에 포함되어야 한다.")
     void apply() throws Exception {
         // given
-        String token = new TestUtil().saveMemberAndGetToken(tokenProvider, memberRepository);
-        Member studyOwner = createMember();
-        Study study = getStudy(studyOwner);
+        Member member = memberRepository.save(MemberFixture.create(true));
+        String token = tokenProvider.createAccessToken(member.getId(), member.getRole());
+
+        Member studyOwner = memberRepository.save(MemberFixture.create(true));
+        Study study = StudyFixture.create(studyOwner);
         studyRepository.save(study);
 
-        ApplyRequest applyRequest = new ApplyRequest("지원 동기입니다.");
+        ApplyRequest applyRequest = ApplyRequestFixture.create();
 
         String json = objectMapper.writeValueAsString(applyRequest);
 
@@ -220,12 +224,12 @@ public class StudyControllerDocTest {
     @DisplayName("스터디 신청인원은 스터디장이 승인할 수 있다.")
     void approve() throws Exception {
         // given
-        String token = new TestUtil().saveMemberAndGetToken(tokenProvider, memberRepository);
-        Member studyOwner = memberRepository.findById(1L).orElseThrow(RuntimeException::new);
-        Study study = getStudy(studyOwner);
+        Member studyOwner = memberRepository.save(MemberFixture.create(true));
+        String token = tokenProvider.createAccessToken(studyOwner.getId(), studyOwner.getRole());
+        Study study = StudyFixture.create(studyOwner);
         studyRepository.save(study);
-        Member member = memberRepository.save(new Member("applicant@gmail.com", "testpassword", "kim", null));
-        Applicant applicant = new Applicant(study, member, "지원동기", LocalDate.now());
+        Member member = memberRepository.save(MemberFixture.createGithubMember());
+        Applicant applicant = ApplicantFixture.create(study, member);
         study.addApplicant(applicant);
 
         // expected
@@ -248,23 +252,8 @@ public class StudyControllerDocTest {
     @DisplayName("스터디 여러건 조회 1페이지")
     void getStudies() throws Exception {
         // given
-        Member studyOwner = createMember();
-        List<Study> studies = IntStream.range(0, 20)
-                .mapToObj(i -> Study.builder()
-                        .title("제목입니다. " + i)
-                        .description("설명입니다. " + i)
-                        .studyStatus(StudyStatus.PREPARING)
-                        .studyType(StudyType.STUDY)
-                        .startDate(LocalDate.now().plusDays(1))
-                        .endDate(LocalDate.now().plusDays(2))
-                        .owner(studyOwner)
-                        .currentMemberCount(1)
-                        .maxMemberCount(30)
-                        .thumbnail("#00000")
-                        .tags(List.of(new Tag("태그1"), new Tag("태그2")))
-                        .build()
-                )
-                .collect(Collectors.toList());
+        Member studyOwner = memberRepository.save(MemberFixture.create(true));
+        List<Study> studies = StudyFixture.createStudies(studyOwner);
         studyRepository.saveAll(studies);
 
         // expected
@@ -301,11 +290,10 @@ public class StudyControllerDocTest {
     @DisplayName("나의 신청 스터디 여러건 조회")
     void getMyApplies() throws Exception {
         // given
-        String token = new TestUtil().saveMemberAndGetToken(tokenProvider, memberRepository);
-        MemberPayload payload = tokenProvider.getPayload("Bearer " + token);
-        Member applicantMember = memberRepository.findById(payload.getId()).orElseThrow(RuntimeException::new);
+        Member applicantMember = memberRepository.save(MemberFixture.create(true));
+        String token = tokenProvider.createAccessToken(applicantMember.getId(), applicantMember.getRole());
 
-        Member studyOwner = createMember();
+        Member studyOwner = memberRepository.save(MemberFixture.createGithubMember());
         List<Study> studies = IntStream.range(0, 10)
                 .mapToObj(i -> {
                     Study study = Study.builder()
@@ -322,7 +310,7 @@ public class StudyControllerDocTest {
                                     .thumbnail("#00000")
                                     .tags(List.of(new Tag("태그1"), new Tag("태그2")))
                                     .build();
-                    Applicant applicant = new Applicant(study, applicantMember, "지원동기", LocalDate.now().plusDays(i));
+                    Applicant applicant = ApplicantFixture.create(study, applicantMember);
                     applicantRepository.save(applicant);
                     study.addApplicant(applicant);
                     return study;
@@ -362,11 +350,10 @@ public class StudyControllerDocTest {
     @DisplayName("나의 참가 스터디 조회")
     void getMyParticipates() throws Exception {
         // given
-        String token = new TestUtil().saveMemberAndGetToken(tokenProvider, memberRepository);
-        MemberPayload payload = tokenProvider.getPayload("Bearer " + token);
-        Member applicantMember = memberRepository.findById(payload.getId()).orElseThrow(RuntimeException::new);
+        Member applicantMember = memberRepository.save(MemberFixture.create(true));
+        String token = tokenProvider.createAccessToken(applicantMember.getId(), applicantMember.getRole());
 
-        Member studyOwner = createMember();
+        Member studyOwner = memberRepository.save(MemberFixture.createGithubMember());
         List<Study> studies = IntStream.range(0, 10)
                 .mapToObj(i -> {
                     Study study = Study.builder()
@@ -423,10 +410,10 @@ public class StudyControllerDocTest {
     @DisplayName("스터디 수정하기")
     void edit() throws Exception {
         // given
-        String token = new TestUtil().saveMemberAndGetToken(tokenProvider, memberRepository);
-        MemberPayload payload = tokenProvider.getPayload("Bearer " + token);
-        Member owner = memberRepository.findById(payload.getId()).orElseThrow(RuntimeException::new);
-        Study study = studyRepository.save(getStudy(owner));
+        Member owner = memberRepository.save(MemberFixture.create(true));
+        String token = tokenProvider.createAccessToken(owner.getId(), owner.getRole());
+
+        Study study = studyRepository.save(StudyFixture.create(owner));
 
         StudyRequest request = StudyRequest.builder()
                 .title("제목입니다. 수정")
@@ -470,10 +457,9 @@ public class StudyControllerDocTest {
     @DisplayName("스터디 삭제하기")
     void delete() throws Exception {
         // given
-        String token = new TestUtil().saveMemberAndGetToken(tokenProvider, memberRepository);
-        MemberPayload payload = tokenProvider.getPayload("Bearer " + token);
-        Member owner = memberRepository.findById(payload.getId()).orElseThrow(RuntimeException::new);
-        Study study = studyRepository.save(getStudy(owner));
+        Member owner = memberRepository.save(MemberFixture.create(true));
+        String token = tokenProvider.createAccessToken(owner.getId(), owner.getRole());
+        Study study = studyRepository.save(StudyFixture.create(owner));
 
         // expected
         mockMvc.perform(RestDocumentationRequestBuilders.delete("/api/study/{studyId}", study.getId())
@@ -494,12 +480,13 @@ public class StudyControllerDocTest {
     @DisplayName("스터디 탈퇴하기")
     void withdraw() throws Exception {
         // given
-        Member owner = createMember();
-        Study study = studyRepository.save(getStudy(owner));
-        String token = new TestUtil().saveMemberAndGetToken(tokenProvider, memberRepository);
-        MemberPayload payload = tokenProvider.getPayload("Bearer " + token);
+        Member owner = memberRepository.save(MemberFixture.createGithubMember());
+        Study study = studyRepository.save(StudyFixture.create(owner));
 
-        Participant participant = new Participant(study, memberRepository.findById(payload.getId()).orElseThrow(), LocalDate.now());
+        Member participantMember = memberRepository.save(MemberFixture.create(true));
+        String token = tokenProvider.createAccessToken(participantMember.getId(), participantMember.getRole());
+
+        Participant participant = new Participant(study, participantMember, LocalDate.now());
         participantRepository.save(participant);
         study.initParticipants(participant);
 
@@ -522,12 +509,11 @@ public class StudyControllerDocTest {
     @DisplayName("스터디 강퇴하기")
     void kick() throws Exception {
         // given
-        String token = new TestUtil().saveMemberAndGetToken(tokenProvider, memberRepository);
-        MemberPayload payload = tokenProvider.getPayload("Bearer " + token);
-        Member owner = memberRepository.findById(payload.getId()).orElseThrow();
-        Study study = studyRepository.save(getStudy(owner));
+        Member owner = memberRepository.save(MemberFixture.create(true));
+        String token = tokenProvider.createAccessToken(owner.getId(), owner.getRole());
+        Study study = studyRepository.save(StudyFixture.create(owner));
 
-        Member member = createMember();
+        Member member = memberRepository.save(MemberFixture.createGithubMember());
         Participant participant = new Participant(study, member, LocalDate.now());
         participantRepository.save(participant);
         study.initParticipants(participant);
@@ -552,13 +538,12 @@ public class StudyControllerDocTest {
     @DisplayName("스터디 신청 취소하기")
     void cancelApply() throws Exception {
         // given
-        String token = new TestUtil().saveMemberAndGetToken(tokenProvider, memberRepository);
-        MemberPayload payload = tokenProvider.getPayload("Bearer " + token);
-        Member applicantMember = memberRepository.findById(payload.getId()).orElseThrow();
+        Member applicantMember = memberRepository.save(MemberFixture.create(true));
+        String token = tokenProvider.createAccessToken(applicantMember.getId(), applicantMember.getRole());
 
-        Member owner = createMember();
-        Study study = studyRepository.save(getStudy(owner));
-        Applicant applicant = new Applicant(study, applicantMember, "지원동기", LocalDate.now());
+        Member owner = memberRepository.save(MemberFixture.createGithubMember());
+        Study study = studyRepository.save(StudyFixture.create(owner));
+        Applicant applicant = ApplicantFixture.create(study, applicantMember);
         study.addApplicant(applicant);
         applicantRepository.save(applicant);
 
@@ -582,23 +567,8 @@ public class StudyControllerDocTest {
     @DisplayName("스터디 Search 여러건 조회 1페이지")
     void getSearchStudies() throws Exception {
         // given
-        Member studyOwner = createMember();
-        List<Study> studies = IntStream.range(0, 20)
-                .mapToObj(i -> Study.builder()
-                        .title("제목입니다. " + i)
-                        .description("설명입니다. " + i)
-                        .studyStatus(StudyStatus.PREPARING)
-                        .studyType(StudyType.STUDY)
-                        .startDate(LocalDate.now().plusDays(1))
-                        .endDate(LocalDate.now().plusDays(2))
-                        .owner(studyOwner)
-                        .currentMemberCount(1)
-                        .maxMemberCount(30)
-                        .thumbnail("#00000")
-                        .tags(List.of(new Tag("태그1"), new Tag("태그2")))
-                        .build()
-                )
-                .collect(Collectors.toList());
+        Member studyOwner = memberRepository.save(MemberFixture.create(true));
+        List<Study> studies = StudyFixture.createStudies(studyOwner);
         studyRepository.saveAll(studies);
 
         // expected
@@ -635,26 +605,5 @@ public class StudyControllerDocTest {
                                 fieldWithPath("studyResponses[].createdAt").description("스터디 등록일")
                         )
                 ));
-    }
-
-    Study getStudy(Member owner) {
-        StudyRequest request = StudyRequest.builder()
-                .title("제목입니다.")
-                .description("설명입니다.")
-                .studyType("STUDY")
-                .thumbnail("#000000")
-                .startDate(LocalDate.of(2023, 2, 1))
-                .endDate(LocalDate.of(2023, 2, 3))
-                .maxMemberCount(30)
-                .tags(List.of("태그1", "태그2"))
-                .build();
-
-        return request.mapToStudy(owner);
-    }
-
-    private Member createMember() {
-        Member member = new Member("abc@gmail.com", "1q2w3e4r!", "hong", null);
-        memberRepository.save(member);
-        return member;
     }
 }

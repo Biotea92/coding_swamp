@@ -6,7 +6,7 @@ import com.study.codingswamp.application.auth.service.request.MailAuthentication
 import com.study.codingswamp.application.auth.token.TokenProvider;
 import com.study.codingswamp.domain.member.entity.Member;
 import com.study.codingswamp.domain.member.repository.MemberRepository;
-import com.study.codingswamp.util.TestUtil;
+import com.study.codingswamp.util.fixture.entity.member.MemberFixture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -99,8 +99,8 @@ class AuthControllerTest {
     @Test
     @DisplayName("새로은 토큰을 refresh한다.")
     void refresh() throws Exception {
-        TestUtil testUtil = new TestUtil();
-        String token = testUtil.saveMemberAndGetToken(tokenProvider, memberRepository);
+        Member member = memberRepository.save(MemberFixture.create(true));
+        String token = tokenProvider.createAccessToken(member.getId(), member.getRole());
 
         mockMvc.perform(post("/api/auth/refresh")
                         .contentType(APPLICATION_JSON)
