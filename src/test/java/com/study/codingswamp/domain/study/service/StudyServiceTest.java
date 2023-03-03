@@ -1,6 +1,5 @@
 package com.study.codingswamp.domain.study.service;
 
-import com.study.codingswamp.application.auth.MemberPayload;
 import com.study.codingswamp.domain.member.entity.Member;
 import com.study.codingswamp.domain.member.repository.MemberRepository;
 import com.study.codingswamp.domain.study.dto.request.ApplyRequest;
@@ -64,11 +63,10 @@ class StudyServiceTest {
         // given
         Member member = memberRepository.save(MemberFixture.create(true));
 
-        MemberPayload memberPayload = new MemberPayload(member.getId(), member.getRole());
         StudyRequest request = StudyRequestFixture.create();
 
         // when
-        Study study = studyService.createStudy(memberPayload, request);
+        Study study = studyService.createStudy(member.getId(), request);
 
         // then
         assertThat(study.getTitle()).isEqualTo(request.getTitle());
@@ -91,9 +89,8 @@ class StudyServiceTest {
     void getStudyDetail() {
         // given
         Member member = memberRepository.save(MemberFixture.create(true));
-        MemberPayload memberPayload = new MemberPayload(member.getId(), member.getRole());
         StudyRequest request = StudyRequestFixture.create();
-        Study study = studyService.createStudy(memberPayload, request);
+        Study study = studyService.createStudy(member.getId(), request);
 
         // when
         StudyDetailResponse response = studyService.getStudyDetails(study.getId());
@@ -129,16 +126,14 @@ class StudyServiceTest {
     void apply() {
         // given
         Member studyOwner = memberRepository.save(MemberFixture.create(true));
-        MemberPayload memberPayload = new MemberPayload(studyOwner.getId(), studyOwner.getRole());
         StudyRequest studyRequest = StudyRequestFixture.create();
-        Study study = studyService.createStudy(memberPayload, studyRequest);
+        Study study = studyService.createStudy(studyOwner.getId(), studyRequest);
 
         Member applicantMember = memberRepository.save(MemberFixture.createGithubMember());
-        MemberPayload applicantMemberPayload = new MemberPayload(applicantMember.getId(), applicantMember.getRole());
         ApplyRequest applyRequest = ApplyRequestFixture.create();
 
         // when
-        studyService.apply(applicantMemberPayload, study.getId(), applyRequest);
+        studyService.apply(applicantMember.getId(), study.getId(), applyRequest);
 
         // then
         assertThat(study.getApplicants().size()).isEqualTo(1);
@@ -149,18 +144,16 @@ class StudyServiceTest {
     void applyWhenMaxMemberCount() {
         // given
         Member studyOwner = memberRepository.save(MemberFixture.create(true));;
-        MemberPayload memberPayload = new MemberPayload(studyOwner.getId(), studyOwner.getRole());
         StudyRequest studyRequest = StudyRequestFixture.create(1);
-        Study study = studyService.createStudy(memberPayload, studyRequest);
+        Study study = studyService.createStudy(studyOwner.getId(), studyRequest);
 
         Member applicantMember = memberRepository.save(MemberFixture.createGithubMember());;
-        MemberPayload applicantMemberPayload = new MemberPayload(applicantMember.getId(), applicantMember.getRole());
         ApplyRequest applyRequest = ApplyRequestFixture.create();
 
         // expected
         assertThrows(
                 ConflictException.class,
-                () -> studyService.apply(applicantMemberPayload, study.getId(), applyRequest)
+                () -> studyService.apply(applicantMember.getId(), study.getId(), applyRequest)
         );
     }
 
@@ -169,19 +162,17 @@ class StudyServiceTest {
     void applyTwice() {
         // given
         Member studyOwner = memberRepository.save(MemberFixture.create(true));
-        MemberPayload memberPayload = new MemberPayload(studyOwner.getId(), studyOwner.getRole());
         StudyRequest studyRequest = StudyRequestFixture.create();
-        Study study = studyService.createStudy(memberPayload, studyRequest);
+        Study study = studyService.createStudy(studyOwner.getId(), studyRequest);
 
         Member applicantMember = memberRepository.save(MemberFixture.createGithubMember());
-        MemberPayload applicantMemberPayload = new MemberPayload(applicantMember.getId(), applicantMember.getRole());
         ApplyRequest applyRequest = ApplyRequestFixture.create();
-        studyService.apply(applicantMemberPayload, study.getId(), applyRequest);
+        studyService.apply(applicantMember.getId(), study.getId(), applyRequest);
 
         // expected
         assertThrows(
                 ConflictException.class,
-                () -> studyService.apply(applicantMemberPayload, study.getId(), applyRequest)
+                () -> studyService.apply(applicantMember.getId(), study.getId(), applyRequest)
         );
     }
 
@@ -190,16 +181,15 @@ class StudyServiceTest {
     void applyIfParticipant() {
         // given
         Member studyOwner = memberRepository.save(MemberFixture.create(true));
-        MemberPayload memberPayload = new MemberPayload(studyOwner.getId(), studyOwner.getRole());
         StudyRequest studyRequest = StudyRequestFixture.create();
-        Study study = studyService.createStudy(memberPayload, studyRequest);
+        Study study = studyService.createStudy(studyOwner.getId(), studyRequest);
 
         ApplyRequest applyRequest = ApplyRequestFixture.create();
 
         // then
         assertThrows(
                 ConflictException.class,
-                () -> studyService.apply(memberPayload, study.getId(), applyRequest)
+                () -> studyService.apply(studyOwner.getId(), study.getId(), applyRequest)
         );
     }
 
@@ -208,15 +198,14 @@ class StudyServiceTest {
     void approve() {
         // given
         Member studyOwner = memberRepository.save(MemberFixture.create(true));
-        MemberPayload ownerPayload = new MemberPayload(studyOwner.getId(), studyOwner.getRole());
         StudyRequest studyRequest = StudyRequestFixture.create();
-        Study study = studyService.createStudy(ownerPayload, studyRequest);
+        Study study = studyService.createStudy(studyOwner.getId(), studyRequest);
         Member member = memberRepository.save(MemberFixture.createGithubMember());
         Applicant applicant = ApplicantFixture.create(study, member);
         study.addApplicant(applicant);
 
         // when
-        studyService.approve(ownerPayload, study.getId(), applicant.getMember().getId());
+        studyService.approve(studyOwner.getId(), study.getId(), applicant.getMember().getId());
 
         // then
         assertThat(study.getApplicants()).isEmpty();
@@ -228,18 +217,16 @@ class StudyServiceTest {
     void approveNotOwner() {
         // given
         Member studyOwner = memberRepository.save(MemberFixture.create(true));
-        MemberPayload ownerPayload = new MemberPayload(studyOwner.getId(), studyOwner.getRole());
         StudyRequest studyRequest = StudyRequestFixture.create();
-        Study study = studyService.createStudy(ownerPayload, studyRequest);
+        Study study = studyService.createStudy(studyOwner.getId(), studyRequest);
         Member member = memberRepository.save(MemberFixture.createGithubMember());
         Applicant applicant = ApplicantFixture.create(study, member);
         study.addApplicant(applicant);
-        MemberPayload memberPayload = new MemberPayload(member.getId(), member.getRole());
 
         // then
         assertThrows(
                 ForbiddenException.class,
-                () -> studyService.approve(memberPayload, study.getId(), applicant.getMember().getId())
+                () -> studyService.approve(member.getId(), study.getId(), applicant.getMember().getId())
         );
     }
 
@@ -272,10 +259,9 @@ class StudyServiceTest {
             applicantRepository.save(applicant);
             study.addApplicant(applicant);
         });
-        MemberPayload memberPayload = new MemberPayload(member.getId(), member.getRole());
 
         // when
-        StudiesResponse response = studyService.getMyApplies(memberPayload);
+        StudiesResponse response = studyService.getMyApplies(member.getId());
 
         // then
         assertThat(response.getStudyResponses().size()).isEqualTo(20);
@@ -297,10 +283,9 @@ class StudyServiceTest {
             participantRepository.save(participant);
             study.addParticipant(participant);
         });
-        MemberPayload memberPayload = new MemberPayload(member.getId(), member.getRole());
 
         // when
-        StudiesResponse response = studyService.getMyParticipates(memberPayload);
+        StudiesResponse response = studyService.getMyParticipates(member.getId());
 
         // then
         assertThat(response.getStudyResponses().size()).isEqualTo(20);
@@ -311,8 +296,7 @@ class StudyServiceTest {
     void edit() {
         // given
         Member member = memberRepository.save(MemberFixture.create(true));
-        MemberPayload memberPayload = new MemberPayload(member.getId(), member.getRole());
-        Study study = studyService.createStudy(memberPayload, StudyRequestFixture.create());
+        Study study = studyService.createStudy(member.getId(), StudyRequestFixture.create());
 
         StudyRequest request = StudyRequest.builder()
                 .title("제목입니다. 수정")
@@ -326,7 +310,7 @@ class StudyServiceTest {
                 .build();
 
         // when
-        studyService.edit(memberPayload, study.getId(), request);
+        studyService.edit(member.getId(), study.getId(), request);
 
         assertThat(study.getTitle()).isEqualTo("제목입니다. 수정");
         assertThat(study.getDescription()).isEqualTo("설명입니다. 수정");
@@ -343,7 +327,6 @@ class StudyServiceTest {
     void delete() {
         // when
         Member studyOwner = memberRepository.save(MemberFixture.create(true));
-        MemberPayload memberPayload = new MemberPayload(studyOwner.getId(), studyOwner.getRole());
         Study study = Study.builder()
                 .title("제목입니다.")
                 .description("설명입니다.")
@@ -362,7 +345,7 @@ class StudyServiceTest {
         studyRepository.save(study);
 
         // when
-        studyService.delete(memberPayload, study.getId());
+        studyService.delete(studyOwner.getId(), study.getId());
 
         // then
         assertThat(studyRepository.findById(study.getId())).isEmpty();
@@ -397,10 +380,9 @@ class StudyServiceTest {
         study.initParticipants(new Participant(study, studyOwner, now));
         study.initParticipants(new Participant(study, member, now));
         studyRepository.save(study);
-        MemberPayload memberPayload = new MemberPayload(member.getId(), member.getRole());
 
         // when
-        studyService.withdraw(memberPayload, study.getId());
+        studyService.withdraw(member.getId(), study.getId());
 
         // then
         assertEquals(1, study.getParticipants().size());
@@ -435,10 +417,9 @@ class StudyServiceTest {
         study.initParticipants(ownerParticipant);
         study.initParticipants(participant);
         studyRepository.save(study);
-        MemberPayload memberPayload = new MemberPayload(studyOwner.getId(), studyOwner.getRole());
 
         // when
-        studyService.kickParticipant(memberPayload, study.getId(), member.getId());
+        studyService.kickParticipant(studyOwner.getId(), study.getId(), member.getId());
 
         // then
         assertThat(study.getParticipants().size()).isEqualTo(1);
@@ -486,10 +467,9 @@ class StudyServiceTest {
         Applicant applicant = ApplicantFixture.create(study, applicantMember);
         study.addApplicant(applicant);
         applicantRepository.save(applicant);
-        MemberPayload memberPayload = new MemberPayload(applicantMember.getId(), applicantMember.getRole());
 
         // when
-        studyService.cancelApply(memberPayload, study.getId());
+        studyService.cancelApply(applicantMember.getId(), study.getId());
 
         // then
         assertThat(study.getApplicants().size()).isEqualTo(0);

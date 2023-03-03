@@ -1,6 +1,5 @@
 package com.study.codingswamp.domain.study.service;
 
-import com.study.codingswamp.application.auth.MemberPayload;
 import com.study.codingswamp.domain.member.entity.Member;
 import com.study.codingswamp.domain.member.repository.MemberRepository;
 import com.study.codingswamp.domain.study.dto.request.ApplyRequest;
@@ -35,8 +34,8 @@ public class StudyService {
     private final ParticipantRepository participantRepository;
 
     @Transactional
-    public Study createStudy(MemberPayload memberPayload, StudyRequest request) {
-        Member owner = findMember(memberPayload.getId());
+    public Study createStudy(Long memberId, StudyRequest request) {
+        Member owner = findMember(memberId);
         Study study = request.mapToStudy(owner);
         Participant participant = new Participant(study, owner, LocalDate.now());
         study.initParticipants(participant);
@@ -57,8 +56,8 @@ public class StudyService {
     }
 
     @Transactional
-    public void apply(MemberPayload memberPayload, Long studyId, ApplyRequest applyRequest) {
-        Member applicantMember = findMember(memberPayload.getId());
+    public void apply(Long memberId, Long studyId, ApplyRequest applyRequest) {
+        Member applicantMember = findMember(memberId);
         Study findStudy = findStudy(studyId);
 
         findStudy.validateStudyMaxMember();
@@ -71,8 +70,8 @@ public class StudyService {
     }
 
     @Transactional
-    public void approve(MemberPayload memberPayload, Long studyId, Long applicantId) {
-        Member owner = findMember(memberPayload.getId());
+    public void approve(Long memberId, Long studyId, Long applicantId) {
+        Member owner = findMember(memberId);
         Study findStudy = findStudy(studyId);
         findStudy.validateOwner(owner);
         findStudy.validateStudyMaxMember();
@@ -104,8 +103,8 @@ public class StudyService {
         return new StudiesResponse(studyResponses, condition.getTotalPage(totalCount));
     }
 
-    public StudiesResponse getMyApplies(MemberPayload memberPayload) {
-        Member member = findMember(memberPayload.getId());
+    public StudiesResponse getMyApplies(Long memberId) {
+        Member member = findMember(memberId);
         List<StudyResponse> studyResponses = studyRepository.findMyApplies(member)
                 .stream()
                 .map(study -> new StudyResponse(study, getTags(study.getTags())))
@@ -113,8 +112,8 @@ public class StudyService {
         return new StudiesResponse(studyResponses, 1);
     }
 
-    public StudiesResponse getMyParticipates(MemberPayload memberPayload) {
-        Member member = findMember(memberPayload.getId());
+    public StudiesResponse getMyParticipates(Long memberId) {
+        Member member = findMember(memberId);
         List<StudyResponse> studyResponses = studyRepository.findMyParticipates(member)
                 .stream()
                 .map(study -> new StudyResponse(study, getTags(study.getTags())))
@@ -123,17 +122,17 @@ public class StudyService {
     }
 
     @Transactional
-    public void edit(MemberPayload memberPayload, Long studyId, StudyRequest request) {
+    public void edit(Long memberId, Long studyId, StudyRequest request) {
         Study findStudy = findStudy(studyId);
-        Member owner = findMember(memberPayload.getId());
+        Member owner = findMember(memberId);
         findStudy.validateOwner(owner);
         findStudy.update(request);
     }
 
     @Transactional
-    public void delete(MemberPayload memberPayload, Long studyId) {
+    public void delete(Long memberId, Long studyId) {
         Study findStudy = findStudy(studyId);
-        Member owner = findMember(memberPayload.getId());
+        Member owner = findMember(memberId);
         findStudy.validateOwner(owner);
         participantRepository.deleteAll(findStudy.getParticipants());
         applicantRepository.deleteAll(findStudy.getApplicants());
@@ -141,28 +140,28 @@ public class StudyService {
     }
 
     @Transactional
-    public void withdraw(MemberPayload memberPayload, Long studyId) {
+    public void withdraw(Long memberId, Long studyId) {
         Study findStudy = findStudy(studyId);
-        Member member = findMember(memberPayload.getId());
+        Member member = findMember(memberId);
         Participant participant = findStudy.withDrawParticipant(member);
         participantRepository.delete(participant);
     }
 
     @Transactional
-    public void kickParticipant(MemberPayload memberPayload, Long studyId, Long memberId) {
+    public void kickParticipant(Long memberId, Long studyId, Long participantMemberId) {
         Study findStudy = findStudy(studyId);
-        Member owner = findMember(memberPayload.getId());
+        Member owner = findMember(memberId);
         findStudy.validateOwner(owner);
 
-        Member participantMember = findMember(memberId);
+        Member participantMember = findMember(participantMemberId);
         Participant participant = findStudy.kickParticipant(participantMember);
         participantRepository.delete(participant);
     }
 
     @Transactional
-    public void cancelApply(MemberPayload memberPayload, Long studyId) {
+    public void cancelApply(Long memberId, Long studyId) {
         Study findStudy = findStudy(studyId);
-        Member applicantMember = findMember(memberPayload.getId());
+        Member applicantMember = findMember(memberId);
 
         Applicant applicant = findStudy.removeApplicant(applicantMember);
         applicantRepository.delete(applicant);

@@ -29,7 +29,7 @@ public class StudyController {
     @PostMapping
     public ResponseEntity<Void> create(@AuthenticatedMember MemberPayload memberPayload,
                                        @Validated @RequestBody StudyRequest request) {
-        Study study = studyService.createStudy(memberPayload, request);
+        Study study = studyService.createStudy(memberPayload.getId(), request);
         return ResponseEntity.created(URI.create("/api/study/" + study.getId())).build();
     }
 
@@ -50,7 +50,7 @@ public class StudyController {
     public ResponseEntity<Void> apply(@AuthenticatedMember MemberPayload memberPayload,
                                       @PathVariable Long studyId,
                                       @Validated @RequestBody ApplyRequest applyRequest) {
-        studyService.apply(memberPayload, studyId, applyRequest);
+        studyService.apply(memberPayload.getId(), studyId, applyRequest);
         return ResponseEntity.created(URI.create("/api/study/" + studyId)).build();
     }
 
@@ -59,21 +59,21 @@ public class StudyController {
     public ResponseEntity<Void> approve(@AuthenticatedMember MemberPayload memberPayload,
                                         @PathVariable Long studyId,
                                         @PathVariable Long applicantId) {
-        studyService.approve(memberPayload, studyId, applicantId);
+        studyService.approve(memberPayload.getId(), studyId, applicantId);
         return ResponseEntity.created(URI.create("/api/study/" + studyId)).build();
     }
 
     @Login
     @GetMapping("/my/applies")
     public ResponseEntity<StudiesResponse> getMyApplies(@AuthenticatedMember MemberPayload memberPayload) {
-        StudiesResponse response = studyService.getMyApplies(memberPayload);
+        StudiesResponse response = studyService.getMyApplies(memberPayload.getId());
         return ResponseEntity.ok(response);
     }
 
     @Login
     @GetMapping("/my/participates")
     public ResponseEntity<StudiesResponse> getMyParticipates(@AuthenticatedMember MemberPayload memberPayload) {
-        StudiesResponse response = studyService.getMyParticipates(memberPayload);
+        StudiesResponse response = studyService.getMyParticipates(memberPayload.getId());
         return ResponseEntity.ok(response);
     }
 
@@ -82,7 +82,7 @@ public class StudyController {
     public ResponseEntity<Void> edit(@AuthenticatedMember MemberPayload memberPayload,
                                      @PathVariable Long studyId,
                                      @Validated @RequestBody StudyRequest request) {
-        studyService.edit(memberPayload, studyId, request);
+        studyService.edit(memberPayload.getId(), studyId, request);
         return ResponseEntity.created(URI.create("/api/study/" + studyId)).build();
     }
 
@@ -90,7 +90,7 @@ public class StudyController {
     @DeleteMapping("/{studyId}")
     public ResponseEntity<Void> delete(@AuthenticatedMember MemberPayload memberPayload,
                                        @PathVariable Long studyId) {
-        studyService.delete(memberPayload, studyId);
+        studyService.delete(memberPayload.getId(), studyId);
         return ResponseEntity.noContent().build();
     }
 
@@ -98,7 +98,7 @@ public class StudyController {
     @PatchMapping("/{studyId}/withdraw")
     public ResponseEntity<Void> withdraw(@AuthenticatedMember MemberPayload memberPayload,
                                          @PathVariable Long studyId) {
-        studyService.withdraw(memberPayload, studyId);
+        studyService.withdraw(memberPayload.getId(), studyId);
         return ResponseEntity.created(URI.create("/api/study/" + studyId)).build();
     }
 
@@ -107,7 +107,7 @@ public class StudyController {
     public ResponseEntity<Void> kick(@AuthenticatedMember MemberPayload memberPayload,
                                      @PathVariable Long studyId,
                                      @PathVariable Long memberId) {
-        studyService.kickParticipant(memberPayload, studyId, memberId);
+        studyService.kickParticipant(memberPayload.getId(), studyId, memberId);
         return ResponseEntity.created(URI.create("/api/study/" + studyId)).build();
     }
 
@@ -116,7 +116,7 @@ public class StudyController {
     public ResponseEntity<Void> cancelApply(
             @AuthenticatedMember MemberPayload memberPayload,
             @PathVariable Long studyId) {
-        studyService.cancelApply(memberPayload, studyId);
+        studyService.cancelApply(memberPayload.getId(), studyId);
         return ResponseEntity.created(URI.create("/api/study/" + studyId)).build();
     }
 
