@@ -1,16 +1,15 @@
 package com.study.codingswamp.domain.member.service;
 
-import com.study.codingswamp.application.auth.service.MemberPayload;
 import com.study.codingswamp.application.auth.service.request.CommonLoginRequest;
+import com.study.codingswamp.application.file.FileStore;
+import com.study.codingswamp.domain.member.dto.request.MemberEditRequest;
+import com.study.codingswamp.domain.member.dto.request.MemberSignupRequest;
+import com.study.codingswamp.domain.member.dto.response.MemberResponse;
+import com.study.codingswamp.domain.member.entity.Member;
+import com.study.codingswamp.domain.member.repository.MemberRepository;
 import com.study.codingswamp.exception.ConflictException;
 import com.study.codingswamp.exception.NotFoundException;
 import com.study.codingswamp.exception.UnauthorizedException;
-import com.study.codingswamp.application.file.FileStore;
-import com.study.codingswamp.domain.member.entity.Member;
-import com.study.codingswamp.domain.member.repository.MemberRepository;
-import com.study.codingswamp.domain.member.dto.request.MemberEditRequest;
-import com.study.codingswamp.domain.member.dto.response.MemberResponse;
-import com.study.codingswamp.domain.member.dto.request.MemberSignupRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -20,6 +19,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class MemberService {
 
     private final MemberRepository memberRepository;
@@ -72,8 +72,7 @@ public class MemberService {
     }
 
     @Transactional
-    public MemberResponse edit(MemberPayload memberPayload, MemberEditRequest request) {
-        Long memberId = memberPayload.getId();
+    public MemberResponse edit(Long memberId, MemberEditRequest request) {
         Member member = checkExistMemberAndGet(memberId);
         if (member.getGithubId() != null) {
             throw new UnauthorizedException("github", "깃허브 사용자는 수정이 불가능합니다.");
@@ -90,8 +89,7 @@ public class MemberService {
     }
 
     @Transactional
-    public void delete(MemberPayload memberPayload) {
-        Long memberId = memberPayload.getId();
+    public void delete(Long memberId) {
         Member member = checkExistMemberAndGet(memberId);
         if (member.getGithubId() != null) {
             throw new UnauthorizedException("github", "깃허브 사용자는 회원탈퇴가 불가능합니다. ");

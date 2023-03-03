@@ -6,7 +6,7 @@ import com.study.codingswamp.application.auth.oauth.GithubOauthClient;
 import com.study.codingswamp.application.auth.oauth.response.GithubProfileResponse;
 import com.study.codingswamp.application.auth.service.AuthService;
 import com.study.codingswamp.application.auth.service.MailService;
-import com.study.codingswamp.application.auth.service.MemberPayload;
+import com.study.codingswamp.application.auth.MemberPayload;
 import com.study.codingswamp.application.auth.service.request.CommonLoginRequest;
 import com.study.codingswamp.application.auth.service.request.MailAuthenticationRequest;
 import com.study.codingswamp.application.auth.service.response.AccessTokenResponse;

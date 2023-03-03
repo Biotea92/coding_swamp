@@ -1,4 +1,4 @@
-package com.study.codingswamp.application.auth.utils;
+package com.study.codingswamp.application.auth.token;
 
 import com.study.codingswamp.exception.UnauthorizedException;
 import org.springframework.stereotype.Component;

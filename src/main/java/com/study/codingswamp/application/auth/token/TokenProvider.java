@@ -1,7 +1,6 @@
 package com.study.codingswamp.application.auth.token;
 
-import com.study.codingswamp.application.auth.utils.AuthTokenExtractor;
-import com.study.codingswamp.application.auth.service.MemberPayload;
+import com.study.codingswamp.application.auth.MemberPayload;
 import com.study.codingswamp.exception.UnauthorizedException;
 import com.study.codingswamp.domain.member.entity.Role;
 import io.jsonwebtoken.*;

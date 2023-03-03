@@ -1,6 +1,6 @@
 package com.study.codingswamp.study.service;
 
-import com.study.codingswamp.application.auth.service.MemberPayload;
+import com.study.codingswamp.application.auth.MemberPayload;
 import com.study.codingswamp.exception.ConflictException;
 import com.study.codingswamp.exception.ForbiddenException;
 import com.study.codingswamp.exception.NotFoundException;

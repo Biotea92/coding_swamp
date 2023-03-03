@@ -1,6 +1,6 @@
 package com.study.codingswamp.presentation.common;
 
-import com.study.codingswamp.application.auth.service.MemberPayload;
+import com.study.codingswamp.application.auth.MemberPayload;
 import com.study.codingswamp.application.auth.token.TokenProvider;
 import com.study.codingswamp.exception.ForbiddenException;
 import com.study.codingswamp.exception.UnauthorizedException;

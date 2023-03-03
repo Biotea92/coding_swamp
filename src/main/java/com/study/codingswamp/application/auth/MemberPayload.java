@@ -1,4 +1,4 @@
-package com.study.codingswamp.application.auth.service;
+package com.study.codingswamp.application.auth;
 
 import com.study.codingswamp.domain.member.entity.Role;
 import lombok.EqualsAndHashCode;

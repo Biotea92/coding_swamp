@@ -1,6 +1,6 @@
 package com.study.codingswamp.auth.utils;
 
-import com.study.codingswamp.application.auth.utils.AuthTokenExtractor;
+import com.study.codingswamp.application.auth.token.AuthTokenExtractor;
 import com.study.codingswamp.exception.UnauthorizedException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

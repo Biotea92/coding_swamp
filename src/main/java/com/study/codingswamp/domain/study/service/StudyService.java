@@ -1,6 +1,6 @@
 package com.study.codingswamp.domain.study.service;
 
-import com.study.codingswamp.application.auth.service.MemberPayload;
+import com.study.codingswamp.application.auth.MemberPayload;
 import com.study.codingswamp.domain.member.entity.Member;
 import com.study.codingswamp.domain.member.repository.MemberRepository;
 import com.study.codingswamp.domain.study.dto.request.ApplyRequest;

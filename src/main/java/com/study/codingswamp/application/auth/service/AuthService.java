@@ -1,5 +1,6 @@
 package com.study.codingswamp.application.auth.service;
 
+import com.study.codingswamp.application.auth.MemberPayload;
 import com.study.codingswamp.application.auth.oauth.response.GithubProfileResponse;
 import com.study.codingswamp.application.auth.service.request.CommonLoginRequest;
 import com.study.codingswamp.application.auth.token.TokenProvider;

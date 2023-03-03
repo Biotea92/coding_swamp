@@ -1,7 +1,7 @@
 package com.study.codingswamp.auth.service;
 
 import com.study.codingswamp.application.auth.service.AuthService;
-import com.study.codingswamp.application.auth.service.MemberPayload;
+import com.study.codingswamp.application.auth.MemberPayload;
 import com.study.codingswamp.application.auth.service.request.CommonLoginRequest;
 import com.study.codingswamp.application.auth.service.response.AccessTokenResponse;
 import com.study.codingswamp.application.auth.token.TokenProvider;

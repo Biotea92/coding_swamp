@@ -2,7 +2,7 @@ package com.study.codingswamp.presentation.member;
 
 import com.study.codingswamp.presentation.common.AuthenticatedMember;
 import com.study.codingswamp.presentation.common.Login;
-import com.study.codingswamp.application.auth.service.MemberPayload;
+import com.study.codingswamp.application.auth.MemberPayload;
 import com.study.codingswamp.domain.member.dto.request.MemberEditRequest;
 import com.study.codingswamp.domain.member.dto.response.MemberResponse;
 import com.study.codingswamp.domain.member.service.MemberService;
@@ -38,7 +38,7 @@ public class MemberController {
     @PostMapping("/edit")
     public ResponseEntity<MemberResponse> edit(@AuthenticatedMember MemberPayload memberPayload,
                                                @Validated MemberEditRequest memberEditRequest) {
-        MemberResponse response = memberService.edit(memberPayload, memberEditRequest);
+        MemberResponse response = memberService.edit(memberPayload.getId(), memberEditRequest);
         return ResponseEntity
                 .created(URI.create("/api/member/" + memberPayload.getId()))
                 .body(response);
@@ -47,7 +47,7 @@ public class MemberController {
     @Login
     @DeleteMapping
     public ResponseEntity<Void> delete(@AuthenticatedMember MemberPayload memberPayload) {
-        memberService.delete(memberPayload);
+        memberService.delete(memberPayload.getId());
         return ResponseEntity.noContent().build();
     }
 }

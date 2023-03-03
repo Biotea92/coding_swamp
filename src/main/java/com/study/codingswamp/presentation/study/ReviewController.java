@@ -3,7 +3,7 @@ package com.study.codingswamp.presentation.study;
 
 import com.study.codingswamp.presentation.common.AuthenticatedMember;
 import com.study.codingswamp.presentation.common.Login;
-import com.study.codingswamp.application.auth.service.MemberPayload;
+import com.study.codingswamp.application.auth.MemberPayload;
 import com.study.codingswamp.domain.study.service.ReviewService;
 import com.study.codingswamp.domain.study.dto.request.ReviewRequest;
 import lombok.RequiredArgsConstructor;

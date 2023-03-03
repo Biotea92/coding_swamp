@@ -1,7 +1,7 @@
 package com.study.codingswamp.study.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.study.codingswamp.application.auth.service.MemberPayload;
+import com.study.codingswamp.application.auth.MemberPayload;
 import com.study.codingswamp.application.auth.token.TokenProvider;
 import com.study.codingswamp.domain.member.entity.Member;
 import com.study.codingswamp.domain.member.repository.MemberRepository;

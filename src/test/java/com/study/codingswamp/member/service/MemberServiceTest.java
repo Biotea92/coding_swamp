@@ -1,17 +1,16 @@
 package com.study.codingswamp.member.service;
 
-import com.study.codingswamp.application.auth.service.MemberPayload;
 import com.study.codingswamp.application.auth.service.request.CommonLoginRequest;
-import com.study.codingswamp.exception.ConflictException;
-import com.study.codingswamp.exception.NotFoundException;
-import com.study.codingswamp.exception.UnauthorizedException;
+import com.study.codingswamp.domain.member.dto.request.MemberEditRequest;
+import com.study.codingswamp.domain.member.dto.request.MemberSignupRequest;
+import com.study.codingswamp.domain.member.dto.response.MemberResponse;
 import com.study.codingswamp.domain.member.entity.Member;
 import com.study.codingswamp.domain.member.entity.Role;
 import com.study.codingswamp.domain.member.repository.MemberRepository;
 import com.study.codingswamp.domain.member.service.MemberService;
-import com.study.codingswamp.domain.member.dto.request.MemberEditRequest;
-import com.study.codingswamp.domain.member.dto.request.MemberSignupRequest;
-import com.study.codingswamp.domain.member.dto.response.MemberResponse;
+import com.study.codingswamp.exception.ConflictException;
+import com.study.codingswamp.exception.NotFoundException;
+import com.study.codingswamp.exception.UnauthorizedException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -149,7 +148,6 @@ class MemberServiceTest {
     void edit() {
         // given
         Member member = saveMemberAndGet();
-        MemberPayload memberPayload = new MemberPayload(member.getId(), member.getRole());
         MemberEditRequest editRequest = MemberEditRequest.builder()
                 .username("kim")
                 .profileUrl("http://profile")
@@ -157,7 +155,7 @@ class MemberServiceTest {
                 .build();
 
         // when
-        MemberResponse editResponse = memberService.edit(memberPayload, editRequest);
+        MemberResponse editResponse = memberService.edit(member.getId(), editRequest);
 
         assertThat(editResponse.getMemberId()).isEqualTo(member.getId());
         assertThat(editResponse.getUsername()).isEqualTo("kim");
@@ -170,7 +168,6 @@ class MemberServiceTest {
     void editGithubMember() {
         // given
         Member member = saveGithubMemberAndGet();
-        MemberPayload memberPayload = new MemberPayload(member.getId(), member.getRole());
         MemberEditRequest editRequest = MemberEditRequest.builder()
                 .username("kim")
                 .profileUrl("http://profile")
@@ -180,7 +177,7 @@ class MemberServiceTest {
         // expected
         assertThrows(
                 UnauthorizedException.class,
-                () -> memberService.edit(memberPayload, editRequest)
+                () -> memberService.edit(member.getId(), editRequest)
         );
     }
 
@@ -189,12 +186,10 @@ class MemberServiceTest {
     void delete() {
         // given
         Member member = saveMemberAndGet();
-        MemberPayload memberPayload = new MemberPayload(member.getId(), member.getRole());
-
         System.out.println(member.getImageUrl());
 
         // when
-        memberService.delete(memberPayload);
+        memberService.delete(member.getId());
 
         // then
         assertThrows(
@@ -208,12 +203,11 @@ class MemberServiceTest {
     void deleteGithubMember() {
         // given
         Member member = saveGithubMemberAndGet();
-        MemberPayload memberPayload = new MemberPayload(member.getId(), member.getRole());
 
         // expected
         assertThrows(
                 UnauthorizedException.class,
-                () -> memberService.delete(memberPayload)
+                () -> memberService.delete(member.getId())
         );
     }
 
