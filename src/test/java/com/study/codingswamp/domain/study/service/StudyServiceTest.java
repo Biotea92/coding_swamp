@@ -19,6 +19,7 @@ import com.study.codingswamp.util.fixture.dto.study.ApplyRequestFixture;
 import com.study.codingswamp.util.fixture.dto.study.StudyRequestFixture;
 import com.study.codingswamp.util.fixture.entity.member.MemberFixture;
 import com.study.codingswamp.util.fixture.entity.study.ApplicantFixture;
+import com.study.codingswamp.util.fixture.entity.study.ParticipantFixture;
 import com.study.codingswamp.util.fixture.entity.study.StudyFixture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -279,7 +280,7 @@ class StudyServiceTest {
             study.addApplicant(applicant);
         });
         studies.forEach(study -> {
-            Participant participant = new Participant(study, member, LocalDate.now());
+            Participant participant = ParticipantFixture.create(member, study);
             participantRepository.save(participant);
             study.addParticipant(participant);
         });
@@ -377,8 +378,8 @@ class StudyServiceTest {
                 .participants(new HashSet<>())
                 .tags(List.of(new Tag("태그1"), new Tag("태그2")))
                 .build();
-        study.initParticipants(new Participant(study, studyOwner, now));
-        study.initParticipants(new Participant(study, member, now));
+        study.initParticipants(ParticipantFixture.create(studyOwner, study));
+        study.initParticipants(ParticipantFixture.create(member, study));
         studyRepository.save(study);
 
         // when
@@ -396,7 +397,6 @@ class StudyServiceTest {
         // given
         Member studyOwner = memberRepository.save(MemberFixture.create(true));
         Member member = memberRepository.save(MemberFixture.createGithubMember());
-        LocalDate now = LocalDate.now();
         Study study = Study.builder()
                 .title("제목입니다.")
                 .description("설명입니다.")
@@ -412,8 +412,8 @@ class StudyServiceTest {
                 .participants(new HashSet<>())
                 .tags(List.of(new Tag("태그1"), new Tag("태그2")))
                 .build();
-        Participant ownerParticipant = new Participant(study, studyOwner, now);
-        Participant participant = new Participant(study, member, now);
+        Participant ownerParticipant = ParticipantFixture.create(studyOwner, study);
+        Participant participant = ParticipantFixture.create(member, study);
         study.initParticipants(ownerParticipant);
         study.initParticipants(participant);
         studyRepository.save(study);

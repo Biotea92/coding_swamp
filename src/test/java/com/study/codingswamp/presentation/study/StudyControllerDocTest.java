@@ -13,6 +13,7 @@ import com.study.codingswamp.domain.study.repository.StudyRepository;
 import com.study.codingswamp.util.fixture.dto.study.ApplyRequestFixture;
 import com.study.codingswamp.util.fixture.entity.member.MemberFixture;
 import com.study.codingswamp.util.fixture.entity.study.ApplicantFixture;
+import com.study.codingswamp.util.fixture.entity.study.ParticipantFixture;
 import com.study.codingswamp.util.fixture.entity.study.StudyFixture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -136,7 +137,7 @@ public class StudyControllerDocTest {
         // given
         Member member = memberRepository.save(MemberFixture.create(true));
         Study study = StudyFixture.create(member);
-        Participant participant = new Participant(study, member, LocalDate.now());
+        Participant participant = ParticipantFixture.create(member, study);
         study.initParticipants(participant);
         Member hong = memberRepository.save(MemberFixture.createGithubMember());
         study.addApplicant(ApplicantFixture.create(study, hong));
@@ -370,7 +371,7 @@ public class StudyControllerDocTest {
                                     .thumbnail("#00000")
                                     .tags(List.of(new Tag("태그1"), new Tag("태그2")))
                                     .build();
-                    Participant participant = new Participant(study, applicantMember, LocalDate.now().plusDays(i));
+                    Participant participant = ParticipantFixture.create(applicantMember, study);
                     participantRepository.save(participant);
                     study.initParticipants(participant);
                     return study;
@@ -486,7 +487,7 @@ public class StudyControllerDocTest {
         Member participantMember = memberRepository.save(MemberFixture.create(true));
         String token = tokenProvider.createAccessToken(participantMember.getId(), participantMember.getRole());
 
-        Participant participant = new Participant(study, participantMember, LocalDate.now());
+        Participant participant = ParticipantFixture.create(participantMember, study);
         participantRepository.save(participant);
         study.initParticipants(participant);
 
@@ -514,7 +515,7 @@ public class StudyControllerDocTest {
         Study study = studyRepository.save(StudyFixture.create(owner));
 
         Member member = memberRepository.save(MemberFixture.createGithubMember());
-        Participant participant = new Participant(study, member, LocalDate.now());
+        Participant participant = ParticipantFixture.create(member, study);
         participantRepository.save(participant);
         study.initParticipants(participant);
 
