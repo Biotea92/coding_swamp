@@ -2,7 +2,6 @@ package com.study.codingswamp.config;
 
 import com.study.codingswamp.presentation.common.AuthenticatedMemberResolver;
 import com.study.codingswamp.presentation.common.AuthenticationInterceptor;
-import com.study.codingswamp.application.auth.token.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -17,7 +16,7 @@ import java.util.List;
 public class AuthConfig implements WebMvcConfigurer {
 
     private final AuthenticatedMemberResolver authenticatedMemberResolver;
-    private final TokenProvider tokenProvider;
+    private final AuthenticationInterceptor authenticationInterceptor;
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
@@ -26,7 +25,7 @@ public class AuthConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new AuthenticationInterceptor(tokenProvider))
+        registry.addInterceptor(authenticationInterceptor)
                 .addPathPatterns("/**");
     }
 

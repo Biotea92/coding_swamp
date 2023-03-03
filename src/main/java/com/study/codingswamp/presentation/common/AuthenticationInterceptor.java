@@ -4,7 +4,7 @@ import com.study.codingswamp.application.auth.MemberPayload;
 import com.study.codingswamp.application.auth.token.TokenProvider;
 import com.study.codingswamp.exception.ForbiddenException;
 import com.study.codingswamp.exception.UnauthorizedException;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 @Component
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class AuthenticationInterceptor implements HandlerInterceptor {
 
     private final TokenProvider tokenProvider;
