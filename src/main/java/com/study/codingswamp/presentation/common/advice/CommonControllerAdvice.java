@@ -25,7 +25,7 @@ public class CommonControllerAdvice {
     })
     public ErrorResponse invalidRequestHandler(BindException e) {
         ErrorResponse errorResponse = ErrorResponse.builder()
-                .code("400")
+                .code(String.valueOf(HttpStatus.BAD_REQUEST))
                 .message("잘못된 요청입니다.")
                 .build();
 
@@ -59,7 +59,7 @@ public class CommonControllerAdvice {
     public ResponseEntity<ErrorResponse> handleInternalServerError(RuntimeException e) {
 
         ErrorResponse body = ErrorResponse.builder()
-                .code("500")
+                .code(String.valueOf(INTERNAL_SERVER_ERROR))
                 .message(e.getMessage())
                 .build();
 
