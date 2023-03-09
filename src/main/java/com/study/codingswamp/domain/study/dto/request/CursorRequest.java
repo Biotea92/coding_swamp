@@ -23,10 +23,6 @@ public class CursorRequest {
     }
 
     public CursorRequest next(Long key) {
-        return new CursorRequest(key, getValidatedSize());
-    }
-
-    private int getValidatedSize() {
-        return min(size, MAX_SIZE);
+        return new CursorRequest(key, size);
     }
 }
