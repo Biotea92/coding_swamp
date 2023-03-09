@@ -1,16 +1,23 @@
 package com.study.codingswamp.domain.study.service;
 
-import com.study.codingswamp.exception.NotFoundException;
 import com.study.codingswamp.domain.member.entity.Member;
 import com.study.codingswamp.domain.member.repository.MemberRepository;
+import com.study.codingswamp.domain.study.dto.request.CursorRequest;
+import com.study.codingswamp.domain.study.dto.request.ReviewRequest;
+import com.study.codingswamp.domain.study.dto.response.PageCursor;
+import com.study.codingswamp.domain.study.dto.response.ParticipantResponse;
+import com.study.codingswamp.domain.study.dto.response.ReviewResponse;
 import com.study.codingswamp.domain.study.entity.Review;
 import com.study.codingswamp.domain.study.entity.Study;
 import com.study.codingswamp.domain.study.repository.ReviewRepository;
 import com.study.codingswamp.domain.study.repository.StudyRepository;
-import com.study.codingswamp.domain.study.dto.request.ReviewRequest;
+import com.study.codingswamp.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +35,29 @@ public class ReviewService {
         findStudy.isParticipant(member);
         Review review = new Review(request.getContent(), member, findStudy);
         reviewRepository.save(review);
+    }
+
+    public PageCursor<ReviewResponse> getReviews(Long memberId, Long studyId, CursorRequest cursorRequest) {
+        Member member = findMember(memberId);
+        Study study = findStudy(studyId);
+        study.isParticipant(member);
+
+        List<Review> reviews = reviewRepository.findAllByLessThanIdAndStudyId(cursorRequest, studyId);
+
+        Long nextKey = reviews.stream()
+                .mapToLong(Review::getId)
+                .min().orElse(CursorRequest.NONE_KEY);
+
+        List<ReviewResponse> reviewResponses = reviews.stream()
+                .map(review -> ReviewResponse.builder()
+                        .reviewId(review.getId())
+                        .createdAt(review.getCreatedAt())
+                        .content(review.getContent())
+                        .participantResponse(new ParticipantResponse(review.getMember()))
+                        .build()
+                ).collect(Collectors.toList());
+
+        return new PageCursor<>(cursorRequest.next(nextKey), reviewResponses);
     }
 
     private Member findMember(Long memberId) {
