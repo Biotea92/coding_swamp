@@ -21,4 +21,12 @@ public class ParticipantResponse {
         this.profileUrl = member.getProfileUrl();
         this.participationDate = participationDate;
     }
+
+    public ParticipantResponse(Member member) {
+        this.memberId = member.getId();
+        this.username = member.getUsername();
+        this.imageUrl = member.getImageUrl();
+        this.profileUrl = member.getProfileUrl();
+        this.participationDate = null;
+    }
 }

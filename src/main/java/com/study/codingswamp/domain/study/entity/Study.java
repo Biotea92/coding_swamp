@@ -212,7 +212,7 @@ public class Study {
                 .orElseThrow(() -> new NotFoundException("member", "신청자에 없습니다."));
     }
 
-    private Participant findParticipant(Member member) {
+    public Participant findParticipant(Member member) {
         return participants.stream()
                 .filter(participant -> participant.getMember() == member)
                 .findAny()
