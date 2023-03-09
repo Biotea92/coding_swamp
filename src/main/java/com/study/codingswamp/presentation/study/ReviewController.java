@@ -34,11 +34,21 @@ public class ReviewController {
 
     @Login
     @GetMapping("/{studyId}/review")
-    public PageCursor<ReviewResponse> getReviews (
+    public PageCursor<ReviewResponse> getReviews(
             @AuthenticatedMember MemberPayload memberPayload,
             @PathVariable Long studyId,
-            CursorRequest request
-            ) {
+            CursorRequest request) {
         return reviewService.getReviews(memberPayload.getId(), studyId, request);
+    }
+
+    @Login
+    @PutMapping("/{studyId}/review/{reviewId}")
+    public ResponseEntity<Void> edit(
+            @AuthenticatedMember MemberPayload memberPayload,
+            @PathVariable Long studyId,
+            @PathVariable Long reviewId,
+            @RequestBody ReviewRequest request) {
+        reviewService.edit(memberPayload.getId(), reviewId, request);
+        return ResponseEntity.created(URI.create("/api/study/" + studyId + "/review" )).build();
     }
 }

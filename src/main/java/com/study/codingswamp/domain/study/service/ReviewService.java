@@ -12,6 +12,7 @@ import com.study.codingswamp.domain.study.entity.Study;
 import com.study.codingswamp.domain.study.repository.ReviewRepository;
 import com.study.codingswamp.domain.study.repository.StudyRepository;
 import com.study.codingswamp.exception.NotFoundException;
+import com.study.codingswamp.exception.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,6 +59,19 @@ public class ReviewService {
                 ).collect(Collectors.toList());
 
         return new PageCursor<>(cursorRequest.next(nextKey), reviewResponses);
+    }
+
+    @Transactional
+    public void edit(Long memberId, Long reviewId, ReviewRequest request) {
+        Review review = reviewRepository.findById(reviewId).orElseThrow(NotFoundException::new);
+        validateReviewWriter(memberId, review);
+        review.updateContent(request.getContent());
+    }
+
+    private void validateReviewWriter(Long memberId, Review review) {
+        if (review.getMember() != findMember(memberId)) {
+            throw new UnauthorizedException();
+        }
     }
 
     private Member findMember(Long memberId) {
