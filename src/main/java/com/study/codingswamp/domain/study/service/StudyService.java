@@ -7,12 +7,10 @@ import com.study.codingswamp.domain.study.dto.request.SearchCondition;
 import com.study.codingswamp.domain.study.dto.request.StudiesPageableRequest;
 import com.study.codingswamp.domain.study.dto.request.StudyRequest;
 import com.study.codingswamp.domain.study.dto.response.*;
-import com.study.codingswamp.domain.study.entity.Applicant;
-import com.study.codingswamp.domain.study.entity.Participant;
-import com.study.codingswamp.domain.study.entity.Study;
-import com.study.codingswamp.domain.study.entity.Tag;
+import com.study.codingswamp.domain.study.entity.*;
 import com.study.codingswamp.domain.study.repository.ApplicantRepository;
 import com.study.codingswamp.domain.study.repository.ParticipantRepository;
+import com.study.codingswamp.domain.study.repository.ReviewRepository;
 import com.study.codingswamp.domain.study.repository.StudyRepository;
 import com.study.codingswamp.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +30,7 @@ public class StudyService {
     private final MemberRepository memberRepository;
     private final ApplicantRepository applicantRepository;
     private final ParticipantRepository participantRepository;
+    private final ReviewRepository reviewRepository;
 
     @Transactional
     public Study createStudy(Long memberId, StudyRequest request) {
@@ -136,6 +135,7 @@ public class StudyService {
         findStudy.validateOwner(owner);
         participantRepository.deleteAll(findStudy.getParticipants());
         applicantRepository.deleteAll(findStudy.getApplicants());
+        reviewRepository.deleteByStudyId(studyId);
         studyRepository.delete(findStudy);
     }
 

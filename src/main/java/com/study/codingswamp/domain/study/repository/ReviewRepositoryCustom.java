@@ -8,4 +8,5 @@ import java.util.List;
 public interface ReviewRepositoryCustom {
 
     List<Review> findAllByLessThanIdAndStudyId(CursorRequest cursorRequest, Long studyId);
+    void deleteByStudyId(Long studyId);
 }

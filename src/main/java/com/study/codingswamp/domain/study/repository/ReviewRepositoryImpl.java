@@ -27,6 +27,13 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
                 .fetch();
     }
 
+    @Override
+    public void deleteByStudyId(Long studyId) {
+        jpaQueryFactory.delete(review)
+                .where(review.study.id.eq(studyId))
+                .execute();
+    }
+
     private BooleanExpression lessThanReviewId(CursorRequest cursorRequest) {
         if (cursorRequest.hasKey()) {
             return review.id.lt(cursorRequest.getKey());
