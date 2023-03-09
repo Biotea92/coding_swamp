@@ -6,12 +6,15 @@ import com.study.codingswamp.domain.member.entity.Member;
 import com.study.codingswamp.domain.member.repository.MemberRepository;
 import com.study.codingswamp.domain.study.dto.request.ReviewRequest;
 import com.study.codingswamp.domain.study.entity.Participant;
+import com.study.codingswamp.domain.study.entity.Review;
 import com.study.codingswamp.domain.study.entity.Study;
 import com.study.codingswamp.domain.study.repository.ParticipantRepository;
+import com.study.codingswamp.domain.study.repository.ReviewRepository;
 import com.study.codingswamp.domain.study.repository.StudyRepository;
 import com.study.codingswamp.util.fixture.dto.study.ReviewRequestFixture;
 import com.study.codingswamp.util.fixture.entity.member.MemberFixture;
 import com.study.codingswamp.util.fixture.entity.study.ParticipantFixture;
+import com.study.codingswamp.util.fixture.entity.study.ReviewFixture;
 import com.study.codingswamp.util.fixture.entity.study.StudyFixture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -28,19 +31,20 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.util.List;
+
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.removeHeaders;
-import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
-import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -63,6 +67,8 @@ class ReviewControllerDocTest {
     private StudyRepository studyRepository;
     @Autowired
     private ParticipantRepository participantRepository;
+    @Autowired
+    private ReviewRepository reviewRepository;
 
     @BeforeEach
     public void setUp(WebApplicationContext webApplicationContext, RestDocumentationContextProvider restDocumentation) {
@@ -89,7 +95,6 @@ class ReviewControllerDocTest {
         study.initParticipants(participant);
         ReviewRequest reviewRequest = ReviewRequestFixture.create();
 
-        System.out.println("reviewRequest.getContent() = " + reviewRequest.getContent());
         String json = objectMapper.writeValueAsString(reviewRequest);
         String token = tokenProvider.createAccessToken(owner.getId(), owner.getRole());
 
@@ -111,6 +116,62 @@ class ReviewControllerDocTest {
                         ),
                         requestFields(
                                 fieldWithPath("content").description("리뷰 내용")
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("리뷰를 조회한다.")
+    void getReviews() throws Exception {
+        // given
+        Member member = MemberFixture.createGithubMember();
+        memberRepository.save(member);
+
+        Study study = StudyFixture.createEasy(member);
+        studyRepository.save(study);
+
+        Participant participant = ParticipantFixture.create(member, study);
+        study.initParticipants(participant);
+        participantRepository.save(participant);
+
+        List<Review> reviews = ReviewFixture.createReviews(member, study);
+        reviewRepository.saveAll(reviews);
+
+        String token = tokenProvider.createAccessToken(member.getId(), member.getRole());
+
+        // expected
+        mockMvc.perform(get("/api/study/{studyId}/review", study.getId())
+                        .param("key", "50")
+                        .param("size", "8")
+                        .header(AUTHORIZATION, "Bearer " + token)
+                )
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andDo(document("review-inquiry",
+                        requestHeaders(
+                                headerWithName(AUTHORIZATION).description("Bearer auth credentials")
+                        ),
+                        pathParameters(
+                                parameterWithName("studyId").description("스터디 아이디 type(Long)")
+                        ),
+                        requestParameters(
+                                parameterWithName("key").description("next key, 키를 주지않거나 음수 입력시 첫 번째 반환"),
+                                parameterWithName("size").description("리뷰 수, 값을 주지않으면 default 8")
+                        ),
+                        responseFields(
+                                fieldWithPath("nextCursorRequest").description("다음 커서"),
+                                fieldWithPath("nextCursorRequest.key").description("다음 커서 key, -1이 반환되면 마지막 커서"),
+                                fieldWithPath("nextCursorRequest.size").description("다음 커서 size"),
+                                fieldWithPath("body").description("리뷰 body"),
+                                fieldWithPath("body[].participantResponse").description("참가자 정보"),
+                                fieldWithPath("body[].participantResponse.memberId").description("참가자 id"),
+                                fieldWithPath("body[].participantResponse.username").description("참가자 닉네임"),
+                                fieldWithPath("body[].participantResponse.imageUrl").description("참가자 imageUrl"),
+                                fieldWithPath("body[].participantResponse.profileUrl").description("참가자 profileUrl"),
+                                fieldWithPath("body[].participantResponse.participationDate").description("참가일 현재 필요없으므로 null 반환 중"),
+                                fieldWithPath("body[].reviewId").description("reviewId"),
+                                fieldWithPath("body[].content").description("리뷰 내용"),
+                                fieldWithPath("body[].createdAt").description("리뷰 등록일")
                         )
                 ));
     }
