@@ -12,6 +12,7 @@ import com.study.codingswamp.domain.study.entity.Study;
 import com.study.codingswamp.domain.study.repository.ParticipantRepository;
 import com.study.codingswamp.domain.study.repository.ReviewRepository;
 import com.study.codingswamp.domain.study.repository.StudyRepository;
+import com.study.codingswamp.exception.UnauthorizedException;
 import com.study.codingswamp.util.fixture.dto.study.ReviewRequestFixture;
 import com.study.codingswamp.util.fixture.entity.member.MemberFixture;
 import com.study.codingswamp.util.fixture.entity.study.ParticipantFixture;
@@ -28,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @Transactional
@@ -178,5 +180,58 @@ class ReviewServiceTest {
 
         // then
         assertThat(review.getContent()).isEqualTo("리뷰 수정");
+    }
+
+    @Test
+    @DisplayName("리뷰를 삭제한다.")
+    void delete() {
+        // given
+        Member member = MemberFixture.create();
+        memberRepository.save(member);
+
+        Study study = StudyFixture.createEasy(member);
+        studyRepository.save(study);
+
+        Participant participant = ParticipantFixture.create(member, study);
+        study.initParticipants(participant);
+        participantRepository.save(participant);
+
+        Review review = ReviewFixture.create(member, study);
+        reviewRepository.save(review);
+
+        // when
+        reviewService.delete(member.getId(), review.getId());
+
+        // then
+        assertThrows(
+                RuntimeException.class,
+                () -> reviewRepository.findById(review.getId()).orElseThrow(RuntimeException::new)
+        );
+    }
+
+    @Test
+    @DisplayName("리뷰작성자가 아니면 리뷰를 삭제하지 못한다.")
+    void deleteNotReviewWriter() {
+        // given
+        Member writer = MemberFixture.create();
+        memberRepository.save(writer);
+
+        Study study = StudyFixture.createEasy(writer);
+        studyRepository.save(study);
+
+        Participant participant = ParticipantFixture.create(writer, study);
+        study.initParticipants(participant);
+        participantRepository.save(participant);
+
+        Review review = ReviewFixture.create(writer, study);
+        reviewRepository.save(review);
+
+        Member NotWriter = memberRepository.save(MemberFixture.create());
+
+        // expected
+        assertThrows(
+                UnauthorizedException.class,
+                () -> reviewService.delete(NotWriter.getId(), review.getId())
+        );
     }
 }

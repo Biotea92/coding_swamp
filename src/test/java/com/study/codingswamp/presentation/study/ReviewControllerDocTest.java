@@ -26,6 +26,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
+import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
@@ -192,7 +193,6 @@ class ReviewControllerDocTest {
         ReviewRequest reviewRequest = new ReviewRequest("리뷰 수정입니다.");
         String json = objectMapper.writeValueAsString(reviewRequest);
 
-        // when
         // expected
         mockMvc.perform(put("/api/study/{studyId}/review/{reviewId}", study.getId(), review.getId())
                         .contentType(APPLICATION_JSON)
@@ -210,6 +210,40 @@ class ReviewControllerDocTest {
                         ),
                         requestFields(
                                 fieldWithPath("content").description("리뷰 내용")
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("리뷰를 삭제한다.")
+    void delete() throws Exception {
+        // given
+        Member member = MemberFixture.create();
+        memberRepository.save(member);
+
+        Study study = StudyFixture.createEasy(member);
+        studyRepository.save(study);
+
+        Participant participant = ParticipantFixture.create(member, study);
+        study.initParticipants(participant);
+        participantRepository.save(participant);
+
+        Review review = ReviewFixture.create(member, study);
+        reviewRepository.save(review);
+
+        String token = tokenProvider.createAccessToken(member.getId(), member.getRole());
+
+        // expected
+        mockMvc.perform(RestDocumentationRequestBuilders.delete("/api/study/review/{reviewId}", review.getId())
+                        .header(AUTHORIZATION, "Bearer " + token)
+                )
+                .andExpect(status().isNoContent())
+                .andDo(document("review-delete",
+                        requestHeaders(
+                                headerWithName(AUTHORIZATION).description("Bearer auth credentials")
+                        ),
+                        pathParameters(
+                                parameterWithName("reviewId").description("리뷰 아이디 type(Long)")
                         )
                 ));
     }
