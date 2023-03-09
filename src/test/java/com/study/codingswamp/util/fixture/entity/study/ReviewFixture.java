@@ -10,6 +10,10 @@ import java.util.stream.IntStream;
 
 public class ReviewFixture {
 
+    public static Review create(Member member, Study study) {
+        return new Review("리뷰 내용입니다.", member, study);
+    }
+
     public static List<Review> createReviews(Member member, Study study) {
         return IntStream.range(0, 100)
                 .mapToObj(i -> new Review("리뷰 내용입니다" + i, member, study))

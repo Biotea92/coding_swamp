@@ -155,4 +155,28 @@ class ReviewServiceTest {
         // then
         assertThat(response.getBody().get(0).getReviewId()).isEqualTo(100L);
     }
+
+    @Test
+    @DisplayName("리뷰를 수정한다.")
+    void edit() {
+        // given
+        Member member = MemberFixture.create();
+        memberRepository.save(member);
+
+        Study study = StudyFixture.createEasy(member);
+        studyRepository.save(study);
+
+        Participant participant = ParticipantFixture.create(member, study);
+        study.initParticipants(participant);
+        participantRepository.save(participant);
+
+        Review review = ReviewFixture.create(member, study);
+        reviewRepository.save(review);
+
+        // when
+        reviewService.edit(member.getId(), review.getId(), new ReviewRequest("리뷰 수정"));
+
+        // then
+        assertThat(review.getContent()).isEqualTo("리뷰 수정");
+    }
 }

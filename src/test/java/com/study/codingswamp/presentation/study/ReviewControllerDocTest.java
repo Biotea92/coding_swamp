@@ -39,13 +39,11 @@ import static org.springframework.restdocs.headers.HeaderDocumentation.headerWit
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.removeHeaders;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -98,7 +96,6 @@ class ReviewControllerDocTest {
         String json = objectMapper.writeValueAsString(reviewRequest);
         String token = tokenProvider.createAccessToken(owner.getId(), owner.getRole());
 
-
         // expected
         mockMvc.perform(post("/api/study/{studyId}/review", study.getId())
                         .contentType(APPLICATION_JSON)
@@ -106,7 +103,6 @@ class ReviewControllerDocTest {
                         .header(AUTHORIZATION, "Bearer " + token)
                 )
                 .andExpect(status().isCreated())
-                .andDo(print())
                 .andDo(document("review-register",
                         requestHeaders(
                                 headerWithName(AUTHORIZATION).description("Bearer auth credentials")
@@ -146,7 +142,6 @@ class ReviewControllerDocTest {
                         .header(AUTHORIZATION, "Bearer " + token)
                 )
                 .andExpect(status().isOk())
-                .andDo(print())
                 .andDo(document("review-inquiry",
                         requestHeaders(
                                 headerWithName(AUTHORIZATION).description("Bearer auth credentials")
@@ -172,6 +167,49 @@ class ReviewControllerDocTest {
                                 fieldWithPath("body[].reviewId").description("reviewId"),
                                 fieldWithPath("body[].content").description("리뷰 내용"),
                                 fieldWithPath("body[].createdAt").description("리뷰 등록일")
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("리뷰를 수정한다.")
+    void edit() throws Exception {
+        // given
+        Member member = MemberFixture.create();
+        memberRepository.save(member);
+
+        Study study = StudyFixture.createEasy(member);
+        studyRepository.save(study);
+
+        Participant participant = ParticipantFixture.create(member, study);
+        study.initParticipants(participant);
+        participantRepository.save(participant);
+
+        Review review = ReviewFixture.create(member, study);
+        reviewRepository.save(review);
+
+        String token = tokenProvider.createAccessToken(member.getId(), member.getRole());
+        ReviewRequest reviewRequest = new ReviewRequest("리뷰 수정입니다.");
+        String json = objectMapper.writeValueAsString(reviewRequest);
+
+        // when
+        // expected
+        mockMvc.perform(put("/api/study/{studyId}/review/{reviewId}", study.getId(), review.getId())
+                        .contentType(APPLICATION_JSON)
+                        .content(json)
+                        .header(AUTHORIZATION, "Bearer " + token)
+                )
+                .andExpect(status().isCreated())
+                .andDo(document("review-edit",
+                        requestHeaders(
+                                headerWithName(AUTHORIZATION).description("Bearer auth credentials")
+                        ),
+                        pathParameters(
+                                parameterWithName("studyId").description("스터디 아이디 type(Long)"),
+                                parameterWithName("reviewId").description("리뷰 아이디 type(Long)")
+                        ),
+                        requestFields(
+                                fieldWithPath("content").description("리뷰 내용")
                         )
                 ));
     }

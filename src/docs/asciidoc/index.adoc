@@ -250,3 +250,11 @@ include::{snippets}/review-inquiry/request-parameters.adoc[]
 include::{snippets}/review-inquiry/http-response.adoc[]
 include::{snippets}/review-inquiry/response-fields.adoc[]
 
+== 리뷰 수정
+- 요청
+include::{snippets}/review-edit/http-request.adoc[]
+include::{snippets}/review-edit/request-headers.adoc[]
+include::{snippets}/review-edit/path-parameters.adoc[]
+- 응답
+include::{snippets}/review-edit/http-response.adoc[]
+
