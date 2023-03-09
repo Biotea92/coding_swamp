@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
 import org.springframework.data.annotation.CreatedDate;
 
 import javax.persistence.*;
@@ -12,6 +13,8 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
+@SQLDelete(sql = "UPDATE member SET deleted = true WHERE member_id = ?")
+//@Where(clause = "deleted = false")
 public class Member {
 
     @Id
@@ -37,6 +40,8 @@ public class Member {
     @CreatedDate
     @Column(updatable = false)
     private LocalDateTime joinedAt;
+
+    private final boolean deleted = Boolean.FALSE;
 
     @PrePersist
     public void onPrePersist() {
