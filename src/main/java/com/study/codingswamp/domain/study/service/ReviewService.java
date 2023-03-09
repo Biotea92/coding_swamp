@@ -63,9 +63,16 @@ public class ReviewService {
 
     @Transactional
     public void edit(Long memberId, Long reviewId, ReviewRequest request) {
-        Review review = reviewRepository.findById(reviewId).orElseThrow(NotFoundException::new);
+        Review review = findReview(reviewId);
         validateReviewWriter(memberId, review);
         review.updateContent(request.getContent());
+    }
+
+    @Transactional
+    public void delete(Long memberId, Long reviewId) {
+        Review review = findReview(reviewId);
+        validateReviewWriter(memberId, review);
+        reviewRepository.delete(review);
     }
 
     private void validateReviewWriter(Long memberId, Review review) {
@@ -82,5 +89,10 @@ public class ReviewService {
     private Study findStudy(Long studyId) {
         return studyRepository.findById(studyId)
                 .orElseThrow(() -> new NotFoundException("studyId", "스터디를 찾을 수 없습니다."));
+    }
+
+    private Review findReview(Long reviewId) {
+        return reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new NotFoundException("review", "리뷰를 찾을 수 없습니다."));
     }
 }

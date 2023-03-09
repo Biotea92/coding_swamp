@@ -51,4 +51,13 @@ public class ReviewController {
         reviewService.edit(memberPayload.getId(), reviewId, request);
         return ResponseEntity.created(URI.create("/api/study/" + studyId + "/review" )).build();
     }
+
+    @Login
+    @DeleteMapping("/review/{reviewId}")
+    public ResponseEntity<Void> delete(
+            @AuthenticatedMember MemberPayload memberPayload,
+            @PathVariable Long reviewId) {
+        reviewService.delete(memberPayload.getId(), reviewId);
+        return ResponseEntity.noContent().build();
+    }
 }
