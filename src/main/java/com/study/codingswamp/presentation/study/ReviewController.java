@@ -37,7 +37,7 @@ public class ReviewController {
     public PageCursor<ReviewResponse> getReviews (
             @AuthenticatedMember MemberPayload memberPayload,
             @PathVariable Long studyId,
-            @RequestBody CursorRequest request
+            CursorRequest request
             ) {
         return reviewService.getReviews(memberPayload.getId(), studyId, request);
     }
