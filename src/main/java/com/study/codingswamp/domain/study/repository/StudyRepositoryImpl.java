@@ -96,20 +96,20 @@ public class StudyRepositoryImpl implements StudyRepositoryCustom {
         if (StringUtils.hasText(title)) {
             return study.title.like("%" + title + "%");
         }
-        return  null;
+        return null;
     }
 
     private BooleanExpression eqStudyType(StudyType studyType) {
         if (studyType != null) {
             return study.studyType.eq(studyType);
         }
-        return  null;
+        return null;
     }
 
     private BooleanExpression likeTag(String tag) {
         if (StringUtils.hasText(tag)) {
             return study.tags.any().tagText.containsIgnoreCase(tag);
         }
-        return  null;
+        return null;
     }
 }
