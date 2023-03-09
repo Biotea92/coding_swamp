@@ -2,16 +2,21 @@ package com.study.codingswamp.domain.study.service;
 
 import com.study.codingswamp.domain.member.entity.Member;
 import com.study.codingswamp.domain.member.repository.MemberRepository;
+import com.study.codingswamp.domain.study.dto.request.CursorRequest;
+import com.study.codingswamp.domain.study.dto.request.ReviewRequest;
+import com.study.codingswamp.domain.study.dto.response.PageCursor;
+import com.study.codingswamp.domain.study.dto.response.ReviewResponse;
 import com.study.codingswamp.domain.study.entity.Participant;
 import com.study.codingswamp.domain.study.entity.Review;
 import com.study.codingswamp.domain.study.entity.Study;
 import com.study.codingswamp.domain.study.repository.ParticipantRepository;
 import com.study.codingswamp.domain.study.repository.ReviewRepository;
 import com.study.codingswamp.domain.study.repository.StudyRepository;
-import com.study.codingswamp.domain.study.dto.request.ReviewRequest;
+import com.study.codingswamp.exception.UnauthorizedException;
+import com.study.codingswamp.util.fixture.dto.study.ReviewRequestFixture;
 import com.study.codingswamp.util.fixture.entity.member.MemberFixture;
 import com.study.codingswamp.util.fixture.entity.study.ParticipantFixture;
-import com.study.codingswamp.util.fixture.dto.study.ReviewRequestFixture;
+import com.study.codingswamp.util.fixture.entity.study.ReviewFixture;
 import com.study.codingswamp.util.fixture.entity.study.StudyFixture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -21,7 +26,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @Transactional
@@ -70,5 +78,160 @@ class ReviewServiceTest {
         assertThat(review.getContent()).isEqualTo(reviewRequest.getContent());
         assertThat(review.getMember()).isEqualTo(member);
         assertThat(review.getStudy()).isEqualTo(study);
+    }
+
+    @Test
+    @DisplayName("리뷰를 조회한다.")
+    void getReviews() {
+        // given
+        Member member = MemberFixture.create();
+        memberRepository.save(member);
+
+        Study study = StudyFixture.createEasy(member);
+        studyRepository.save(study);
+
+        Participant participant = ParticipantFixture.create(member, study);
+        study.initParticipants(participant);
+        participantRepository.save(participant);
+
+        List<Review> reviews = ReviewFixture.createReviews(member, study);
+        reviewRepository.saveAll(reviews);
+
+
+        // when
+        PageCursor<ReviewResponse> response = reviewService.getReviews(member.getId(), study.getId(), new CursorRequest(null, null));
+
+        // then
+        assertThat(response.getBody().size()).isEqualTo(8);
+        assertThat(response.getBody().get(0).getReviewId()).isEqualTo(100L);
+        assertThat(response.getNextCursorRequest().getKey()).isEqualTo(93L);
+    }
+
+    @Test
+    @DisplayName("리뷰를 조회한다. 다음 키")
+    void getReviewsNextKey() {
+        // given
+        Member member = MemberFixture.create();
+        memberRepository.save(member);
+
+        Study study = StudyFixture.createEasy(member);
+        studyRepository.save(study);
+
+        Participant participant = ParticipantFixture.create(member, study);
+        study.initParticipants(participant);
+        participantRepository.save(participant);
+
+        List<Review> reviews = ReviewFixture.createReviews(member, study);
+        reviewRepository.saveAll(reviews);
+
+
+        // when
+        PageCursor<ReviewResponse> response = reviewService.getReviews(member.getId(), study.getId(), new CursorRequest(93L, null));
+
+        // then
+        assertThat(response.getBody().get(0).getReviewId()).isEqualTo(92L);
+        assertThat(response.getNextCursorRequest().getKey()).isEqualTo(85L);
+    }
+
+    @Test
+    @DisplayName("리뷰를 조회한다. 마지막 키")
+    void getReviewsLastKey() {
+        // given
+        Member member = MemberFixture.create();
+        memberRepository.save(member);
+
+        Study study = StudyFixture.createEasy(member);
+        studyRepository.save(study);
+
+        Participant participant = ParticipantFixture.create(member, study);
+        study.initParticipants(participant);
+        participantRepository.save(participant);
+
+        List<Review> reviews = ReviewFixture.createReviews(member, study);
+        reviewRepository.saveAll(reviews);
+
+
+        // when
+        PageCursor<ReviewResponse> response = reviewService.getReviews(member.getId(), study.getId(), new CursorRequest(-1L, null));
+
+        // then
+        assertThat(response.getBody().get(0).getReviewId()).isEqualTo(100L);
+    }
+
+    @Test
+    @DisplayName("리뷰를 수정한다.")
+    void edit() {
+        // given
+        Member member = MemberFixture.create();
+        memberRepository.save(member);
+
+        Study study = StudyFixture.createEasy(member);
+        studyRepository.save(study);
+
+        Participant participant = ParticipantFixture.create(member, study);
+        study.initParticipants(participant);
+        participantRepository.save(participant);
+
+        Review review = ReviewFixture.create(member, study);
+        reviewRepository.save(review);
+
+        // when
+        reviewService.edit(member.getId(), review.getId(), new ReviewRequest("리뷰 수정"));
+
+        // then
+        assertThat(review.getContent()).isEqualTo("리뷰 수정");
+    }
+
+    @Test
+    @DisplayName("리뷰를 삭제한다.")
+    void delete() {
+        // given
+        Member member = MemberFixture.create();
+        memberRepository.save(member);
+
+        Study study = StudyFixture.createEasy(member);
+        studyRepository.save(study);
+
+        Participant participant = ParticipantFixture.create(member, study);
+        study.initParticipants(participant);
+        participantRepository.save(participant);
+
+        Review review = ReviewFixture.create(member, study);
+        reviewRepository.save(review);
+
+        // when
+        reviewService.delete(member.getId(), review.getId());
+
+        // then
+        assertThrows(
+                RuntimeException.class,
+                () -> reviewRepository.findById(review.getId()).orElseThrow(RuntimeException::new)
+        );
+    }
+
+    @Test
+    @DisplayName("리뷰작성자가 아니면 리뷰를 삭제하지 못한다.")
+    void deleteNotReviewWriter() {
+        // given
+        Member writer = MemberFixture.create();
+        memberRepository.save(writer);
+
+        Study study = StudyFixture.createEasy(writer);
+        studyRepository.save(study);
+
+        Participant participant = ParticipantFixture.create(writer, study);
+        study.initParticipants(participant);
+        participantRepository.save(participant);
+
+        Review review = ReviewFixture.create(writer, study);
+        reviewRepository.save(review);
+
+        Member NotWriter = memberRepository.save(MemberFixture.create());
+
+        // expected
+        assertThrows(
+                UnauthorizedException.class,
+                () -> reviewService.delete(NotWriter.getId(), review.getId())
+        );
     }
 }

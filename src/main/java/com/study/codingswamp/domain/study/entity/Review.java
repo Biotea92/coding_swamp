@@ -46,4 +46,8 @@ public class Review {
         this.member = member;
         this.study = study;
     }
+
+    public void updateContent(String content) {
+        this.content = content;
+    }
 }

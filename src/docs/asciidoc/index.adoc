@@ -227,3 +227,42 @@ include::{snippets}/study-get-myParticipates/request-headers.adoc[]
 - 응답
 include::{snippets}/study-get-myParticipates/http-response.adoc[]
 include::{snippets}/study-get-myParticipates/response-fields.adoc[]
+
+
+== Review API
+
+=== 리뷰 등록
+- 요청
+include::{snippets}/review-register/http-request.adoc[]
+include::{snippets}/review-register/request-headers.adoc[]
+include::{snippets}/review-register/path-parameters.adoc[]
+include::{snippets}/review-register/request-fields.adoc[]
+- 응답
+include::{snippets}/review-register/http-response.adoc[]
+
+=== 리뷰 조회
+- 요청
+include::{snippets}/review-inquiry/http-request.adoc[]
+include::{snippets}/review-inquiry/request-headers.adoc[]
+include::{snippets}/review-inquiry/path-parameters.adoc[]
+include::{snippets}/review-inquiry/request-parameters.adoc[]
+- 응답
+include::{snippets}/review-inquiry/http-response.adoc[]
+include::{snippets}/review-inquiry/response-fields.adoc[]
+
+== 리뷰 수정
+- 요청
+include::{snippets}/review-edit/http-request.adoc[]
+include::{snippets}/review-edit/request-headers.adoc[]
+include::{snippets}/review-edit/path-parameters.adoc[]
+- 응답
+include::{snippets}/review-edit/http-response.adoc[]
+
+== 리뷰 삭제
+- 요청
+include::{snippets}/review-delete/http-request.adoc[]
+include::{snippets}/review-delete/request-headers.adoc[]
+include::{snippets}/review-delete/path-parameters.adoc[]
+- 응답
+include::{snippets}/review-delete/http-response.adoc[]
+
