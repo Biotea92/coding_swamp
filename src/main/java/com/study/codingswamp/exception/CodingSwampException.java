@@ -2,13 +2,13 @@ package com.study.codingswamp.exception;
 
 import lombok.Getter;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Getter
 public abstract class CodingSwampException extends RuntimeException{
 
-    public final Map<String, String> validation = new HashMap<>();
+    public final Map<String, String> validation = new ConcurrentHashMap<>();
 
     public CodingSwampException(String message) {
         super(message);
