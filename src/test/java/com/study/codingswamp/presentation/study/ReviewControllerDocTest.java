@@ -81,6 +81,7 @@ class ReviewControllerDocTest {
 
         jdbcTemplate.update("alter table study auto_increment= ?", 1);
         jdbcTemplate.update("alter table member auto_increment= ?", 1);
+        jdbcTemplate.update("alter table review auto_increment= ?", 1);
     }
 
     @Test
